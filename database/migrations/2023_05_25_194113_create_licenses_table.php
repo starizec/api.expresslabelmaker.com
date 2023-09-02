@@ -11,18 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('licenses', function (Blueprint $table) {
+        Schema::create('licences', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id');
             $table->foreignId('domain_id');
-            $table->string("licence_id", 36)->unique();
-            $table->float('amount', 8, 2);
-            $table->foreignId('currency_id');
-            $table->date('payed_at');
-            $table->string("invoice_number", 100);
-            $table->text('note')->nullable();
+            $table->string("licence_uid", 36)->unique();
             $table->date('valid_from');
-            $table->date('valid_until');
+            $table->date('valid_until')->nullable()->default(null);
+            $table->integer('usage')->default(0);
+            $table->integer('usage_limit');
+            $table->foreignId('licence_type_id');
             $table->timestamps();
         });
     }
