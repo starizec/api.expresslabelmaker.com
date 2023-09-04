@@ -32,15 +32,15 @@ class DpdController extends Controller
         $user = $jsonData->user;
         $parcel = $jsonData->parcel;
 
-        $parcel_response = Http::post(config('urls.hr.dpd') .
+        $parcelResponse = Http::post(config('urls.hr.dpd') .
             '/parcel/parcel_import?' .
             "username=$user->username&password=$user->password&" .
             http_build_query($parcel));
 
-        $parcel_response_json = json_decode($parcel_response->body());
+        $parcelResponseJson = json_decode($parcelResponse->body());
 
-        if ($parcel_response->successful()) {
-            if ($parcel_response_json->status === 'err') {
+        if ($parcelResponse->successful()) {
+            if ($parcelResponseJson->status === 'err') {
                 return response()->json([
                     "errors" => [
                         [
@@ -48,8 +48,8 @@ class DpdController extends Controller
                             "id" => 123456,
                             "type_id" => "Dodati vrste errora",
                             "courier_id" => "DPD",
-                            "title" =>  $parcel_response_json->status,
-                            "detail" => $parcel_response_json->errlog
+                            "title" =>  $parcelResponseJson->status,
+                            "detail" => $parcelResponseJson->errlog
                         ]
                     ],
                 ], 400);
@@ -58,7 +58,7 @@ class DpdController extends Controller
             return response()->json([
                 "errors" => [
                     [
-                        "status" => $parcel_response->status(),
+                        "status" => $parcelResponse->status(),
                         "id" => 123456,
                         "type_id" => "Dodati vrste errora",
                         "courier_id" => "DPD",
@@ -66,12 +66,12 @@ class DpdController extends Controller
                         "detail" => "DPD server je vratio grešku."
                     ]
                 ]
-            ], $parcel_response->status());
+            ], $parcelResponse->status());
         }
 
-        $pl_numbers = implode(",", $parcel_response_json->pl_number);
+        $pl_numbers = implode(",", $parcelResponseJson->pl_number);
 
-        $parcel_label_response = Http::accept('*/*')->withHeaders([
+        $parcelLabelResponse = Http::accept('*/*')->withHeaders([
             "xhrFields" => [
                 'responseType' => 'blob'
             ],
@@ -81,8 +81,10 @@ class DpdController extends Controller
             "username=$user->username&password=$user->password&" .
             "parcels=$pl_numbers");
 
-        if ($parcel_label_response->successful()) {
-            if ($parcel_response_json->status === 'err') {
+        $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
+
+        if ($parcelLabelResponse->successful()) {
+            if (isset($parcelLabelResponseJson->status)) {
                 return response()->json([
                     "errors" => [
                         [
@@ -90,8 +92,8 @@ class DpdController extends Controller
                             "id" => 123456,
                             "type_id" => "Dodati vrste errora",
                             "courier_id" => "DPD",
-                            "title" =>  $parcel_response_json->status,
-                            "detail" => $parcel_response_json->errlog
+                            "title" =>  $parcelLabelResponseJson->status,
+                            "detail" => $parcelLabelResponseJson->errlog
                         ]
                     ],
                 ], 400);
@@ -100,7 +102,7 @@ class DpdController extends Controller
             return response()->json([
                 "errors" => [
                     [
-                        "status" => $parcel_label_response->status(),
+                        "status" => $parcelLabelResponse->status(),
                         "id" => 123456,
                         "type_id" => "Dodati vrste errora",
                         "courier_id" => "DPD",
@@ -108,13 +110,13 @@ class DpdController extends Controller
                         "detail" => "DPD server je vratio grešku."
                     ]
                 ]
-            ], $parcel_label_response->status());
+            ], $parcelLabelResponse->status());
         }
 
         return response()->json([
             "data" => [
                 "parcels" => $pl_numbers,
-                "labels" => base64_encode($parcel_label_response->body()) // Encode as base64 for JSON
+                "labels" => base64_encode($parcelLabelResponse->body()) // Encode as base64 for JSON
             ]
         ], 201);
     }
@@ -123,7 +125,58 @@ class DpdController extends Controller
     {
     }
 
-    public function getPackageStatus()
+    public function getParcelStatus(Request $request)
     {
+        $requestBody = $request->getContent();
+        $jsonData = json_decode($requestBody);
+
+        if (!isset($jsonData->user, $jsonData->parcel)) {
+            return response()->json([
+                "errors" => [
+                    [
+                        "status" => 400,
+                        "id" => 123456,
+                        "type_id" => "Dodati vrste errora",
+                        "courier_id" => "DPD",
+                        "title" =>  "Invalid Attribute",
+                        "detail" => "Missing user property."
+                    ]
+                ],
+            ], 400);
+        }
+
+        $parcel = $jsonData->parcel;
+        $secret = config('misc.hr.dpd.status_secret');
+
+        $parcelStatusResponse = Http::accept('*/*')->withHeaders([
+            "content-type" => "application/x-www-form-urlencoded"
+        ])->post(config('urls.hr.dpd') .
+            "/parcel/parcel_status?secret=" .
+            "$secret&" .
+            http_build_query($parcel));
+        
+        if (!$parcelStatusResponse->successful()) {
+            return response()->json([
+                "errors" => [
+                    [
+                        "status" => $parcelStatusResponse->status(),
+                        "id" => 123456,
+                        "type_id" => "Dodati vrste errora",
+                        "courier_id" => "DPD",
+                        "title" =>  "DPD error",
+                        "detail" => "DPD server je vratio grešku."
+                    ]
+                ],
+            ], $parcelStatusResponse->status());
+        }
+
+        $parcelStatusResponseJson = json_decode($parcelStatusResponse->body());
+
+        return response()->json([
+            "data" => [
+                "parcel_number" => $parcel->parcel_number,
+                "parcel_status" => $parcelStatusResponseJson->parcel_status
+            ]
+        ], 201);
     }
 }
