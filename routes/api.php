@@ -21,6 +21,7 @@ Route::prefix('wordpress')->group(function () {
         Route::prefix('dpd')->group(function () {
             Route::post('printLabel', [DpdController::class, 'printLabel']);
             Route::post('getParcelStatus', [DpdController::class, 'getParcelStatus']);
+            Route::post('collectionRequest', [DpdController::class, 'collectionRequest']);
         });
     });
 });

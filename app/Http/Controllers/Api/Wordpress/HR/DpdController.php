@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
+use function PHPUnit\Framework\isNull;
+
 class DpdController extends Controller
 {
     public function printLabel(Request $request)
@@ -121,8 +123,90 @@ class DpdController extends Controller
         ], 201);
     }
 
-    public function printLabels()
+    public function collectionRequest(Request $request)
     {
+
+        $requestBody = $request->getContent();
+        $jsonData = json_decode($requestBody);
+
+        if (!isset($jsonData->user, $jsonData->parcel)) {
+            return response()->json([
+                "errors" => [
+                    [
+                        "status" => 400,
+                        "id" => 123456,
+                        "type_id" => "Dodati vrste errora",
+                        "courier_id" => "DPD",
+                        "title" =>  "Invalid Attribute",
+                        "detail" => "Missing user property."
+                    ]
+                ],
+            ], 400);
+        }
+
+        $user = $jsonData->user;
+        $parcel = $jsonData->parcel;
+
+        $parcelResponse = Http::accept('*/*')->withHeaders([
+            "content-type" => "application/x-www-form-urlencoded"
+        ])->post(config('urls.hr.dpd') .
+            '/collection_request/cr_import?' .
+            "username=$user->username&password=$user->password&" .
+            http_build_query($parcel));
+
+        $parcelResponseJson = json_decode($parcelResponse->body());
+
+        if ($parcelResponse->successful()) {
+            if ($parcelResponseJson->status === 'Error') {
+                return response()->json([
+                    "errors" => [
+                        [
+                            "status" => 1,
+                            "id" => 123456,
+                            "type_id" => "Dodati vrste errora",
+                            "courier_id" => "DPD",
+                            "title" =>  $parcelResponseJson->status,
+                            "detail" => $parcelResponseJson->errlog
+                        ]
+                    ],
+                ], 400);
+            }
+
+            if ($parcelResponseJson->reference === null) {
+                return response()->json([
+                    "errors" => [
+                        [
+                            "status" => 1,
+                            "id" => 123456,
+                            "type_id" => "Dodati vrste errora",
+                            "courier_id" => "DPD",
+                            "title" =>  "Loša adresnica",
+                            "detail" => "Nedovoljno podataka"
+                        ]
+                    ],
+                ], 400);
+            }
+        } else {
+            return response()->json([
+                "errors" => [
+                    [
+                        "status" => $parcelResponse->status(),
+                        "id" => 123456,
+                        "type_id" => "Dodati vrste errora",
+                        "courier_id" => "DPD",
+                        "title" =>  "DPD error",
+                        "detail" => "DPD server je vratio grešku."
+                    ]
+                ]
+            ], $parcelResponse->status());
+        }
+
+        return response()->json([
+            "data" => [
+                "reference" => substr($parcelResponseJson->reference, 1, -1),
+                "code" => $parcelResponseJson->code
+            ]
+        ], 201);
     }
 
     public function getParcelStatus(Request $request)
@@ -154,7 +238,7 @@ class DpdController extends Controller
             "/parcel/parcel_status?secret=" .
             "$secret&" .
             http_build_query($parcel));
-        
+
         if (!$parcelStatusResponse->successful()) {
             return response()->json([
                 "errors" => [
