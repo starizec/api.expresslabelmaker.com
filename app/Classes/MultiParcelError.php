@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helpers;
+namespace App\Classes;
 
 final class MultiParcelError
 {

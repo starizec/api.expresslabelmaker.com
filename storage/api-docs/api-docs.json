@@ -1,0 +1,505 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Express label maker aopi",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/v1/parcel-statuses": {
+            "post": {
+                "tags": [
+                    "Parcel Status"
+                ],
+                "summary": "Dohvaća statuse parcele po kuriru i državi.",
+                "description": "Dohvaća statuse parcele po kuriru i državi.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "user": {
+                                        "description": "User information",
+                                        "type": "string"
+                                    },
+                                    "parcels": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "parcel": {
+                                                    "properties": {
+                                                        "country": {
+                                                            "description": "Parcel country",
+                                                            "type": "string"
+                                                        },
+                                                        "courier": {
+                                                            "description": "Parcel courier",
+                                                            "type": "string"
+                                                        },
+                                                        "parcel_number": {
+                                                            "description": "Parcel number",
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "order_number": {
+                                                    "description": "Order number",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "order_number": {
+                                                        "description": "Order number",
+                                                        "type": "string"
+                                                    },
+                                                    "parcel_number": {
+                                                        "description": "Parcel number",
+                                                        "type": "string"
+                                                    },
+                                                    "parcel_status": {
+                                                        "description": "Parcel status",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "order_number": {
+                                                        "description": "Order number",
+                                                        "type": "string"
+                                                    },
+                                                    "error_code": {
+                                                        "description": "Error code",
+                                                        "type": "integer"
+                                                    },
+                                                    "error_details": {
+                                                        "description": "Error details",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "error_id": {
+                                                        "description": "Error ID",
+                                                        "type": "integer"
+                                                    },
+                                                    "error_details": {
+                                                        "description": "Error details",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/hr/dpd/create/label": {
+            "post": {
+                "tags": [
+                    "HrDpd"
+                ],
+                "summary": "Generira DPD naljepnicu za jednu narudžbu",
+                "description": "Generira DPD naljepnicu za jednu narudžbu. Može vratiti 2 naljepnice ako je narudžba od 2 paketa. Parcel property prihvaća sve elemente iz DPD dokumentacije: [https://easyship.hr/documentation/hr/DPD_EasyShip_Web_Services.pdf#page=3](https://easyship.hr/documentation/hr/DPD_EasyShip_Web_Services.pdf#page=3)",
+                "operationId": "ccc6a93a14ff26be5ec9df75fcc037e2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "user": {
+                                        "description": "User information",
+                                        "properties": {
+                                            "username": {
+                                                "description": "Client’s Easyship username",
+                                                "type": "string"
+                                            },
+                                            "password": {
+                                                "description": "Client’s Easyship password",
+                                                "type": "string"
+                                            },
+                                            "domain": {
+                                                "description": "Client’s domain",
+                                                "type": "string"
+                                            },
+                                            "licence": {
+                                                "description": "Client’s ELM.com licence",
+                                                "type": "string"
+                                            },
+                                            "email": {
+                                                "description": "Client’s ELM.com E-mail address",
+                                                "type": "string"
+                                            },
+                                            "platform": {
+                                                "description": "WebStore platform",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "parcel": {
+                                        "description": "Parcel information",
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Parcel label created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "parcels": {
+                                                    "description": "Comma-separated parcel numbers",
+                                                    "type": "string"
+                                                },
+                                                "label": {
+                                                    "description": "Base64-encoded parcel label",
+                                                    "type": "string",
+                                                    "format": "base64"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid input or DPD Server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "error_id": {
+                                                        "description": "Error ID",
+                                                        "type": "integer"
+                                                    },
+                                                    "error_details": {
+                                                        "description": "Error details",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/hr/dpd/create/labels": {
+            "post": {
+                "tags": [
+                    "HrDpd"
+                ],
+                "summary": "Generira DPD naljepnice za više narudžbi",
+                "description": "Generira DPD naljepnice za više narudžbi. Parcel property prihvaća sve elemente iz DPD dokumentacije: [https://easyship.hr/documentation/hr/DPD_EasyShip_Web_Services.pdf#page=3](https://easyship.hr/documentation/hr/DPD_EasyShip_Web_Services.pdf#page=3) ",
+                "operationId": "35ee59715815c5aedc1da5ab17dc13fc",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "user": {
+                                        "description": "User information",
+                                        "properties": {
+                                            "username": {
+                                                "description": "Client’s Easyship username (Max 20 characters)",
+                                                "type": "string"
+                                            },
+                                            "password": {
+                                                "description": "Client’s Easyship password (Max 20 characters)",
+                                                "type": "string"
+                                            },
+                                            "domain": {
+                                                "description": "Client’s domain (Max 20 characters)",
+                                                "type": "string"
+                                            },
+                                            "licence": {
+                                                "description": "Client’s licence (Max 20 characters)",
+                                                "type": "string"
+                                            },
+                                            "email": {
+                                                "description": "Client’s E-mail address (Max 50 characters)",
+                                                "type": "string"
+                                            },
+                                            "platform": {
+                                                "description": "Client’s platform (Max 20 characters)",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "parcels": {
+                                        "description": "Array of parcels",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "order_number": {
+                                                    "description": "Parcel information",
+                                                    "type": "string"
+                                                },
+                                                "parcel": {
+                                                    "description": "Parcel information",
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Parcel labels created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "label": {
+                                                    "description": "Base64-encoded parcel labels",
+                                                    "type": "string",
+                                                    "format": "base64"
+                                                },
+                                                "parcels": {
+                                                    "description": "Array of parcel responses",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "order_number": {
+                                                                "description": "Customer’s parcel reference (Max 20 characters)",
+                                                                "type": "string"
+                                                            },
+                                                            "parcel_number": {
+                                                                "description": "Comma-separated parcel numbers",
+                                                                "type": "string"
+                                                            },
+                                                            "label": {
+                                                                "description": "Base64-encoded parcel label",
+                                                                "type": "string",
+                                                                "format": "base64"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "error_id": {
+                                                        "description": "Error ID",
+                                                        "type": "integer"
+                                                    },
+                                                    "error_details": {
+                                                        "description": "Error details",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/hr/dpd/create/collection-request": {
+            "post": {
+                "tags": [
+                    "HrDpd"
+                ],
+                "summary": "Creates a DPD collection request",
+                "description": "Creates a DPD collection request for a parcel. Parcel property prihvaća sve elemente iz DPD dokumentacije: [https://easyship.hr/documentation/hr/DPD_EasyShip_Web_Services.pdf#page=15](https://easyship.hr/documentation/hr/DPD_EasyShip_Web_Services.pdf#page=15)",
+                "operationId": "6f52d8bba5c57e72b3aaa42d874822b0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "user": {
+                                        "description": "User information",
+                                        "properties": {
+                                            "username": {
+                                                "description": "Client’s Easyship username (Max 20 characters)",
+                                                "type": "string"
+                                            },
+                                            "password": {
+                                                "description": "Client’s Easyship password (Max 20 characters)",
+                                                "type": "string"
+                                            },
+                                            "domain": {
+                                                "description": "Client’s domain (Max 20 characters)",
+                                                "type": "string"
+                                            },
+                                            "licence": {
+                                                "description": "Client’s licence (Max 20 characters)",
+                                                "type": "string"
+                                            },
+                                            "email": {
+                                                "description": "Client’s E-mail address (Max 50 characters)",
+                                                "type": "string"
+                                            },
+                                            "platform": {
+                                                "description": "Client’s platform (Max 20 characters)",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "parcel": {
+                                        "description": "Parcel information",
+                                        "properties": {
+                                            "...": {
+                                                "description": "Additional properties within the 'parcel' object",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "reference": {
+                                                    "description": "Reference number for the collection request",
+                                                    "type": "string"
+                                                },
+                                                "code": {
+                                                    "description": "Code for the collection request",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request or error response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "error_id": {
+                                                        "description": "Error identifier",
+                                                        "type": "integer"
+                                                    },
+                                                    "error_details": {
+                                                        "description": "Error details",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
