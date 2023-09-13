@@ -46,5 +46,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'checkUserProperty' => \App\Http\Middleware\CheckUserProperty::class,
+        'checkHrDpdUserProperty' => \App\Http\Middleware\CheckHrDpdUserProperty::class,
     ];
 }

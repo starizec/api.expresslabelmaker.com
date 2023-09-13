@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class CheckUserProperty
+class CheckHrDpdUserProperty
 {
     public function handle(Request $request, Closure $next): Response
     {
@@ -15,14 +15,14 @@ class CheckUserProperty
 
             if (
                 !isset($jsonData->user) ||
-                (!isset($jsonData->user->domain) || !isset($jsonData->user->email) || !isset($jsonData->user->licence)) ||
-                (!is_string($jsonData->user->domain) || !is_string($jsonData->user->email) || !is_string($jsonData->user->licence))
+                (!isset($jsonData->user->username) || !isset($jsonData->user->password)) ||
+                (!is_string($jsonData->user->username) || !is_string($jsonData->user->password))
             ) {
                 return response()->json([
                     "errors" => [
                         [
                             "error_id" => 1,
-                            "error_details" => "Missing user properties."
+                            "error_details" => "Missing DPD username or password."
                         ]
                     ],
                 ], 400);
