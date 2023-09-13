@@ -10,6 +10,9 @@ use App\Models\User;
 use App\Models\Domain;
 use App\Models\Licence;
 
+use App\Services\UserService;
+use App\Classes\UserClass;
+
 class AuthenticateRequest
 {
     public function handle(Request $request, Closure $next): Response
@@ -34,19 +37,18 @@ class AuthenticateRequest
                 ], 400);
             }
 
-            if (
-                !User::where('email', $jsonData['user']['email'])->exists() ||
-                !Domain::where('name', $jsonData['user']['domain'])->exists() ||
-                !Licence::where('licence_uid', $jsonData['user']['licence'])->exists()
-            ) {
+            $user_s = new UserService();
+            $licence = $user_s->checkUserLicence(new UserClass($jsonData['user']['email'], $jsonData['user']['domain'], $jsonData['user']['licence']));
+
+            if ($licence['status'] > 300) {
                 return response()->json([
                     "errors" => [
                         [
                             "error_id" => 1,
-                            "error_details" => "Wrong email, domain, or licence."
+                            "error_details" => $licence['status'] . ' - ' . $licence['message']
                         ]
                     ],
-                ], 400);
+                ], $licence['status']);
             }
         } else {
             return response()->json([
