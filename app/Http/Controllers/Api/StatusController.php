@@ -16,10 +16,40 @@ use App\Classes\MultiStatusResponse;
  *     @OA\RequestBody(
  *         required=true,
  *         @OA\JsonContent(
- *             @OA\Property(
+ *              @OA\Property(
  *                 property="user",
- *                 type="string",
- *                 description="User information"
+ *                 type="object",
+ *                 description="User information",
+ *                 @OA\Property(
+ *                     property="username",
+ *                     type="string",
+ *                     description="Client’s Easyship username (Max 20 characters)"
+ *                 ),
+ *                 @OA\Property(
+ *                     property="password",
+ *                     type="string",
+ *                     description="Client’s Easyship password (Max 20 characters)"
+ *                 ),
+ *                 @OA\Property(
+ *                     property="domain",
+ *                     type="string",
+ *                     description="Client’s domain (Max 20 characters)"
+ *                 ),
+ *                 @OA\Property(
+ *                     property="licence",
+ *                     type="string",
+ *                     description="Client’s licence (Max 20 characters)"
+ *                 ),
+ *                 @OA\Property(
+ *                     property="email",
+ *                     type="string",
+ *                     description="Client’s E-mail address (Max 50 characters)"
+ *                 ),
+ *                 @OA\Property(
+ *                     property="platform",
+ *                     type="string",
+ *                     description="Client’s platform (Max 20 characters)"
+ *                 ),
  *             ),
  *             @OA\Property(
  *                 property="parcels",
@@ -138,17 +168,6 @@ class StatusController extends Controller
     {
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
-
-        if (!isset($jsonData->user, $jsonData->parcels)) {
-            return response()->json([
-                "errors" => [
-                    [
-                        "error_id" => 123456,
-                        "error_details" => "Missing object properties."
-                    ]
-                ],
-            ], 400);
-        }
 
         $user = $jsonData->user;
         $parcels = $jsonData->parcels;

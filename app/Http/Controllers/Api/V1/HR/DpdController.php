@@ -113,17 +113,6 @@ class DpdController extends Controller
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
 
-        if (!isset($jsonData->user, $jsonData->parcel)) {
-            return response()->json([
-                "errors" => [
-                    [
-                        "error_id" => 123456,
-                        "error_details" => "Missing object properties."
-                    ]
-                ],
-            ], 400);
-        }
-
         $user = $jsonData->user;
         $parcel = $jsonData->parcel;
 
@@ -330,17 +319,6 @@ class DpdController extends Controller
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
 
-        if (!isset($jsonData->user, $jsonData->parcels)) {
-            return response()->json([
-                "errors" => [
-                    [
-                        "error_id" => 123456,
-                        "error_details" => "Missing object properties."
-                    ]
-                ],
-            ], 400);
-        }
-
         $user = $jsonData->user;
         $parcels = $jsonData->parcels;
 
@@ -541,17 +519,6 @@ class DpdController extends Controller
 
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
-
-        if (!isset($jsonData->user, $jsonData->parcel)) {
-            return response()->json([
-                "errors" => [
-                    [
-                        "error_id" => 123456,
-                        "error_details" => "Missing object properties."
-                    ]
-                ],
-            ], 400);
-        }
 
         $user = $jsonData->user;
         $parcel = $jsonData->parcel;
