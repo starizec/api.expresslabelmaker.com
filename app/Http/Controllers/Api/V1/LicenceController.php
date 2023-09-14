@@ -17,7 +17,7 @@ class LicenceController extends Controller
 {
     /**
      * @OA\Post(
-     *     path="/api/licence/start-trial",
+     *     path="/v1/licence/start-trial",
      *     description="Mora se poslati trial za licenca property ili vraća error.",
      *     summary="Kreira probno razdoblje s neograničenim vremenom i XX brojem izrada naljepnica.",
      *     tags={"Licence"},
