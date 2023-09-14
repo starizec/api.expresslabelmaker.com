@@ -6,11 +6,8 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-use App\Models\User;
-use App\Models\Domain;
-use App\Models\Licence;
-
 use App\Services\UserService;
+use App\Services\DomainService;
 use App\Classes\UserClass;
 
 class AuthenticateRequest
@@ -38,7 +35,7 @@ class AuthenticateRequest
             }
 
             $user_s = new UserService();
-            $licence = $user_s->checkUserLicence(new UserClass($jsonData['user']['email'], $jsonData['user']['domain'], $jsonData['user']['licence']));
+            $licence = $user_s->checkUserLicence(new UserClass($jsonData['user']['email'], DomainService::parseDomain($jsonData['user']['domain']), $jsonData['user']['licence']));
 
             if ($licence['status'] > 300) {
                 return response()->json([

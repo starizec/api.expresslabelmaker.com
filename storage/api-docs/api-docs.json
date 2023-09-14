@@ -5,142 +5,6 @@
         "version": "1.0.0"
     },
     "paths": {
-        "/v1/parcel-statuses": {
-            "post": {
-                "tags": [
-                    "Parcel Status"
-                ],
-                "summary": "Dohvaća statuse parcele po kuriru i državi.",
-                "description": "Dohvaća statuse parcele po kuriru i državi.",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "user": {
-                                        "description": "User information",
-                                        "type": "string"
-                                    },
-                                    "parcels": {
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "parcel": {
-                                                    "properties": {
-                                                        "country": {
-                                                            "description": "Parcel country",
-                                                            "type": "string"
-                                                        },
-                                                        "courier": {
-                                                            "description": "Parcel courier",
-                                                            "type": "string"
-                                                        },
-                                                        "parcel_number": {
-                                                            "description": "Parcel number",
-                                                            "type": "string"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                },
-                                                "order_number": {
-                                                    "description": "Order number",
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "order_number": {
-                                                        "description": "Order number",
-                                                        "type": "string"
-                                                    },
-                                                    "parcel_number": {
-                                                        "description": "Parcel number",
-                                                        "type": "string"
-                                                    },
-                                                    "parcel_status": {
-                                                        "description": "Parcel status",
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        },
-                                        "errors": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "order_number": {
-                                                        "description": "Order number",
-                                                        "type": "string"
-                                                    },
-                                                    "error_code": {
-                                                        "description": "Error code",
-                                                        "type": "integer"
-                                                    },
-                                                    "error_details": {
-                                                        "description": "Error details",
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request format",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "array",
-                                            "items": {
-                                                "properties": {
-                                                    "error_id": {
-                                                        "description": "Error ID",
-                                                        "type": "integer"
-                                                    },
-                                                    "error_details": {
-                                                        "description": "Error details",
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "type": "object"
-                                            }
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/v1/hr/dpd/create/label": {
             "post": {
                 "tags": [
@@ -482,6 +346,362 @@
                                                 "properties": {
                                                     "error_id": {
                                                         "description": "Error identifier",
+                                                        "type": "integer"
+                                                    },
+                                                    "error_details": {
+                                                        "description": "Error details",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/licence/start-trial": {
+            "post": {
+                "tags": [
+                    "Licence"
+                ],
+                "summary": "Kreira probno razdoblje s neograničenim vremenom i XX brojem izrada naljepnica.",
+                "description": "Mora se poslati trial za licenca property ili vraća error.",
+                "operationId": "03373878e2555f31c3482a0811cfbf1d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "user": {
+                                        "properties": {
+                                            "email": {
+                                                "type": "string",
+                                                "example": "user@example.com"
+                                            },
+                                            "domain": {
+                                                "type": "string",
+                                                "example": "example.com"
+                                            },
+                                            "licence": {
+                                                "type": "string",
+                                                "example": "trial"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Trial started successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "licence": {
+                                            "type": "string",
+                                            "example": "unique-licence-uid"
+                                        },
+                                        "domain": {
+                                            "type": "string",
+                                            "example": "example.com"
+                                        },
+                                        "email": {
+                                            "type": "string",
+                                            "example": "user@example.com"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Invalid request or licence",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "error_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "error_details": {
+                                                        "type": "string",
+                                                        "example": "Error message"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/licence/check": {
+            "post": {
+                "tags": [
+                    "Licence"
+                ],
+                "summary": "Provjerava i vraća podatke licence",
+                "description": "Check the validity of a user's licence.",
+                "operationId": "087fe0e57350b62b4164d69ae8940372",
+                "requestBody": {
+                    "description": "User data for licence check",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user"
+                                ],
+                                "properties": {
+                                    "user": {
+                                        "properties": {
+                                            "email": {
+                                                "type": "string"
+                                            },
+                                            "domain": {
+                                                "type": "string"
+                                            },
+                                            "licence": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Licence and user information",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "licence": {
+                                            "type": "string"
+                                        },
+                                        "domain": {
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "type": "string"
+                                        },
+                                        "valid_from": {
+                                            "type": "string"
+                                        },
+                                        "valid_until": {
+                                            "type": "string"
+                                        },
+                                        "usage": {
+                                            "type": "integer"
+                                        },
+                                        "usage_limit": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "User or licence does not exist",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "error_id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "error_details": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/parcel-statuses": {
+            "post": {
+                "tags": [
+                    "Parcel Status"
+                ],
+                "summary": "Dohvaća statuse parcele po kuriru i državi.",
+                "description": "Dohvaća statuse parcele po kuriru i državi.",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "user": {
+                                        "description": "User information",
+                                        "properties": {
+                                            "username": {
+                                                "description": "Client’s Easyship username (Max 20 characters)",
+                                                "type": "string"
+                                            },
+                                            "password": {
+                                                "description": "Client’s Easyship password (Max 20 characters)",
+                                                "type": "string"
+                                            },
+                                            "domain": {
+                                                "description": "Client’s domain (Max 20 characters)",
+                                                "type": "string"
+                                            },
+                                            "licence": {
+                                                "description": "Client’s licence (Max 20 characters)",
+                                                "type": "string"
+                                            },
+                                            "email": {
+                                                "description": "Client’s E-mail address (Max 50 characters)",
+                                                "type": "string"
+                                            },
+                                            "platform": {
+                                                "description": "Client’s platform (Max 20 characters)",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    "parcels": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "parcel": {
+                                                    "properties": {
+                                                        "country": {
+                                                            "description": "Parcel country",
+                                                            "type": "string"
+                                                        },
+                                                        "courier": {
+                                                            "description": "Parcel courier",
+                                                            "type": "string"
+                                                        },
+                                                        "parcel_number": {
+                                                            "description": "Parcel number",
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                },
+                                                "order_number": {
+                                                    "description": "Order number",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "order_number": {
+                                                        "description": "Order number",
+                                                        "type": "string"
+                                                    },
+                                                    "parcel_number": {
+                                                        "description": "Parcel number",
+                                                        "type": "string"
+                                                    },
+                                                    "parcel_status": {
+                                                        "description": "Parcel status",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "order_number": {
+                                                        "description": "Order number",
+                                                        "type": "string"
+                                                    },
+                                                    "error_code": {
+                                                        "description": "Error code",
+                                                        "type": "integer"
+                                                    },
+                                                    "error_details": {
+                                                        "description": "Error details",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "error_id": {
+                                                        "description": "Error ID",
                                                         "type": "integer"
                                                     },
                                                     "error_details": {
