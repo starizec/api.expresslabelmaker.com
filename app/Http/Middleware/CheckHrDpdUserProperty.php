@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use App\Services\ErrorService;
 
 class CheckHrDpdUserProperty
 {
@@ -20,10 +21,14 @@ class CheckHrDpdUserProperty
             ) {
                 return response()->json([
                     "errors" => [
-                        [
-                            "error_id" => 1,
-                            "error_details" => "Missing DPD username or password."
-                        ]
+                        ErrorService::write(
+                            $jsonData['user']['email'],
+                            400,
+                            "Missing DPD username or password.",
+                            $request,
+                            "namespace App\Http\Middleware\CheckHrDpdUserProperty@handle::" . __LINE__,
+                            ""
+                        )
                     ],
                 ], 400);
             }

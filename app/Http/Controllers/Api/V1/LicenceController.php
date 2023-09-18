@@ -12,6 +12,7 @@ use App\Services\DomainService;
 use App\Models\User;
 use App\Models\Domain;
 use App\Models\Licence;
+use App\Services\ErrorService;
 
 class LicenceController extends Controller
 {
@@ -65,10 +66,7 @@ class LicenceController extends Controller
         if (Domain::where('name', DomainService::parseDomain($data->domain))->exists()) {
             return response()->json([
                 "errors" => [
-                    [
-                        "error_id" => 1,
-                        "error_details" => "Domain already registered. Enter your licence code."
-                    ]
+                    ErrorService::write($data->email, 403, "Domain already registered. Enter your licence code.", $request, "App\Http\Controllers\Api\V1\LicenceController@startTrial", ''),
                 ],
             ], 403);
         }
@@ -77,10 +75,7 @@ class LicenceController extends Controller
         if ($data->licence != 'trial') {
             return response()->json([
                 "errors" => [
-                    [
-                        "error_id" => 1,
-                        "error_details" => "Invalid trial licence key."
-                    ]
+                    ErrorService::write($data->email, 403, "Invalid trial licence key.", $request, "App\Http\Controllers\Api\V1\LicenceController@startTrial", ''),
                 ],
             ], 403);
         }
@@ -175,8 +170,7 @@ class LicenceController extends Controller
             return response()->json([
                 "errors" => [
                     [
-                        "error_id" => 1,
-                        "error_details" => "User does not exist."
+                        ErrorService::write($data->email, 403, "User does not exist.", $request, "App\Http\Controllers\Api\V1\LicenceController@check", '')
                     ]
                 ],
             ], 403);
@@ -188,10 +182,7 @@ class LicenceController extends Controller
         if (!Licence::where('user_id', $user->id)->where('domain_id', $domain->id)->where('licence_uid', $data->licence)->exists()) {
             return response()->json([
                 "errors" => [
-                    [
-                        "error_id" => 1,
-                        "error_details" => "User does not exist."
-                    ]
+                    ErrorService::write($data->email, 403, "User does not exist.", $request, "App\Http\Controllers\Api\V1\LicenceController@check", '')
                 ],
             ], 403);
         }
@@ -204,10 +195,7 @@ class LicenceController extends Controller
         if ($licence->user_id != $user->id || $licence->domain_id != $domain->id) {
             return response()->json([
                 "errors" => [
-                    [
-                        "error_id" => 1,
-                        "error_details" => "User does not exist."
-                    ]
+                    ErrorService::write($data->email, 403, "User does not exist.", $request, "App\Http\Controllers\Api\V1\LicenceController@check", '')
                 ],
             ], 403);
         }

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Classes\MultiParcelResponse;
 use App\Classes\MultiParcelError;
+use App\Services\ErrorService;
 
 class DpdController extends Controller
 {
@@ -127,20 +128,28 @@ class DpdController extends Controller
             if ($parcelResponseJson->status === 'err') {
                 return response()->json([
                     "errors" => [
-                        [
-                            "error_id" => 123456,
-                            "error_details" => $parcelResponseJson->status . ' - ' . $parcelResponseJson->errlog
-                        ]
+                        ErrorService::write(
+                            $user->email,
+                            400,
+                            $parcelResponseJson->status . ' - ' . $parcelResponseJson->errlog,
+                            $request,
+                            "App\Http\Controllers\Api\V1\HR\DpdController@createLabel::" . __LINE__,
+                            json_encode($parcel)
+                        )
                     ],
                 ], 400);
             }
         } else {
             return response()->json([
                 "errors" => [
-                    [
-                        "error_id" => 123456,
-                        "error_details" => $parcelResponse->status() . " - DPD Server error"
-                    ]
+                    ErrorService::write(
+                        $user->email,
+                        $parcelResponse->status(),
+                        $parcelResponse->status() . " - DPD Server error",
+                        $request,
+                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabel::" . __LINE__,
+                        json_encode($parcel)
+                    )
                 ]
             ], $parcelResponse->status());
         }
@@ -163,20 +172,28 @@ class DpdController extends Controller
             if (isset($parcelLabelResponseJson->status)) {
                 return response()->json([
                     "errors" => [
-                        [
-                            "error_id" => 123456,
-                            "error_details" => $parcelLabelResponseJson->status . ' - ' . $parcelLabelResponseJson->errlog
-                        ]
+                        ErrorService::write(
+                            $user->email,
+                            400,
+                            $parcelLabelResponseJson->status . ' - ' . $parcelLabelResponseJson->errlog,
+                            $request,
+                            "App\Http\Controllers\Api\V1\HR\DpdController@createLabel::" . __LINE__,
+                            json_encode($parcel)
+                        )
                     ],
                 ], 400);
             }
         } else {
             return response()->json([
                 "errors" => [
-                    [
-                        "error_id" => 123456,
-                        "error_details" => $parcelLabelResponse->status() . ' - DPD Server error'
-                    ]
+                    ErrorService::write(
+                        $user->email,
+                        $parcelLabelResponse->status(),
+                        $parcelLabelResponse->status() . ' - DPD Server error',
+                        $request,
+                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabel::" . __LINE__,
+                        json_encode($parcel)
+                    )
                 ]
             ], $parcelLabelResponse->status());
         }
@@ -336,10 +353,28 @@ class DpdController extends Controller
 
             if ($parcelResponse->successful()) {
                 if ($parcelResponseJson->status === 'err') {
-                    $errors[] = new MultiParcelError($parcel->order_number, 1, $parcelResponseJson->status . ' ' . $parcelResponseJson->errlog);
+                    $error = ErrorService::write(
+                        $user->email,
+                        $parcelResponseJson->status,
+                        $parcelResponseJson->status . ' ' . $parcelResponseJson->errlog,
+                        $request,
+                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
+                        json_encode($parcel)
+                    );
+
+                    $errors[] = new MultiParcelError($parcel->order_number, $error['error_id'], $error['error_details']);
                 }
             } else {
-                $errors[] = new MultiParcelError($parcel->order_number, 1, $parcelResponse->status() . 'DPD Server error');
+                $error = ErrorService::write(
+                    $user->email,
+                    $parcelResponse->status(),
+                    $parcelResponse->status() . 'DPD Server error',
+                    $request,
+                    "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
+                    json_encode($parcel)
+                );
+
+                $errors[] = new MultiParcelError($parcel->order_number, $error['error_id'], $error['error_details']);
             }
 
             $all_pl_numbers[] = $parcelResponseJson->pl_number;
@@ -359,10 +394,28 @@ class DpdController extends Controller
 
             if ($parcelLabelResponse->successful()) {
                 if (isset($parcelLabelResponseJson->status)) {
-                    $errors[] = new MultiParcelError($parcel->order_number, 1, $parcelLabelResponseJson->status . ' ' . $parcelLabelResponseJson->errlog);
+                    $error = ErrorService::write(
+                        $user->email,
+                        $parcelLabelResponseJson->status,
+                        $parcelLabelResponseJson->status . ' ' . $parcelLabelResponseJson->errlog,
+                        $request,
+                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
+                        json_encode($parcel)
+                    );
+
+                    $errors[] = new MultiParcelError($parcel->order_number, $error['error_id'], $error['error_details']);
                 }
             } else {
-                $errors[] = new MultiParcelError($parcel->order_number, 1, $parcelLabelResponse->status() . 'DPD Server error');
+                $error = ErrorService::write(
+                    $user->email,
+                    $parcelLabelResponse->status(),
+                    $parcelLabelResponse->status() . 'DPD Server error',
+                    $request,
+                    "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
+                    json_encode($parcel)
+                );
+
+                $errors[] = new MultiParcelError($parcel->order_number, $error['error_id'], $error['error_details']);
             }
 
             $data[] = new MultiParcelResponse($parcel->order_number, $pl_numbers, base64_encode($parcelLabelResponse->body()));
@@ -386,20 +439,28 @@ class DpdController extends Controller
             if (isset($allParcelLabelResponseJson->status)) {
                 return response()->json([
                     "errors" => [
-                        [
-                            "error_id" => 123456,
-                            "error_details" => $allParcelLabelResponseJson->status . ' ' . $allParcelLabelResponseJson->errlog
-                        ]
+                        $error = ErrorService::write(
+                            $user->email,
+                            $allParcelLabelResponseJson->status,
+                            $allParcelLabelResponseJson->status . ' ' . $allParcelLabelResponseJson->errlog,
+                            $request,
+                            "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
+                            json_encode($parcel)
+                        )
                     ],
                 ], 400);
             }
         } else {
             return response()->json([
                 "errors" => [
-                    [
-                        "error_id" => 123456,
-                        "error_details" => $allParcelLabelResponse->status() . " - DPD Server error"
-                    ]
+                    $error = ErrorService::write(
+                        $user->email,
+                        $allParcelLabelResponse->status(),
+                        $allParcelLabelResponse->status() . " - DPD Server error",
+                        $request,
+                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
+                        json_encode($parcel)
+                    )
                 ]
             ], $allParcelLabelResponse->status());
         }
@@ -536,10 +597,14 @@ class DpdController extends Controller
             if ($parcelResponseJson->status === 'Error') {
                 return response()->json([
                     "errors" => [
-                        [
-                            "error_id" => 123456,
-                            "error_details" => $parcelResponseJson->status . ' ' . $parcelResponseJson->errlog
-                        ]
+                        ErrorService::write(
+                            $user->email,
+                            400,
+                            $parcelResponseJson->status . ' ' . $parcelResponseJson->errlog,
+                            $request,
+                            "App\Http\Controllers\Api\V1\HR\DpdController@collectionRequest::" . __LINE__,
+                            json_encode($parcel)
+                        )
                     ],
                 ], 400);
             }
@@ -547,20 +612,28 @@ class DpdController extends Controller
             if ($parcelResponseJson->reference === null) {
                 return response()->json([
                     "errors" => [
-                        [
-                            "error_id" => 123456,
-                            "error_details" => 'Missing parcel data.'
-                        ]
+                        ErrorService::write(
+                            $user->email,
+                            400,
+                            'Missing parcel data.',
+                            $request,
+                            "App\Http\Controllers\Api\V1\HR\DpdController@collectionRequest::" . __LINE__,
+                            json_encode($parcel)
+                        )
                     ],
                 ], 400);
             }
         } else {
             return response()->json([
                 "errors" => [
-                    [
-                        "error_id" => 123456,
-                        "error_details" => $parcelResponse->status() . " - DPD Server error"
-                    ]
+                    ErrorService::write(
+                        $user->email,
+                        $parcelResponse->status(),
+                        $parcelResponse->status() . " - DPD Server error",
+                        $request,
+                        "App\Http\Controllers\Api\V1\HR\DpdController@collectionRequest::" . __LINE__,
+                        json_encode($parcel)
+                    )
                 ]
             ], $parcelResponse->status());
         }

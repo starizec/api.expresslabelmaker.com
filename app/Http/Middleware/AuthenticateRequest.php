@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 use App\Services\UserService;
 use App\Services\DomainService;
+use App\Services\ErrorService;
 use App\Classes\UserClass;
 
 class AuthenticateRequest
@@ -26,10 +27,14 @@ class AuthenticateRequest
             if ($validator->fails()) {
                 return response()->json([
                     "errors" => [
-                        [
-                            "error_id" => 1,
-                            "error_details" => "Invalid data for email, domain, or licence."
-                        ]
+                        ErrorService::write(
+                            $jsonData['user']['email'],
+                            400,
+                            "Invalid data for email, domain, or licence.",
+                            $request,
+                            "namespace App\Http\Middleware\AuthenticateRequest@handle::" . __LINE__,
+                            ""
+                        )
                     ],
                 ], 400);
             }
@@ -40,10 +45,14 @@ class AuthenticateRequest
             if ($licence['status'] > 300) {
                 return response()->json([
                     "errors" => [
-                        [
-                            "error_id" => 1,
-                            "error_details" => $licence['status'] . ' - ' . $licence['message']
-                        ]
+                        ErrorService::write(
+                            $jsonData['user']['email'],
+                            400,
+                            $licence['status'] . ' - ' . $licence['message'],
+                            $request,
+                            "namespace App\Http\Middleware\AuthenticateRequest@handle::" . __LINE__,
+                            ""
+                        )
                     ],
                 ], $licence['status']);
             }

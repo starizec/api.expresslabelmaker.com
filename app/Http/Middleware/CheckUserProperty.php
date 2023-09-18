@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use App\Services\ErrorService;
 
 class CheckUserProperty
 {
@@ -20,10 +21,14 @@ class CheckUserProperty
             ) {
                 return response()->json([
                     "errors" => [
-                        [
-                            "error_id" => 1,
-                            "error_details" => "Missing user properties."
-                        ]
+                        ErrorService::write(
+                            "",
+                            400,
+                            "Missing user properties.",
+                            $request,
+                            "namespace App\Http\Middleware\CheckUserProperty@handle::" . __LINE__,
+                            ""
+                        )
                     ],
                 ], 400);
             }
