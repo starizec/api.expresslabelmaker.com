@@ -213,39 +213,9 @@ class LicenceController extends Controller
 
     public function buy(Request $request)
     {
-        $validatedData = $request->validate([
-            'email' => 'required|email',
-            'domain' => 'required',
-            'licence' => 'required'
-        ]);
+        $requestBody = $request->getContent();
+        $jsonData = json_decode($requestBody);
 
-        $user = User::firstOrCreate([
-            'email' => $validatedData['email']
-        ]);
-
-        $domain = Domain::firstOrCreate([
-            'name' => $validatedData['domain'],
-            'user_id' => $user->id
-        ]);
-
-        $licence = Licence::create([
-            'user_id' => $user->id,
-            'domain_id' => $domain->id,
-            'licence_uid' => Uuid::uuid4()->toString(),
-            'valid_from' => Carbon::today()->toDateString(),
-            'valid_until' => null,
-            'licence_type_id' => 1,
-            'usage_limit' => config('usage.trial')
-        ]);
-
-        return response()->json([
-            'licence' => $licence->licence_uid,
-            'domain' => $domain->name,
-            'user' => $user->email,
-            'valid_until' => $licence->valid_until,
-            'usage' => $licence->usage,
-        ], 201);
-
-        //slanje email-a
+        $data = $jsonData->user;
     }
 }

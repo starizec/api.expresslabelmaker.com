@@ -2,11 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['checkUserProperty', 'authenticateRequest'])->prefix('v1')->group(function () {
+Route::middleware(['checkUserProperty', 'checkUserLicence'])->prefix('v1')->group(function () {
     Route::prefix('licence')->group(function () {
-        Route::post('/start-trial', [App\Http\Controllers\Api\V1\LicenceController::class, 'startTrial'])->withoutMiddleware(['authenticateRequest']);
+        Route::post('/start-trial', [App\Http\Controllers\Api\V1\LicenceController::class, 'startTrial'])->withoutMiddleware(['checkUserLicence']);
         Route::post('/check', [App\Http\Controllers\Api\V1\LicenceController::class, 'check']);
-        Route::post('/buy', [App\Http\Controllers\Api\V1\LicenceController::class, 'buy']);
+        Route::post('/buy', [App\Http\Controllers\Api\V1\LicenceController::class, 'buy'])->withoutMiddleware(['checkUserLicence']);
     });
 
     Route::post('/parcel-statuses', [App\Http\Controllers\Api\V1\StatusController::class, 'get']);

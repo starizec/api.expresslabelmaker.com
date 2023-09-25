@@ -11,7 +11,7 @@ use App\Services\DomainService;
 use App\Services\ErrorService;
 use App\Classes\UserClass;
 
-class AuthenticateRequest
+class CheckUserLicence
 {
     public function handle(Request $request, Closure $next): Response
     {
