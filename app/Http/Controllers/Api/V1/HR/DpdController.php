@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Api\V1\HR;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+
 use App\Classes\MultiParcelResponse;
 use App\Classes\MultiParcelError;
+
 use App\Services\ErrorService;
+use App\Services\UserService;
 
 class DpdController extends Controller
 {
@@ -197,6 +200,8 @@ class DpdController extends Controller
                 ]
             ], $parcelLabelResponse->status());
         }
+
+        UserService::addUsage($user);
 
         return response()->json([
             "data" => [
@@ -418,6 +423,7 @@ class DpdController extends Controller
                 $errors[] = new MultiParcelError($parcel->order_number, $error['error_id'], $error['error_details']);
             }
 
+            UserService::addUsage($user);
             $data[] = new MultiParcelResponse($parcel->order_number, $pl_numbers, base64_encode($parcelLabelResponse->body()));
         }
 
@@ -638,6 +644,8 @@ class DpdController extends Controller
             ], $parcelResponse->status());
         }
 
+        UserService::addUsage($user);
+        
         return response()->json([
             "data" => [
                 "reference" => substr($parcelResponseJson->reference, 1, -1),

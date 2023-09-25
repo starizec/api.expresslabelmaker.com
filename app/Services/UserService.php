@@ -9,9 +9,9 @@ use App\Classes\UserClass;
 
 class UserService
 {
-    public function addUsage(UserClass $user)
+    static public function addUsage($user)
     {
-        $licence = Licence::where('licence_uid', $user->licence)->first();
+        $licence = Licence::where('licence_uid', $user->licence)->latest()->first();
 
         if ($licence) {
             $licence->increment('usage');
@@ -23,7 +23,7 @@ class UserService
         }
     }
 
-    public function resetUSage(UserClass $user)
+    static public function resetUSage(UserClass $user)
     {
         $licence = Licence::where('licence_uid', $user->licence)->first();
 
