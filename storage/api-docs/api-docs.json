@@ -365,14 +365,14 @@
                 }
             }
         },
-        "/api/licence/start-trial": {
+        "/v1/licence/start-trial": {
             "post": {
                 "tags": [
                     "Licence"
                 ],
                 "summary": "Kreira probno razdoblje s neograničenim vremenom i XX brojem izrada naljepnica.",
                 "description": "Mora se poslati trial za licenca property ili vraća error.",
-                "operationId": "03373878e2555f31c3482a0811cfbf1d",
+                "operationId": "62234b99871af5849c89ecdf6145413e",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -544,6 +544,125 @@
                                                         "type": "integer"
                                                     },
                                                     "error_details": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/licence/buy": {
+            "post": {
+                "tags": [
+                    "Licence"
+                ],
+                "summary": "Buy a licence",
+                "description": "Kupnja licence. Korisnik mora imati nekakvu licencu. 'Licence' vrijednost mora biti 'Full'",
+                "operationId": "buyLicence",
+                "requestBody": {
+                    "description": "JSON payload with user data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user"
+                                ],
+                                "properties": {
+                                    "user": {
+                                        "description": "User data",
+                                        "properties": {
+                                            "licence": {
+                                                "description": "User's licence type ('full')",
+                                                "type": "string"
+                                            },
+                                            "email": {
+                                                "description": "User's email",
+                                                "type": "string"
+                                            },
+                                            "domain": {
+                                                "description": "User's domain",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Licence successfully purchased",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "licence": {
+                                            "description": "Purchased licence UID",
+                                            "type": "string"
+                                        },
+                                        "domain": {
+                                            "description": "User's domain",
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "description": "User's email",
+                                            "type": "string"
+                                        },
+                                        "valid_from": {
+                                            "description": "Licence validity start date",
+                                            "type": "string"
+                                        },
+                                        "valid_until": {
+                                            "description": "Licence validity end date",
+                                            "type": "string"
+                                        },
+                                        "usage": {
+                                            "description": "Current licence usage",
+                                            "type": "integer"
+                                        },
+                                        "usage_limit": {
+                                            "description": "Licence usage limit",
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Invalid request or user",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "description": "List of errors",
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "message": {
+                                                        "description": "Error message",
+                                                        "type": "string"
+                                                    },
+                                                    "code": {
+                                                        "description": "Error code",
+                                                        "type": "integer"
+                                                    },
+                                                    "details": {
+                                                        "description": "Error details",
                                                         "type": "string"
                                                     }
                                                 },
