@@ -37,7 +37,7 @@ class UserService
         }
     }
 
-    public function checkUserLicence(UserClass $user)
+    public function checkUserLicence($user, $pl_no)
     {
         //Postoji li licenca
         if (!Licence::where('licence_uid', $user->licence)->exists()) {
@@ -72,28 +72,24 @@ class UserService
                 "status" => 204,
                 "message" => "Licence OK"
             ];
-
         } elseif ($licence->licence_type_id === config('licence-types.trial')) { //Trial verzija
-            if ($licence->usage > $licence->usage_limit) { // Ako je presao limit
+            if (($licence->usage + $pl_no) > $licence->usage_limit) { // Ako je presao limit
                 return [
                     "status" => 403,
-                    "message" => "Monthly usage reached."
+                    "message" => "Monthly usage reached. " . $licence->usage_limit - $licence->usage . " remain while trying " . $pl_no
                 ];
-
             } else {
                 return [
                     "status" => 204,
                     "message" => "Licence OK."
                 ];
-
             }
         } elseif ($licence->licence_type_id === config('licence-types.full')) { //Full verzija
-            if ($licence->usage > $licence->usage_limit) { // Ako je presao limit
+            if (($licence->usage + $pl_no) > $licence->usage_limit) { // Ako je presao limit
                 return [
                     "status" => 403,
-                    "message" => "Monthly usage reached."
+                    "message" => "Monthly usage reached. " . $licence->usage_limit - $licence->usage . " remain while trying " . $pl_no
                 ];
-
             } else {
                 $today = time();
                 if ($today > strtotime($licence->valid_until)) { // Ako je licenca istekla
@@ -101,13 +97,11 @@ class UserService
                         "status" => 403,
                         "message" => "Licence expired."
                     ];
-
                 } else {
                     return [
                         "status" => 204,
                         "message" => "Licence OK."
                     ];
-
                 }
             }
         }
