@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Domain;
 use App\Models\Licence;
 use App\Services\ErrorService;
+use App\Services\UserService;
 
 class LicenceController extends Controller
 {
@@ -80,9 +81,26 @@ class LicenceController extends Controller
             ], 403);
         }
 
-        $user = User::firstOrCreate([
-            'email' => $data->email
-        ]);
+        if (!User::where('email', $data->email)->exists() && empty(UserService::getWpUser($data->email)["data"][0])) {
+            $wp_user = UserService::createWpUser($data->email);
+
+            if ($wp_user["status"] === 201) {
+                $user = User::create([
+                    'email' => $data->email,
+                    'wp_user_id' => $wp_user["data"]["id"]
+                ]);
+
+            } else {
+                return response()->json([
+                    "errors" => [
+                        ErrorService::write($data->email, 403, "Could not create user.", $request, "App\Http\Controllers\Api\V1\LicenceController@startTrial" . __LINE__, ''),
+                    ],
+                ], 403);
+            }
+
+        } else {
+            $user = User::where('email', $data->email)->first();
+        }
 
         $domain = Domain::firstOrCreate([
             'name' => $data->domain,

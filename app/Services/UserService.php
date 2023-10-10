@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\Domain;
 use App\Classes\UserClass;
 
+use GuzzleHttp\Client;
+
 class UserService
 {
     static public function addUsage($user)
@@ -37,7 +39,7 @@ class UserService
         }
     }
 
-    public function checkUserLicence($user, $pl_no)
+    static public function checkUserLicence($user, $pl_no)
     {
         //Postoji li licenca
         if (!Licence::where('licence_uid', $user->licence)->exists()) {
@@ -104,6 +106,76 @@ class UserService
                     ];
                 }
             }
+        }
+    }
+
+    static public function getWpUser($email)
+    {
+        $url = 'https://expresslabelmaker.com/wp-json/wc/v3/customers';
+
+        $consumerKey = env('WP_CK', '');
+        $consumerSecret = env('WP_CS', '');
+
+        $client = new Client([
+            'base_uri' => $url,
+            'auth' => [$consumerKey, $consumerSecret],
+        ]);
+
+        $response = $client->get('', [
+            'query' => ['email' => $email],
+        ]);
+
+        $data = json_decode($response->getBody(), true);
+
+        if ($response->getStatusCode() == 200) {
+            return [
+                "status" => 200,
+                "message" => "Success",
+                'data' => $data
+            ];
+        } else {
+            return [
+                "status" => $response->getStatusCode(),
+                "message" => 'Failed to get user data. Status code: ' . $response->getStatusCode(),
+                "data" => []
+            ];
+        }
+    }
+
+    static public function createWpUser($email)
+    {
+        $url = 'https://expresslabelmaker.com/wp-json/wc/v3/customers';
+
+        $consumerKey = env('WP_CK', '');
+        $consumerSecret = env('WP_CS', '');
+
+        $user_data = [
+            'email' => $email
+        ];
+
+        $client = new Client([
+            'base_uri' => $url,
+            'auth' => [$consumerKey, $consumerSecret],
+        ]);
+
+        $response = $client->post('', [
+            'json' => $user_data,
+        ]);
+
+        $data = json_decode($response->getBody(), true);
+
+        if ($response->getStatusCode() == 201) {
+            return [
+                "status" => 201,
+                "message" => "User created",
+                'data' => $data
+            ];
+        } else {
+            return [
+                "status" => $response->getStatusCode(),
+                "message" => 'Failed to create user. Status code: ' . $response->getStatusCode(),
+                "data" => []
+            ];
         }
     }
 }
