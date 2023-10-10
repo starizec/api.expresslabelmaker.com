@@ -9,6 +9,10 @@ Route::middleware(['checkUserProperty', 'checkUserLicence'])->prefix('v1')->grou
         Route::post('/buy', [App\Http\Controllers\Api\V1\LicenceController::class, 'buy'])->withoutMiddleware(['checkUserLicence']);
     });
 
+    Route::prefix('user')->group(function () {
+        Route::post('/create', [App\Http\Controllers\Api\V1\UserController::class, 'create'])->withoutMiddleware(['checkUserLicence', 'checkUserProperty']);
+    });
+
     Route::post('/parcel-statuses', [App\Http\Controllers\Api\V1\StatusController::class, 'get']);
 
     Route::prefix('hr')->group(function () {
