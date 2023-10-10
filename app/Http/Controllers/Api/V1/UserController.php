@@ -17,7 +17,7 @@ class UserController extends Controller
         $requestBody = $request->getContent();
         $data = json_decode($requestBody);
 
-        if (!User::where('email', $data->email)->exists() && empty(UserService::getWpUser($data->email)["data"][0])) {
+        if (!User::where('email', $data->email)->exists() && empty(UserService::getWpUser($data->email))) {
             User::create([
                 'email' => $data->email,
                 'wp_user_id' => $data->wp_user_id
