@@ -29,7 +29,8 @@ class UserController extends Controller
         } else {
             return response()->json([
                 "errors" => [
-                    ErrorService::write($data->email, 403, "Could not create user.", $data, "App\Http\Controllers\Api\V1\LicenceController@startTrial" . __LINE__, ''),
+                    "error"
+                    //ErrorService::write("", 403, "Could not create user.", $data, "App\Http\Controllers\Api\V1\UserController@create" . __LINE__, ''),
                 ],
             ], 403);
         }
