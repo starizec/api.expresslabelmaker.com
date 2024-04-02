@@ -51,7 +51,7 @@ class CheckUserLicence
                     ErrorService::write(
                         $jsonData['user']['email'],
                         400,
-                        $licence['status'] . ' - ' . $licence['message'],
+                        $licence,
                         $request,
                         "namespace App\Http\Middleware\AuthenticateRequest@handle::" . __LINE__,
                         ""
