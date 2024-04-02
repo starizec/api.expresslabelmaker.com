@@ -46,6 +46,7 @@ class CheckUserLicence
 
             $user_s = new UserService();
             $licence = $user_s->checkUserLicence(new UserClass($jsonData['user']['email'], DomainService::parseDomain($jsonData['user']['domain']), $jsonData['user']['licence']), $pl_no);
+            return response()->json($licence);
 
             if ($licence['status'] > 300) {
                 return response()->json([
