@@ -23,7 +23,7 @@ class CheckUserLicence
         if ($request->isJson()) {
             $jsonData = json_decode($request->getContent(), true); // Decode JSON into an associative array
 
-            $validator = validator($jsonData->user, [
+            $validator = validator($jsonData['user'], [
                 'email' => 'required|email',
                 'domain' => 'required|string',
                 'licence' => 'required|string'
