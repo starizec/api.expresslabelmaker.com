@@ -70,6 +70,12 @@ class UserService
             ];
         }
 
+        return [
+            "licence-types.trial" => config('licence-types.trial'),
+            "domain_l" => $domain_l,
+            "licence" => $licence,
+            "user_l" => $user_l
+        ];
         
         if ($licence->licence_type_id === config('licence-types.admin')) { //Ako je admin može sve
             return [
@@ -78,7 +84,7 @@ class UserService
             ];
         } elseif ($licence->licence_type_id === config('licence-types.trial')) { //Trial verzija
             return [
-                "licence-types.trial",
+                "licence-types.trial" => config('licence-types.trial'),
                 "domain_l" => $domain_l,
                 "licence" => $licence,
                 "user_l" => $user_l
