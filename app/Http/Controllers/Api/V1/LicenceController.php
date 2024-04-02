@@ -85,7 +85,7 @@ class LicenceController extends Controller
             $user = User::where('email', $data->email)->first();
         } else {
             $user = User::firstOrCreate([
-                'wp_user_id' => Uuid::uuid4(),
+                'wp_user_id' => 999,
                 'email' => $data->email,
             ]);
         }
