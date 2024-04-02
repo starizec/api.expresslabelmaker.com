@@ -81,16 +81,13 @@ class LicenceController extends Controller
             ], 403);
         }
 
-        if (!User::where('email', $data->email)->exists()) {
-
-            return response()->json([
-                "errors" => [
-                    ErrorService::write($data->email, 403, "Could not create user.", $request, "App\Http\Controllers\Api\V1\LicenceController@startTrial" . __LINE__, ''),
-                ],
-            ], 403);
-
-        } else {
+        if (User::where('email', $data->email)->exists()) {
             $user = User::where('email', $data->email)->first();
+        } else {
+            $user = User::firstOrCreate([
+                'wp_user_id' => Uuid::uuid4(),
+                'email' => $data->email,
+            ]);
         }
 
         $domain = Domain::firstOrCreate([
