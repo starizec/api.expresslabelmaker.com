@@ -59,7 +59,7 @@ class UserService
                 "message" => "Wrong licence email."
             ];
         }
-        return response()->json(["user_l" => $user_l]);
+        
         //Postoji li domena iz licence
         $domain_l = Domain::find($licence->domain_id);
         if ($user->domain != $domain_l->name) {
