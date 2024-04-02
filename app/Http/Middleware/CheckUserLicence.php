@@ -23,17 +23,17 @@ class CheckUserLicence
         if ($request->isJson()) {
             $jsonData = json_decode($request->getContent(), true); // Decode JSON into an associative array
 
-            $validator = validator($jsonData['user'], [
+            $validator = validator($jsonData->user, [
                 'email' => 'required|email',
                 'domain' => 'required|string',
                 'licence' => 'required|string'
             ]);
-            return response()->json(["errors" => $jsonData]);
+
             if ($validator->fails()) {
                 return response()->json([
                     "errors" => [
                         ErrorService::write(
-                            $jsonData['user']['email'],
+                            $jsonData->user->email,
                             400,
                             "Invalid data for email, domain, or licence.",
                             $request,
@@ -45,7 +45,8 @@ class CheckUserLicence
             }
 
             $user_s = new UserService();
-            $licence = $user_s->checkUserLicence(new UserClass($jsonData['user']['email'], DomainService::parseDomain($jsonData['user']['domain']), $jsonData['user']['licence']), $pl_no);
+            $licence = $user_s->checkUserLicence(new UserClass($jsonData->user->email, DomainService::parseDomain($jsonData->user->domain), $jsonData->user->licence), $pl_no);
+            return response()->json(["errors" => $user_s, "licence" => $licence]);
             
             if ($licence['status'] > 300) {
                 return response()->json([
