@@ -77,17 +77,18 @@ class UserService
                 "message" => "Licence OK"
             ];
         } elseif ($licence->licence_type_id === config('licence-types.trial')) { //Trial verzija
+            return [
+                "licence-types.trial",
+                "domain_l" => $domain_l,
+                "licence" => $licence,
+                "user_l" => $user_l
+            ];
             if (($licence->usage + $pl_no) > $licence->usage_limit) { // Ako je presao limit
                 return [
                     "status" => 403,
                     "message" => "Monthly usage reached. " . $licence->usage_limit - $licence->usage . " remain while trying " . $pl_no
                 ];
             } else {
-                return [
-                    "domain_l" => $domain_l,
-                    "licence" => $licence,
-                    "user_l" => $user_l
-                ];
                 return [
                     "status" => 204,
                     "message" => "Licence OK."
