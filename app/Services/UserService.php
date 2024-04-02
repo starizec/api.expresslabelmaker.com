@@ -41,7 +41,6 @@ class UserService
 
     static public function checkUserLicence($user, $pl_no)
     {
-        return response()->json(["errors" => $user]);
         //Postoji li licenca
         if (!Licence::where('licence_uid', $user->licence)->exists()) {
             return [
