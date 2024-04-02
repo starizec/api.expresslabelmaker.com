@@ -49,7 +49,7 @@ class CheckUserLicence
             return response()->json([
                 "errors" => [
                     ErrorService::write(
-                        $jsonData['user']['email'],
+                        $jsonData,
                         400,
                         $licence,
                         $request,
