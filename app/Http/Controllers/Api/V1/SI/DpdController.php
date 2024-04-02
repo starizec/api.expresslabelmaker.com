@@ -136,7 +136,7 @@ class DpdController extends Controller
                             400,
                             $parcelResponseJson->status . ' - ' . $parcelResponseJson->errlog,
                             $request,
-                            "App\Http\Controllers\Api\V1\HR\DpdController@createLabel::" . __LINE__,
+                            "App\Http\Controllers\Api\V1\SI\DpdController@createLabel::" . __LINE__,
                             json_encode($parcel)
                         )
                     ],
@@ -150,7 +150,7 @@ class DpdController extends Controller
                         $parcelResponse->status(),
                         $parcelResponse->status() . " - DPD Server error",
                         $request,
-                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabel::" . __LINE__,
+                        "App\Http\Controllers\Api\V1\SI\DpdController@createLabel::" . __LINE__,
                         json_encode($parcel)
                     )
                 ]
@@ -180,7 +180,7 @@ class DpdController extends Controller
                             400,
                             $parcelLabelResponseJson->status . ' - ' . $parcelLabelResponseJson->errlog,
                             $request,
-                            "App\Http\Controllers\Api\V1\HR\DpdController@createLabel::" . __LINE__,
+                            "App\Http\Controllers\Api\V1\SI\DpdController@createLabel::" . __LINE__,
                             json_encode($parcel)
                         )
                     ],
@@ -194,7 +194,7 @@ class DpdController extends Controller
                         $parcelLabelResponse->status(),
                         $parcelLabelResponse->status() . ' - DPD Server error',
                         $request,
-                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabel::" . __LINE__,
+                        "App\Http\Controllers\Api\V1\SI\DpdController@createLabel::" . __LINE__,
                         json_encode($parcel)
                     )
                 ]
@@ -363,7 +363,7 @@ class DpdController extends Controller
                         $parcelResponseJson->status,
                         $parcelResponseJson->status . ' ' . $parcelResponseJson->errlog,
                         $request,
-                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
+                        "App\Http\Controllers\Api\V1\SI\DpdController@createLabels::" . __LINE__,
                         json_encode($parcel)
                     );
 
@@ -375,7 +375,7 @@ class DpdController extends Controller
                     $parcelResponse->status(),
                     $parcelResponse->status() . 'DPD Server error',
                     $request,
-                    "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
+                    "App\Http\Controllers\Api\V1\SI\DpdController@createLabels::" . __LINE__,
                     json_encode($parcel)
                 );
 
@@ -404,7 +404,7 @@ class DpdController extends Controller
                         $parcelLabelResponseJson->status,
                         $parcelLabelResponseJson->status . ' ' . $parcelLabelResponseJson->errlog,
                         $request,
-                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
+                        "App\Http\Controllers\Api\V1\SI\DpdController@createLabels::" . __LINE__,
                         json_encode($parcel)
                     );
 
@@ -416,7 +416,7 @@ class DpdController extends Controller
                     $parcelLabelResponse->status(),
                     $parcelLabelResponse->status() . 'DPD Server error',
                     $request,
-                    "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
+                    "App\Http\Controllers\Api\V1\SI\DpdController@createLabels::" . __LINE__,
                     json_encode($parcel)
                 );
 
@@ -450,7 +450,7 @@ class DpdController extends Controller
                             $allParcelLabelResponseJson->status,
                             $allParcelLabelResponseJson->status . ' ' . $allParcelLabelResponseJson->errlog,
                             $request,
-                            "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
+                            "App\Http\Controllers\Api\V1\SI\DpdController@createLabels::" . __LINE__,
                             json_encode($parcel)
                         )
                     ],
@@ -464,7 +464,7 @@ class DpdController extends Controller
                         $allParcelLabelResponse->status(),
                         $allParcelLabelResponse->status() . " - DPD Server error",
                         $request,
-                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
+                        "App\Http\Controllers\Api\V1\SI\DpdController@createLabels::" . __LINE__,
                         json_encode($parcel)
                     )
                 ]
@@ -608,7 +608,7 @@ class DpdController extends Controller
                             400,
                             $parcelResponseJson->status . ' ' . $parcelResponseJson->errlog,
                             $request,
-                            "App\Http\Controllers\Api\V1\HR\DpdController@collectionRequest::" . __LINE__,
+                            "App\Http\Controllers\Api\V1\SI\DpdController@collectionRequest::" . __LINE__,
                             json_encode($parcel)
                         )
                     ],
@@ -623,7 +623,7 @@ class DpdController extends Controller
                             400,
                             'Missing parcel data.',
                             $request,
-                            "App\Http\Controllers\Api\V1\HR\DpdController@collectionRequest::" . __LINE__,
+                            "App\Http\Controllers\Api\V1\SI\DpdController@collectionRequest::" . __LINE__,
                             json_encode($parcel)
                         )
                     ],
@@ -637,7 +637,7 @@ class DpdController extends Controller
                         $parcelResponse->status(),
                         $parcelResponse->status() . " - DPD Server error",
                         $request,
-                        "App\Http\Controllers\Api\V1\HR\DpdController@collectionRequest::" . __LINE__,
+                        "App\Http\Controllers\Api\V1\SI\DpdController@collectionRequest::" . __LINE__,
                         json_encode($parcel)
                     )
                 ]
