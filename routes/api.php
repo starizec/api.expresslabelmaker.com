@@ -24,4 +24,14 @@ Route::middleware(['checkUserProperty', 'checkUserLicence'])->prefix('api/v1')->
             });
         });
     });
+
+    Route::prefix('si')->group(function () {
+        Route::middleware(['checkHrDpdUserProperty'])->prefix('dpd')->group(function () {
+            Route::prefix('create')->group(function () {
+                Route::post('label', [App\Http\Controllers\Api\V1\SI\DpdController::class, 'createLabel']);
+                Route::post('labels', [App\Http\Controllers\Api\V1\SI\DpdController::class, 'createLabels']);
+                Route::post('collection-request', [App\Http\Controllers\Api\V1\SI\DpdController::class, 'collectionRequest']);
+            });
+        });
+    });
 });
