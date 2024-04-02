@@ -70,11 +70,7 @@ class UserService
             ];
         }
 
-        return [
-            "domain_l" => $domain_l,
-            "licence" => $licence,
-            "user_l" => $user_l
-        ];
+        
         if ($licence->licence_type_id === config('licence-types.admin')) { //Ako je admin može sve
             return [
                 "status" => 204,
@@ -87,6 +83,11 @@ class UserService
                     "message" => "Monthly usage reached. " . $licence->usage_limit - $licence->usage . " remain while trying " . $pl_no
                 ];
             } else {
+                return [
+                    "domain_l" => $domain_l,
+                    "licence" => $licence,
+                    "user_l" => $user_l
+                ];
                 return [
                     "status" => 204,
                     "message" => "Licence OK."
