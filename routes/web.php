@@ -5,7 +5,7 @@ use App\Http\Controllers\Admin\CountryController;
 use App\Http\Controllers\Admin\CourierController;
 
 Route::get('/', function () {
-    return view('admin.users.index');
+    return view('frontend.index.index');
 });
 
 Route::prefix('admin')->group(function () {
