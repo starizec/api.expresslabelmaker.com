@@ -45,19 +45,9 @@ class CheckUserLicence
             }
 
             $user_s = new UserService();
-            $licence = $user_s->checkUserLicence(new UserClass($jsonData['user']['email'], DomainService::parseDomain($jsonData['user']['domain']), $jsonData['user']['licence']), $pl_no);
+            $licence = $user_s->checkUserLicence($jsonData['user']['email'], DomainService::parseDomain($jsonData['user']['domain']), $jsonData['user']['licence'], $pl_no);
             return response()->json([
-                "errors" => [
-                    ErrorService::write(
-                        $jsonData,
-                        400,
-                        $licence,
-                        $request,
-                        "namespace App\Http\Middleware\AuthenticateRequest@handle::" . __LINE__,
-                        ""
-                    )
-                ],
-            ], $licence);
+                "errors" => $licence]);
             if ($licence['status'] > 300) {
                 return response()->json([
                     "errors" => [
