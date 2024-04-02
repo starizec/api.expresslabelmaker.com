@@ -81,7 +81,7 @@ class LicenceController extends Controller
             ], 403);
         }
 
-        if (!User::where('email', $data->email)->exists() && empty(UserService::getWpUser($data->email)["data"][0])) {
+        if (!User::where('email', $data->email)->exists()) {
 
             return response()->json([
                 "errors" => [
