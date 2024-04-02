@@ -41,10 +41,7 @@ class UserService
 
     static public function checkUserLicence($user, $pl_no)
     {
-        return [
-            "status" => $user,
-            "message" => $pl_no
-        ];
+
         //Postoji li licenca
         if (!Licence::where('licence_uid', $user->licence)->exists()) {
             return [
@@ -73,6 +70,11 @@ class UserService
             ];
         }
 
+        return [
+            "domain_l" => $domain_l,
+            "licence" => $licence,
+            "user_l" => $user_l
+        ];
         if ($licence->licence_type_id === config('licence-types.admin')) { //Ako je admin može sve
             return [
                 "status" => 204,
