@@ -70,19 +70,12 @@ class UserService
             ];
         }
 
-        return [
-            "licence-types.trial" => config('licence-types.trial'),
-            "domain_l" => $domain_l,
-            "licence" => $licence,
-            "user_l" => $user_l
-        ];
-        
-        if ($licence->licence_type_id === config('licence-types.admin')) { //Ako je admin može sve
+        if ($licence->licence_type_id == config('licence-types.admin')) { //Ako je admin može sve
             return [
                 "status" => 204,
                 "message" => "Licence OK"
             ];
-        } elseif ($licence->licence_type_id === config('licence-types.trial')) { //Trial verzija
+        } elseif ($licence->licence_type_id == config('licence-types.trial')) { //Trial verzija
             return [
                 "licence-types.trial" => config('licence-types.trial'),
                 "domain_l" => $domain_l,
@@ -100,7 +93,7 @@ class UserService
                     "message" => "Licence OK."
                 ];
             }
-        } elseif ($licence->licence_type_id === config('licence-types.full')) { //Full verzija
+        } elseif ($licence->licence_type_id == config('licence-types.full')) { //Full verzija
             if (($licence->usage + $pl_no) > $licence->usage_limit) { // Ako je presao limit
                 return [
                     "status" => 403,
