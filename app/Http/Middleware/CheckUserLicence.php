@@ -19,7 +19,7 @@ class CheckUserLicence
         if (isset($request->parcels)) {
             $pl_no = count($request->parcels);
         }
-
+        return response()->json(["errors" => $request->getContent()]);
         if ($request->isJson()) {
             $jsonData = json_decode($request->getContent(), true); // Decode JSON into an associative array
 
