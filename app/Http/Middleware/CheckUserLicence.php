@@ -57,7 +57,7 @@ class CheckUserLicence
                         ""
                     )
                 ],
-            ], $licence['status']);
+            ], $licence);
             if ($licence['status'] > 300) {
                 return response()->json([
                     "errors" => [
