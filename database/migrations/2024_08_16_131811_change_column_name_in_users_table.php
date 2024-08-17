@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('licences', function (Blueprint $table) {
-            $table->dropUnique('licence_uid');
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('name')->nullable(true)->change();
         });
     }
 
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('licences', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table) {
             //
         });
     }
