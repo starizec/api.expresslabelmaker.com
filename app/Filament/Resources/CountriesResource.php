@@ -31,7 +31,8 @@ class CountriesResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('name')->sortable(),
+                Tables\Columns\TextColumn::make('short')->sortable()
             ])
             ->filters([
                 //
