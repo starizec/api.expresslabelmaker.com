@@ -23,6 +23,14 @@ Route::middleware(['checkUserProperty', 'checkUserLicence'])->prefix('api/v1')->
                 Route::post('collection-request', [App\Http\Controllers\Api\V1\HR\DpdController::class, 'collectionRequest']);
             });
         });
+
+        Route::middleware(['checkHrOverseasUserProperty'])->prefix('overseas')->group(function () {
+            Route::prefix('create')->group(function () {
+                Route::post('label', [App\Http\Controllers\Api\V1\HR\OverseasController::class, 'createLabel']);
+                Route::post('labels', [App\Http\Controllers\Api\V1\HR\OverseasController::class, 'createLabels']);
+                Route::post('collection-request', [App\Http\Controllers\Api\V1\HR\OverseasController::class, 'collectionRequest']);
+            });
+        });
     });
 
     Route::prefix('si')->group(function () {

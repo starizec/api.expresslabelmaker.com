@@ -47,6 +47,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'checkUserProperty' => \App\Http\Middleware\CheckUserProperty::class,
         'checkHrDpdUserProperty' => \App\Http\Middleware\CheckHrDpdUserProperty::class,
+        'checkHrOverseasUserProperty' => \App\Http\Middleware\CheckHrOverseasUserProperty::class,
         'checkUserLicence' => \App\Http\Middleware\CheckUserLicence::class,
     ];
 }
