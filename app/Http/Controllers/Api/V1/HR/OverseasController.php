@@ -127,7 +127,7 @@ class OverseasController extends Controller
         return response()->json([
             "data" => [
                 "parcels" => $pl_numbers,
-                "label" => base64_encode($parcelLabelResponse["labelsbase64"]) // Encode as base64 for JSON
+                "label" => $parcelLabelResponse["labelsbase64"]
             ]
         ], 201);
     }
