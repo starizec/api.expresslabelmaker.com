@@ -143,7 +143,7 @@ class OverseasController extends Controller
         $data = [];
         $errors = [];
         $all_pl_numbers = [];
-
+        return $user->apiKey;
         foreach ($parcels as $parcel) {
             $parcelResponse = Http::post(
                 config('urls.hr.overseas') .
