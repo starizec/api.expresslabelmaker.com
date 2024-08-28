@@ -151,21 +151,21 @@ class OverseasController extends Controller
                     "apikey=$user->apiKey",
                 [
                     "Cosignee" => [
-                        "Name" => $parcel->parcel->name1,
+                        "Name" => $parcel->name1,
                         "CountryCode" => "HR",
-                        "Zipcode" => $parcel->parcel->pcode,
-                        "City" => $parcel->parcel->city,
-                        "StreetAndNumber" => $parcel->parcel->rPropNum,
-                        "NotifyGSM" => $parcel->parcel->phone,
-                        "NotifyEmail" => $parcel->parcel->email,
+                        "Zipcode" => $parcel->pcode,
+                        "City" => $parcel->city,
+                        "StreetAndNumber" => $parcel->rPropNum,
+                        "NotifyGSM" => $parcel->phone,
+                        "NotifyEmail" => $parcel->email,
                     ],
-                    "UnitAmount" => $parcel->parcel->num_of_parcel,
-                    "Ref1" => $parcel->parcel->order_number,
-                    "NumberOfCollies" => $parcel->parcel->num_of_parcel,
-                    "CODValue" => !empty($parcel->parcel->cod_amount) ? $parcel->parcel->cod_amount : null,
-                    "CODCurrency" => !empty($parcel->parcel->cod_amount) ? 0 : null,
-                    "ExWorksType" => !empty($parcel->parcel->cod_amount) ? 4 : null,
-                    "DeliveryRemark" => $parcel->parcel->sender_remark,
+                    "UnitAmount" => $parcel->num_of_parcel,
+                    "Ref1" => $parcel->order_number,
+                    "NumberOfCollies" => $parcel->num_of_parcel,
+                    "CODValue" => !empty($parcel->cod_amount) ? $parcel->cod_amount : null,
+                    "CODCurrency" => !empty($parcel->cod_amount) ? 0 : null,
+                    "ExWorksType" => !empty($parcel->cod_amount) ? 4 : null,
+                    "DeliveryRemark" => $parcel->sender_remark,
                 ]
             );
             return $parcelResponse->body();
@@ -176,7 +176,7 @@ class OverseasController extends Controller
                     $error = ErrorService::write(
                         $user->email,
                         $parcelResponseJson->status,
-                        substr($parcelResponseJson->status . ' - ' . json_encode($parcelResponseJson->error),0 ,250),
+                        substr($parcelResponseJson->status . ' - ' . json_encode($parcelResponseJson->error), 0, 250),
                         $request,
                         "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
                         json_encode($parcel)
@@ -214,7 +214,7 @@ class OverseasController extends Controller
                     $error = ErrorService::write(
                         $user->email,
                         $parcelLabelResponseJson->status,
-                        substr($parcelResponseJson->status . ' - ' . json_encode($parcelResponseJson->error),0 ,250),
+                        substr($parcelResponseJson->status . ' - ' . json_encode($parcelResponseJson->error), 0, 250),
                         $request,
                         "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
                         json_encode($parcel)
@@ -258,7 +258,7 @@ class OverseasController extends Controller
                         $error = ErrorService::write(
                             $user->email,
                             $allParcelLabelResponseJson->status,
-                            substr($allParcelLabelResponseJson->status . ' ' . json_encode($allParcelLabelResponseJson->error),0 ,250),
+                            substr($allParcelLabelResponseJson->status . ' ' . json_encode($allParcelLabelResponseJson->error), 0, 250),
                             $request,
                             "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
                             json_encode($parcel)
