@@ -159,8 +159,8 @@ class OverseasController extends Controller
                         "NotifyGSM" => $parcel->phone,
                         "NotifyEmail" => $parcel->email,
                     ],
-                    "UnitAmount" => 3,
-                    "Ref1" => "1234567890",
+                    "UnitAmount" => $parcel->num_of_parcel,
+                    "Ref1" => $parcel->order_number,
                     "NumberOfCollies" => $parcel->num_of_parcel,
                     "CODValue" => !empty($parcel->cod_amount) ? $parcel->cod_amount : null,
                     "CODCurrency" => !empty($parcel->cod_amount) ? 0 : null,
@@ -236,7 +236,7 @@ class OverseasController extends Controller
             }
 
             UserService::addUsage($user);
-            $data[] = new MultiParcelResponse($parcel->order_number, $pl_numbers, base64_encode($parcelLabelResponse["labelsbase64"]));
+            $data[] = new MultiParcelResponse($parcel->order_number, $pl_numbers, $parcelLabelResponse["labelsbase64"]);
         }
 
 
@@ -281,7 +281,7 @@ class OverseasController extends Controller
 
         return response()->json([
             "data" => [
-                "label" => base64_encode($allParcelLabelResponse->body()),
+                "label" => $allParcelLabelResponse->body(),
                 "parcels" => $data
             ],
             "errors" => $errors
