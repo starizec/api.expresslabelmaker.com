@@ -239,7 +239,7 @@ class OverseasController extends Controller
             $data[] = new MultiParcelResponse($parcel->order_number, $pl_numbers, $parcelLabelResponse["labelsbase64"]);
         }
 
-
+        return $all_pl_numbers;
         $allParcelLabelResponse = Http::post(
             config('urls.hr.overseas') .
                 '/reprintlabels?' .
