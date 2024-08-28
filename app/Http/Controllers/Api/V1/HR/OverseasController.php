@@ -281,7 +281,7 @@ class OverseasController extends Controller
 
         return response()->json([
             "data" => [
-                "label" => $allParcelLabelResponse->body(),
+                "label" => $allParcelLabelResponse["labelsbase64"],
                 "parcels" => $data
             ],
             "errors" => $errors
