@@ -256,7 +256,7 @@ class OverseasController extends Controller
                         $error = ErrorService::write(
                             $user->email,
                             $allParcelLabelResponseJson->status,
-                            substr($allParcelLabelResponseJson->status . ' ' . $allParcelLabelResponseJson->error,0 ,250),
+                            substr($allParcelLabelResponseJson->status . ' ' . json_encode($allParcelLabelResponseJson->error),0 ,250),
                             $request,
                             "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
                             json_encode($parcel)
