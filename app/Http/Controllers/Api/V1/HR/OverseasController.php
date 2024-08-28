@@ -168,7 +168,7 @@ class OverseasController extends Controller
                     "DeliveryRemark" => $parcel->parcel->sender_remark,
                 ]
             );
-            return $parcelResponse->body();
+
             $parcelResponseJson = json_decode($parcelResponse->body());
 
             if ($parcelResponse->successful()) {
@@ -239,9 +239,6 @@ class OverseasController extends Controller
             $data[] = new MultiParcelResponse($parcel->order_number, $pl_numbers, $parcelLabelResponse["labelsbase64"]);
         }
 
-        return response()->json([
-            "errors" => $errors
-        ], 400);
         $allParcelLabelResponse = Http::post(
             config('urls.hr.overseas') .
                 '/reprintlabels?' .
