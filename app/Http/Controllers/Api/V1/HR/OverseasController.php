@@ -172,7 +172,7 @@ class OverseasController extends Controller
             $parcelResponseJson = json_decode($parcelResponse->body());
 
             if ($parcelResponse->successful()) {
-                if ($parcelResponseJson->status === 'err') {
+                if ($parcelResponseJson->status > 0) {
                     $error = ErrorService::write(
                         $user->email,
                         $parcelResponseJson->status,
