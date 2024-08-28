@@ -143,7 +143,7 @@ class OverseasController extends Controller
         $data = [];
         $errors = [];
         $all_pl_numbers = [];
-        return $user->apiKey;
+
         foreach ($parcels as $parcel) {
             $parcelResponse = Http::post(
                 config('urls.hr.overseas') .
@@ -168,7 +168,7 @@ class OverseasController extends Controller
                     "DeliveryRemark" => $parcel->parcel->sender_remark,
                 ]
             );
-
+            return $parcelResponse->body();
             $parcelResponseJson = json_decode($parcelResponse->body());
 
             if ($parcelResponse->successful()) {
