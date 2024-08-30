@@ -3,7 +3,7 @@
 return [
     'hr' => [
         'dpd' => 'https://easyship.hr/api',
-        'overseas' => 'https://apitest.overseas.hr'
+        'overseas' => 'https://api.overseas.hr'
     ],
     'si' => [
         'dpd' => 'https://easyship.si/api'
