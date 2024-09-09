@@ -41,7 +41,6 @@ class OverseasController extends Controller
                 "NumberOfCollies" => $parcel->num_of_parcel,
                 "CODValue" => !empty($parcel->cod_amount) ? $parcel->cod_amount : null,
                 "CODCurrency" => !empty($parcel->cod_amount) ? 0 : null,
-                "ExWorksType" => !empty($parcel->cod_amount) ? 4 : null,
                 "DeliveryRemark" => $parcel->sender_remark,
             ]
         );
@@ -164,7 +163,6 @@ class OverseasController extends Controller
                     "NumberOfCollies" => $parcel->parcel->num_of_parcel,
                     "CODValue" => !empty($parcel->parcel->cod_amount) ? $parcel->parcel->cod_amount : null,
                     "CODCurrency" => !empty($parcel->parcel->cod_amount) ? 0 : null,
-                    "ExWorksType" => !empty($parcel->parcel->cod_amount) ? 4 : null,
                     "DeliveryRemark" => $parcel->parcel->sender_remark,
                 ]
             );
