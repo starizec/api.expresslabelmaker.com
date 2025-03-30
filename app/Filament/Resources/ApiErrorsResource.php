@@ -95,4 +95,11 @@ class ApiErrorsResource extends Resource
     {
         return 4;
     }
+
+    public static function getWidgets(): array
+    {
+        return [
+            ApiErrorsResource\Widgets\ApiErrorsChart::class,
+        ];
+    }
 }

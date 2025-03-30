@@ -16,4 +16,11 @@ class ListApiErrors extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            ApiErrorsResource\Widgets\ApiErrorsChart::class,
+        ];
+    }
 }
