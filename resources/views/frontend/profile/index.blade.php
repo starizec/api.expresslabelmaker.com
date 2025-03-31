@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'My Profile - ' . config('app.name'))
+@section('title', __('messages.profile') . ' - ' . config('app.name'))
 
 @section('content')
 <div class="container py-5">
@@ -13,7 +13,7 @@
                          alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
                     <h5 class="my-3">{{ $user->name }}</h5>
                     <p class="text-muted mb-1">{{ $user->email }}</p>
-                    <p class="text-muted mb-4">Member since {{ $user->created_at->format('M Y') }}</p>
+                    <p class="text-muted mb-4">{{ __('messages.member_since') }} {{ $user->created_at->format('M Y') }}</p>
                 </div>
             </div>
         </div>
@@ -22,7 +22,7 @@
         <div class="col-lg-9">
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">My Licenses</h5>
+                    <h5 class="mb-0">{{ __('messages.my_licenses') }}</h5>
                 </div>
                 <div class="card-body">
                     @if($licenses->isEmpty())

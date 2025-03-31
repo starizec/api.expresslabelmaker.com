@@ -33,6 +33,15 @@
                         </ul>
                     </li>
                 @endguest
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ strtoupper(app()->getLocale()) }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                        <li><a class="dropdown-item" href="{{ route('language.switch', 'hr') }}">Hrvatski</a></li>
+                        <li><a class="dropdown-item" href="{{ route('language.switch', 'en') }}">English</a></li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>

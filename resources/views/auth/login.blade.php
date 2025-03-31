@@ -1,94 +1,86 @@
-@extends('layouts.app')
-
-@section('content')
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="card-title mb-0">Login</h4>
-                </div>
-                <div class="card-body p-4">
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul class="mb-0">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-                    <form method="POST" action="{{ route('login') }}">
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>@yield('title', 'Personal - Start Bootstrap Theme')</title>
+        
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="{{ asset('assets/favicon.ico') }}" />
+        <!-- Custom Google font-->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100;200;300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet" />
+        <!-- Bootstrap icons-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet" />
+        <!-- Core theme CSS-->
+        <link href="{{ asset('css/bootstrap/bootstrap.min.css') }}" rel="stylesheet" />
+        <link href="{{ asset('css/styles.css') }}" rel="stylesheet" />
+        @stack('styles')
+    </head>
+    <body class="d-flex flex-column h-100 bg-light">
+        <main class="flex-shrink-0">
+          <div class="content">
+            <div class="container">
+              <div class="row justify-content-center">
+                <div class="col-md-6">
+                  <div class="card shadow-sm" style="margin-top: 20%;">
+                    <div class="card-body p-4">
+                      <div class="mb-4 text-center">
+                        <h3>{{ __('messages.sign_in') }}</h3>
+                      </div>
+                      <form action="{{ route('login') }}" method="post">
                         @csrf
+                        <div class="form-group first">
+                          <label for="username">{{ __('messages.email') }}</label>
+                          <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" id="username" value="{{ old('email') }}" required autofocus>
+                          @error('email')
+                              <div class="invalid-feedback">{{ $message }}</div>
+                          @enderror
+                        </div>
+                        <div class="form-group last mb-4">
+                          <label for="password">{{ __('messages.password') }}</label>
+                          <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" id="password" required>
+                          @error('password')
+                              <div class="invalid-feedback">{{ $message }}</div>
+                          @enderror
+                        </div>
                         
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email Address</label>
-                            <input type="email" 
-                                   class="form-control @error('email') is-invalid @enderror" 
-                                   id="email" 
-                                   name="email" 
-                                   value="{{ old('email') }}" 
-                                   required 
-                                   autocomplete="email" 
-                                   autofocus>
-                            @error('email')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
+                        <div class="d-flex mb-5 align-items-center">
+                          <label class="control control--checkbox mb-0">
+                            <span class="caption">{{ __('messages.remember_me') }}</span>
+                            <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}/>
+                            <div class="control__indicator"></div>
+                          </label>
+                          <span class="ml-auto">
+                            <a href="#" class="forgot-pass">{{ __('messages.forgot_password') }}</a>
+                          </span> 
                         </div>
-
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" 
-                                   class="form-control @error('password') is-invalid @enderror" 
-                                   id="password" 
-                                   name="password" 
-                                   required 
-                                   autocomplete="current-password">
-                            @error('password')
-                                <div class="invalid-feedback">
-                                    {{ $message }}
-                                </div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" 
-                                   class="form-check-input" 
-                                   id="remember" 
-                                   name="remember" 
-                                   {{ old('remember') ? 'checked' : '' }}>
-                            <label class="form-check-label" for="remember">
-                                Remember Me
-                            </label>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                Login
-                            </button>
-                        </div>
-
-                        <div class="text-center mt-3">
-                            @if (Route::has('password.request'))
-                                <a href="{{ route('password.request') }}" class="text-decoration-none">
-                                    Forgot Your Password?
-                                </a>
-                            @endif
-                        </div>
-
-                        <div class="text-center mt-3">
-                            <p class="mb-0">
-                                Don't have an account? 
-                                <a href="{{ route('register') }}" class="text-decoration-none">Register here</a>
-                            </p>
-                        </div>
-                    </form>
+        
+                        <button type="submit" class="btn btn-block btn-primary">{{ __('messages.login') }}</button>
+                      </form>
+        
+                      <div class="text-center mt-4">
+                        <p class="mb-0">
+                          {{ __('messages.dont_have_account') }} 
+                          <a href="{{ route('register') }}" class="text-decoration-none">{{ __('messages.register_here') }}</a>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              </div>
             </div>
-        </div>
-    </div>
-</div>
-@endsection 
+          </div>
+        </main>
+
+
+        <!-- Bootstrap core JS-->
+        <script src="{{ asset('js/bootstrap/bootstrap.bundle.min.js') }}"></script>
+        <!-- Core theme JS-->
+        <script src="{{ asset('js/scripts.js') }}"></script>
+        @stack('scripts')
+    </body>
+</html> 
