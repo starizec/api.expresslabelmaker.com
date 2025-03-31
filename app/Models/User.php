@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -23,7 +24,8 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
-        'wp_user_id'
+        'wp_user_id',
+        'is_admin'
     ];
 
     /**
@@ -47,6 +49,6 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return str_ends_with($this->email, '@emedia.hr') && $this->hasVerifiedEmail();
+        return Str::endsWith($this->email, '@emedia.hr') && $this->hasVerifiedEmail();
     }
 }

@@ -49,5 +49,6 @@ class Kernel extends HttpKernel
         'checkHrDpdUserProperty' => \App\Http\Middleware\CheckHrDpdUserProperty::class,
         'checkHrOverseasUserProperty' => \App\Http\Middleware\CheckHrOverseasUserProperty::class,
         'checkUserLicence' => \App\Http\Middleware\CheckUserLicence::class,
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
     ];
 }
