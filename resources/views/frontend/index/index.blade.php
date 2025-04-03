@@ -9,11 +9,20 @@
         <div class="col-md-6">
           <h1 class="display-4">ExpressLabelMaker</h1>
           <p class="lead mb-4">Automatizirana izrada adresnica za WooCommerce trgovine</p>
-          
-          <a href="#download" class="btn btn-primary btn-lg">Preuzmi plugin</a>
+          <div class="mb-4">
+            <ul class="list-unstyled">
+              <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Plug & play rješenje – spremno za korištenje odmah</li>
+              <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Sigurna i stabilna integracija</li>
+              <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Povezivanje s kuririma u par klikova</li>
+              <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Tehnička podrška i redovita ažuriranja</li>
+              <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Više vremena za prodaju, manje za administraciju</li>
+            </ul>
+          </div>
+          <a href="#download" class="btn btn-primary btn-lg me-3">Preuzmi plugin</a>
+          <a href="{{ route('register') }}" class="btn btn-outline-light btn-lg">Registracija</a>
         </div>
         <div class="col-md-6 text-center">
-          <img src="{{ asset('assets/images/hero.png') }}" alt="ExpressLabelMaker Preview" class="img-fluid">
+          <img src="{{ asset('assets/vectors/undraw_delivery-address_409g_1.svg') }}" alt="ExpressLabelMaker Preview" class="img-fluid">
         </div>
       </div>
     </div>
