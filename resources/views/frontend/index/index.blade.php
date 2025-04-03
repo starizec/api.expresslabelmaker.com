@@ -1,13 +1,21 @@
 @extends('layouts.app')
 
-@section('title', 'Welcome - ' . config('app.name'))
+@section('title', 'ExpressLabelMaker - Automatizirana izrada adresnica za WooCommerce trgovine')
 
 @section('content')
-  <header class="bg-primary text-white py-5">
-    <div class="container text-center">
-      <h1 class="display-4">ExpressLabelMaker</h1>
-      <p class="lead mb-4">Automatizirana izrada adresnica za WooCommerce trgovine</p>
-      <a href="#download" class="btn btn-light btn-lg">Preuzmi plugin</a>
+  <header class="text-white py-5" style="background: linear-gradient(to right, #045cb8, #047adb)">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <h1 class="display-4">ExpressLabelMaker</h1>
+          <p class="lead mb-4">Automatizirana izrada adresnica za WooCommerce trgovine</p>
+          
+          <a href="#download" class="btn btn-primary btn-lg">Preuzmi plugin</a>
+        </div>
+        <div class="col-md-6 text-center">
+          <img src="{{ asset('assets/images/hero.png') }}" alt="ExpressLabelMaker Preview" class="img-fluid">
+        </div>
+      </div>
     </div>
   </header>
 
