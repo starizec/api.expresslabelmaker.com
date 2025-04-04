@@ -3,114 +3,166 @@
 @section('title', 'ExpressLabelMaker - Automatizirana izrada adresnica za WooCommerce trgovine')
 
 @section('content')
-  <header class="text-white py-5" style="background: linear-gradient(to right, #045cb8, #047adb)">
-    <div class="container">
-      <div class="row align-items-center">
-        <div class="col-md-6">
-          <h1 class="display-4">ExpressLabelMaker</h1>
-          <p class="lead mb-4">Automatizirana izrada adresnica za WooCommerce trgovine</p>
-          <div class="mb-4">
-            <ul class="list-unstyled">
-              <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Plug & play rješenje – spremno za korištenje odmah</li>
-              <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Sigurna i stabilna integracija</li>
-              <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Povezivanje s kuririma u par klikova</li>
-              <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Tehnička podrška i redovita ažuriranja</li>
-              <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Više vremena za prodaju, manje za administraciju</li>
-            </ul>
-          </div>
-          <a href="#download" class="btn btn-primary btn-lg me-3">Preuzmi plugin</a>
-          <a href="{{ route('register') }}" class="btn btn-outline-light btn-lg">Registracija</a>
+    <header class="text-white py-5" style="background: linear-gradient(to right, #045cb8, #047adb)">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="display-4">ExpressLabelMaker</h1>
+                    <p class="lead mb-4">Automatizirana izrada adresnica za WooCommerce trgovine</p>
+                    <div class="mb-4">
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Plug & play rješenje – spremno za
+                                korištenje odmah</li>
+                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Sigurna i stabilna integracija
+                            </li>
+                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Povezivanje s kuririma u par
+                                klikova</li>
+                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Tehnička podrška i redovita
+                                ažuriranja</li>
+                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Više vremena za prodaju, manje za
+                                administraciju</li>
+                        </ul>
+                    </div>
+                    <a href="#download" class="btn btn-light btn-lg me-3">Preuzmi plugin</a>
+                </div>
+                <div class="col-md-6 text-center">
+                    <img src="{{ asset('assets/vectors/undraw_delivery-address_409g_1.svg') }}"
+                        alt="ExpressLabelMaker Preview" class="img-fluid">
+                </div>
+            </div>
         </div>
-        <div class="col-md-6 text-center">
-          <img src="{{ asset('assets/vectors/undraw_delivery-address_409g_1.svg') }}" alt="ExpressLabelMaker Preview" class="img-fluid">
+    </header>
+
+    <section class="py-5">
+        <div class="container">
+            <h2 class="mb-4 fw-bold">Mogućnosti Express Label Makera</h2>
+            <p class="mb-5 text-muted">Iskoristite sve prednosti za bržu i efikasniju obradu narudžbi u WooCommerce
+                trgovini.</p>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="text-center px-3">
+                        <div class="mb-3">
+                            <img src="{{ asset('assets/vectors/undraw_create_8val.svg') }}" alt="ExpressLabelMaker Preview"
+                                class="img-fluid card-icon" style="height: 120px; width: auto; object-fit: contain;">
+                        </div>
+                        <h5 class="fw-bold">Izrada pojedinačne adresnice</h5>
+                        <p class="text-muted">Brza izrada adresnice direktno iz detalja pojedine narudžbe.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-center px-3">
+                        <div class="mb-3">
+                            <img src="{{ asset('assets/vectors/undraw_correct-answer_vjt7.svg') }}"
+                                alt="ExpressLabelMaker Preview" class="img-fluid card-icon"
+                                style="height: 120px; width: auto; object-fit: contain;">
+                        </div>
+                        <h5 class="fw-bold">Izrada više adresnica</h5>
+                        <p class="text-muted">Odaberite više narudžbi i generirajte sve adresnice odjednom (multiselect).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="text-center px-3">
+                        <div class="mb-3">
+                            <img src="{{ asset('assets/vectors/undraw_location-tracking_q3yd.svg') }}"
+                                alt="ExpressLabelMaker Preview" class="img-fluid card-icon"
+                                style="height: 120px; width: auto; object-fit: contain;">
+                        </div>
+                        <h5 class="fw-bold">Prikaz statusa paketa</h5>
+                        <p class="text-muted">Pregled statusa dostave izravno na stranici svake narudžbe.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mt-4">
+                    <div class="text-center px-3">
+                        <div class="mb-3">
+                            <img src="{{ asset('assets/vectors/undraw_drone-delivery_ri74.svg') }}"
+                                alt="ExpressLabelMaker Preview" class="img-fluid card-icon"
+                                style="height: 120px; width: auto; object-fit: contain;">
+                        </div>
+                        <h5 class="fw-bold"> Dostava na paketomate</h5>
+                        <p class="text-muted">Kreiranje adresnica za dostavu na paketomate.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4  mt-4">
+                    <div class="text-center px-3">
+                        <div class="mb-3">
+                            <img src="{{ asset('assets/vectors/undraw_web-shopping_m3o2.svg') }}"
+                                alt="ExpressLabelMaker Preview" class="img-fluid card-icon"
+                                style="height: 120px; width: auto; object-fit: contain;">
+                        </div>
+                        <h5 class="fw-bold">Izrada adresnice za prikup</h5>
+                        <p class="text-muted">Kreirajte naljepnicu za povratnu pošiljku ili prikup proizvoda.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-4  mt-4">
+                    <div class="text-center px-3">
+                        <div class="mb-3">
+                            <img src="{{ asset('assets/vectors/undraw_delivery-truck_mjui.svg') }}"
+                                alt="ExpressLabelMaker Preview" class="img-fluid card-icon"
+                                style="height: 120px; width: auto; object-fit: contain;">
+                        </div>
+                        <h5 class="fw-bold">Više kurirskih službi na jednom računu</h5>
+                        <p class="text-muted">Dodajte sve kurire i izbjegnite plaćanje za svakog pojedinačno.</p>
+                    </div>
+                </div>
+
+            </div>
         </div>
-      </div>
-    </div>
-  </header>
+    </section>
 
-  <section class="py-5 bg-light">
-    <div class="container">
-      <h2 class="text-center mb-4">Kako funkcionira?</h2>
-      <ol class="list-group list-group-flush list-group-numbered mx-auto" style="max-width: 600px;">
-        <li class="list-group-item">Preuzmite plugin s ove stranice</li>
-        <li class="list-group-item">Registrirajte se i kreirajte svoju licencu</li>
-        <li class="list-group-item">Unesite licencni ključ u postavke plugina</li>
-        <li class="list-group-item">Počnite izrađivati adresnice direktno iz WooCommerce narudžbi</li>
-      </ol>
-    </div>
-  </section>
+    <section class="py-5 bg-light">
+        <div class="container text-center">
+            <h2 class="fw-bold mb-4">Podržane kurirske službe</h2>
+            <p class="mb-5 text-muted">Express Label Maker trenutno podržava sljedeće kurirske službe za generiranje
+                adresnica i praćenje paketa:</p>
 
-  <section class="py-5">
-    <div class="container">
-      <h2 class="text-center mb-4">Ključne mogućnosti</h2>
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <ul class="list-group">
-            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Automatska izrada adresnica za DPD, GLS i Overseas</li>
-            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Mogućnost dodavanja ostalih kurirskih službi</li>
-            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Izrada adresnica pojedinačno ili višestruko (multiselect)</li>
-            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Kreiranje adresnica za povrat proizvoda</li>
-            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Prikaz statusa paketa unutar narudžbi</li>
-            <li class="list-group-item"><i class="bi bi-check-circle-fill text-success me-2"></i>Jednostavno i pregledno sučelje</li>
-          </ul>
+            <div class="row justify-content-center g-4">
+                <div class="col-6 col-md-3">
+                    <img src="{{ asset('assets/logos/dpd-logo.png') }}" alt="DPD logo" class="img-fluid mb-2"
+                        style="max-height: 60px;">
+                    <p class="fw-semibold">DPD</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <img src="{{ asset('assets/logos/overseas-logo.png') }}" alt="Overseas Express logo"
+                        class="img-fluid mb-2" style="max-height: 60px;">
+                    <p class="fw-semibold">Overseas Express</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <img src="{{ asset('assets/logos/GLS-logo.svg') }}" alt="GLS logo" class="img-fluid mb-2"
+                        style="max-height: 60px;">
+                    <p class="fw-semibold">GLS</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <img src="{{ asset('assets/logos/posta-logo.png') }}" alt="Hrvatska pošta logo"
+                        class="img-fluid mb-2" style="max-height: 60px;">
+                    <p class="fw-semibold">Hrvatska pošta</p>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="py-5 bg-light">
-    <div class="container text-center">
-      <h2 class="mb-4">Besplatno isprobajte</h2>
-      <p class="lead">Svi korisnici dobivaju <strong>10 besplatnih izrada adresnica</strong>. Nakon toga, plugin možete nastaviti koristiti uz <strong>povoljnu godišnju licencu</strong>.</p>
-    </div>
-  </section>
-
-  <section class="py-5">
-    <div class="container">
-      <h2 class="text-center mb-4">Za koga je plugin?</h2>
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <ul class="list-group">
-            <li class="list-group-item">Web trgovine koje šalju robu putem kurirskih službi</li>
-            <li class="list-group-item">Tvrtke koje žele automatizirati dostavu i smanjiti greške</li>
-            <li class="list-group-item">WooCommerce korisnici kojima je važna brzina i preciznost</li>
-          </ul>
+    <section class="py-5 bg-primary text-white text-center" id="download">
+        <div class="container">
+            <h2 class="mb-4">Besplatno isprobajte</h2>
+            <p class="lead">Svi korisnici dobivaju <strong>10 besplatnih izrada adresnica</strong>.</p>
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                <a href="/download" class="btn btn-light btn-lg px-4">Preuzmi plugin</a>
+            </div>
         </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="py-5 bg-light">
-    <div class="container">
-      <h2 class="text-center mb-4">Zašto odabrati nas?</h2>
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <ul class="list-group">
-            <li class="list-group-item"><i class="bi bi-star-fill text-warning me-2"></i>Plug & play rješenje – spremno za korištenje odmah</li>
-            <li class="list-group-item"><i class="bi bi-shield-check text-primary me-2"></i>Sigurna i stabilna integracija</li>
-            <li class="list-group-item"><i class="bi bi-lightning-fill text-warning me-2"></i>Povezivanje s kuririma u par klikova</li>
-            <li class="list-group-item"><i class="bi bi-headset text-primary me-2"></i>Tehnička podrška i redovita ažuriranja</li>
-            <li class="list-group-item"><i class="bi bi-clock text-success me-2"></i>Više vremena za prodaju, manje za administraciju</li>
-          </ul>
+    <footer class="py-4 bg-dark text-white">
+        <div class="container text-center">
+            <p class="mb-2">Imate pitanja? <a href="/kontakt"
+                    class="text-white text-decoration-underline">Kontaktirajte nas</a></p>
+            <p class="mb-0"><a href="/dokumentacija" class="text-white text-decoration-underline">Pogledajte
+                    dokumentaciju</a></p>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="py-5 bg-primary text-white text-center" id="download">
-    <div class="container">
-      <h2 class="mb-4">Preuzmite plugin i započnite već danas</h2>
-      <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-        <a href="/download" class="btn btn-light btn-lg px-4">Preuzmi plugin</a>
-        <a href="/register" class="btn btn-outline-light btn-lg px-4">Registriraj se i kreiraj licencu</a>
-      </div>
-    </div>
-  </section>
-
-  <footer class="py-4 bg-dark text-white">
-    <div class="container text-center">
-      <p class="mb-2">Imate pitanja? <a href="/kontakt" class="text-white text-decoration-underline">Kontaktirajte nas</a></p>
-      <p class="mb-0"><a href="/dokumentacija" class="text-white text-decoration-underline">Pogledajte dokumentaciju</a></p>
-    </div>
-  </footer>
+    </footer>
 @endsection
