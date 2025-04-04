@@ -66,4 +66,8 @@ return [
     'reset_password' => 'Reset Password',
     'send_password_reset_link' => 'Send Password Reset Link',
     'back_to_login' => 'Back to Login',
+    'password_reset_email_sent' => 'We have emailed your password reset link.',
+    'password_reset_success' => 'Your password has been reset successfully.',
+    'password_reset_token_invalid' => 'This password reset token is invalid.',
+    'password_reset_token_expired' => 'This password reset token has expired.',
 ]; 

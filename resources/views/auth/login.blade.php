@@ -67,7 +67,7 @@
                                             <div class="control__indicator"></div>
                                         </label>
                                         <span class="ml-auto">
-                                            <a href="#"
+                                            <a href="{{ route('password.request') }}"
                                                 class="forgot-pass">{{ __('messages.forgot_password') }}</a>
                                         </span>
                                     </div>

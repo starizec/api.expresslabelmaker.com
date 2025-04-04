@@ -66,4 +66,8 @@ return [
     'reset_password' => 'Promjena lozinke',
     'send_password_reset_link' => 'Pošalji link za promjenu lozinke',
     'back_to_login' => 'Povratak na prijavu',
+    'password_reset_email_sent' => 'Poslali smo vam e-mail s poveznicom za promjenu lozinke.',
+    'password_reset_success' => 'Vaša lozinka je uspješno promijenjena.',
+    'password_reset_token_invalid' => 'Ovaj link za promjenu lozinke je nevažeći.',
+    'password_reset_token_expired' => 'Ovaj link za promjenu lozinke je istekao.',
 ]; 
