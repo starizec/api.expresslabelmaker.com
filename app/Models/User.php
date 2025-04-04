@@ -25,7 +25,14 @@ class User extends Authenticatable implements FilamentUser
         'email',
         'password',
         'wp_user_id',
-        'is_admin'
+        'is_admin',
+        'first_name',
+        'last_name',
+        'company_name',
+        'company_address',
+        'town',
+        'country',
+        'vat_number'
     ];
 
     /**

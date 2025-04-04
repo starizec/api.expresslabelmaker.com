@@ -12,7 +12,7 @@ return [
     'remember_me' => 'Zapamti me',
     'forgot_password' => 'Zaboravili ste lozinku?',
     'name' => 'Ime',
-    'confirm_password' => 'Potvrdi lozinku',
+    'confirm_password' => 'Potvrdite lozinku',
     'already_have_account' => 'Već imate račun?',
     'login_here' => 'Prijavite se ovdje',
     'dont_have_account' => 'Nemate račun?',
@@ -61,4 +61,5 @@ return [
     'vat_number' => 'OIB/PDV broj',
     'save_changes' => 'Spremi promjene',
     'profile_updated' => 'Podaci su uspješno ažurirani.',
+    'registration_successful' => 'Dobrodošli! Vaš račun je uspješno kreiran.',
 ]; 

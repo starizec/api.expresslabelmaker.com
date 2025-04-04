@@ -15,7 +15,7 @@ return [
     'confirm_password' => 'Confirm Password',
     'already_have_account' => 'Already have an account?',
     'login_here' => 'Login here',
-    'dont_have_account' => "Don't have an account?",
+    'dont_have_account' => 'Don\'t have an account?',
     'register_here' => 'Register here',
     'my_licenses' => 'My Licenses',
     'license_key' => 'License Key',
@@ -61,4 +61,5 @@ return [
     'vat_number' => 'VAT Number',
     'save_changes' => 'Save Changes',
     'profile_updated' => 'Your profile has been successfully updated.',
+    'registration_successful' => 'Welcome! Your account has been successfully created.',
 ]; 

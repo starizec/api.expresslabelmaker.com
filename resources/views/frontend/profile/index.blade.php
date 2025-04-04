@@ -5,6 +5,11 @@
 @section('content')
     <div class="container py-5">
         <div class="row">
+            <!-- Logo centered above the form -->
+            <div class="col-12 text-center mb-4">
+                <img src="{{ asset('assets/logo-white.png') }}" alt="{{ config('app.name') }}" class="img-fluid" style="max-height: 80px;">
+            </div>
+
             <!-- Profile Information Form -->
             <div class="col-lg-12">
                 <div class="card mb-4">
