@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 use App\Services\DomainService;
 
@@ -84,10 +86,18 @@ class LicenceController extends Controller
         if (User::where('email', $data->email)->exists()) {
             $user = User::where('email', $data->email)->first();
         } else {
-            $user = User::firstOrCreate([
+            // Generate a random password for the new user
+            $randomPassword = Str::random(16);
+            
+            $user = User::create([
                 'wp_user_id' => 999,
                 'email' => $data->email,
+                'name' => explode('@', $data->email)[0],
+                'password' => Hash::make($randomPassword),
             ]);
+            
+            // Send password setup notification
+            $user->sendPasswordSetupNotification();
         }
 
         $domain = Domain::firstOrCreate([

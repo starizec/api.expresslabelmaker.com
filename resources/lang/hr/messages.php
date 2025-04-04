@@ -62,4 +62,8 @@ return [
     'save_changes' => 'Spremi promjene',
     'profile_updated' => 'Podaci su uspješno ažurirani.',
     'registration_successful' => 'Dobrodošli! Vaš račun je uspješno kreiran.',
+    // Auth
+    'reset_password' => 'Promjena lozinke',
+    'send_password_reset_link' => 'Pošalji link za promjenu lozinke',
+    'back_to_login' => 'Povratak na prijavu',
 ]; 

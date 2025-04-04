@@ -62,4 +62,8 @@ return [
     'save_changes' => 'Save Changes',
     'profile_updated' => 'Your profile has been successfully updated.',
     'registration_successful' => 'Welcome! Your account has been successfully created.',
+    // Auth
+    'reset_password' => 'Reset Password',
+    'send_password_reset_link' => 'Send Password Reset Link',
+    'back_to_login' => 'Back to Login',
 ]; 

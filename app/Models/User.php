@@ -58,4 +58,14 @@ class User extends Authenticatable implements FilamentUser
     {
         return Str::endsWith($this->email, '@emedia.hr') && $this->hasVerifiedEmail();
     }
+
+    /**
+     * Send the welcome notification with password setup instructions.
+     *
+     * @return void
+     */
+    public function sendPasswordSetupNotification()
+    {
+        $this->notify(new \App\Notifications\WelcomeNewUserNotification());
+    }
 }
