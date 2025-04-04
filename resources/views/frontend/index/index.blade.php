@@ -147,7 +147,7 @@
         </div>
     </section>
 
-    <section class="py-5 bg-primary text-white text-center" id="download">
+    <section class="py-5 bg-primary text-white text-center" style="background: linear-gradient(to right, #045cb8, #047adb)" id="download">
         <div class="container">
             <h2 class="mb-4">Besplatno isprobajte</h2>
             <p class="lead">Svi korisnici dobivaju <strong>10 besplatnih izrada adresnica</strong>.</p>
