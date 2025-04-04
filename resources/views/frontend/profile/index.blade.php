@@ -5,20 +5,6 @@
 @section('content')
     <div class="container py-5">
         <div class="row">
-            <!-- Profile Sidebar -->
-            <div class="col-lg-4">
-                <div class="card mb-4">
-                    <div class="card-body text-center">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}" alt="{{ __('messages.avatar') }}"
-                            class="rounded-circle img-fluid" style="width: 150px;">
-                        <h5 class="my-3">{{ $user->name }}</h5>
-                        <p class="text-muted mb-1">{{ $user->email }}</p>
-                        <p class="text-muted mb-4">{{ __('messages.member_since') }} {{ $user->created_at->format('M Y') }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-
             <!-- Profile Information Form -->
             <div class="col-lg-12">
                 <div class="card mb-4">
@@ -29,93 +15,120 @@
                         <form action="{{ route('profile.update') }}" method="POST">
                             @csrf
                             @method('PUT')
-                            
+
                             <!-- Personal Information -->
                             <div class="row mb-4">
                                 <div class="col-12 mb-3">
                                     <h6 class="text-primary">{{ __('messages.personal_information') }}</h6>
                                 </div>
-                                
+
                                 <div class="col-md-6 mb-3">
-                                    <label for="first_name" class="form-label">{{ __('messages.first_name') }} <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('first_name') is-invalid @enderror" id="first_name" name="first_name" value="{{ old('first_name', $user->first_name ?? '') }}" required>
+                                    <label for="first_name" class="form-label">{{ __('messages.first_name') }} <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('first_name') is-invalid @enderror"
+                                        id="first_name" name="first_name"
+                                        value="{{ old('first_name', $user->first_name ?? '') }}" required>
                                     @error('first_name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                
+
                                 <div class="col-md-6 mb-3">
-                                    <label for="last_name" class="form-label">{{ __('messages.last_name') }} <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('last_name') is-invalid @enderror" id="last_name" name="last_name" value="{{ old('last_name', $user->last_name ?? '') }}" required>
+                                    <label for="last_name" class="form-label">{{ __('messages.last_name') }} <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('last_name') is-invalid @enderror"
+                                        id="last_name" name="last_name"
+                                        value="{{ old('last_name', $user->last_name ?? '') }}" required>
                                     @error('last_name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                
+
                                 <div class="col-md-12 mb-3">
-                                    <label for="email" class="form-label">{{ __('messages.email') }} <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email', $user->email) }}" required>
+                                    <label for="email" class="form-label">{{ __('messages.email') }} <span
+                                            class="text-danger">*</span></label>
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                        id="email" name="email" value="{{ old('email', $user->email) }}" required>
                                     @error('email')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
-                            
+
                             <!-- Company Information -->
                             <div class="row">
                                 <div class="col-12 mb-3">
                                     <h6 class="text-primary">{{ __('messages.company_information') }}</h6>
                                 </div>
-                                
-                                <div class="col-md-12 mb-3">
+
+                                <div class="col-md-6 mb-3">
                                     <label for="company_name" class="form-label">{{ __('messages.company_name') }}</label>
-                                    <input type="text" class="form-control @error('company_name') is-invalid @enderror" id="company_name" name="company_name" value="{{ old('company_name', $user->company_name ?? '') }}">
+                                    <input type="text" class="form-control @error('company_name') is-invalid @enderror"
+                                        id="company_name" name="company_name"
+                                        value="{{ old('company_name', $user->company_name ?? '') }}">
                                     @error('company_name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                
-                                <div class="col-md-12 mb-3">
-                                    <label for="company_address" class="form-label">{{ __('messages.company_address') }}</label>
-                                    <input type="text" class="form-control @error('company_address') is-invalid @enderror" id="company_address" name="company_address" value="{{ old('company_address', $user->company_address ?? '') }}">
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="company_address"
+                                        class="form-label">{{ __('messages.company_address') }}</label>
+                                    <input type="text"
+                                        class="form-control @error('company_address') is-invalid @enderror"
+                                        id="company_address" name="company_address"
+                                        value="{{ old('company_address', $user->company_address ?? '') }}">
                                     @error('company_address')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                
+
                                 <div class="col-md-6 mb-3">
                                     <label for="town" class="form-label">{{ __('messages.town') }}</label>
-                                    <input type="text" class="form-control @error('town') is-invalid @enderror" id="town" name="town" value="{{ old('town', $user->town ?? '') }}">
+                                    <input type="text" class="form-control @error('town') is-invalid @enderror"
+                                        id="town" name="town" value="{{ old('town', $user->town ?? '') }}">
                                     @error('town')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                
-                                <div class="col-md-6 mb-3">
+
+                                <div class="form-group mb-3 col-md-6">
                                     <label for="country" class="form-label">{{ __('messages.country') }}</label>
-                                    <select class="form-select @error('country') is-invalid @enderror" id="country" name="country">
+                                    <select class="form-control" name="country" id="country">
                                         <option value="">{{ __('messages.select_country') }}</option>
-                                        <option value="HR" {{ (old('country', $user->country ?? '') == 'HR') ? 'selected' : '' }}>Hrvatska</option>
-                                        <option value="SI" {{ (old('country', $user->country ?? '') == 'SI') ? 'selected' : '' }}>Slovenija</option>
-                                        <option value="BA" {{ (old('country', $user->country ?? '') == 'BA') ? 'selected' : '' }}>Bosna i Hercegovina</option>
-                                        <option value="RS" {{ (old('country', $user->country ?? '') == 'RS') ? 'selected' : '' }}>Srbija</option>
-                                        <option value="ME" {{ (old('country', $user->country ?? '') == 'ME') ? 'selected' : '' }}>Crna Gora</option>
-                                        <option value="MK" {{ (old('country', $user->country ?? '') == 'MK') ? 'selected' : '' }}>Sjeverna Makedonija</option>
+                                        @php
+                                            $countries = [
+                                                'HR' => 'Hrvatska',
+                                                'SI' => 'Slovenija',
+                                                'BA' => 'Bosna i Hercegovina',
+                                                'RS' => 'Srbija',
+                                                'ME' => 'Crna Gora',
+                                                'MK' => 'Sjeverna Makedonija',
+                                            ];
+                                        @endphp
+                                        @foreach ($countries as $code => $name)
+                                            <option value="{{ $code }}"
+                                                {{ old('country', $user->country ?? '') == $code ? 'selected' : '' }}>
+                                                {{ $name }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                     @error('country')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                
+
                                 <div class="col-md-12 mb-3">
                                     <label for="vat_number" class="form-label">{{ __('messages.vat_number') }}</label>
-                                    <input type="text" class="form-control @error('vat_number') is-invalid @enderror" id="vat_number" name="vat_number" value="{{ old('vat_number', $user->vat_number ?? '') }}">
+                                    <input type="text" class="form-control @error('vat_number') is-invalid @enderror"
+                                        id="vat_number" name="vat_number"
+                                        value="{{ old('vat_number', $user->vat_number ?? '') }}">
                                     @error('vat_number')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                             </div>
-                            
+
                             <div class="text-end">
                                 <button type="submit" class="btn btn-primary">
                                     {{ __('messages.save_changes') }}
@@ -153,8 +166,7 @@
                                             <tr>
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        <span
-                                                            class="text-monospace">{{ $licence->licence_uid }}</span>
+                                                        <span class="text-monospace">{{ $licence->licence_uid }}</span>
                                                     </div>
                                                 </td>
                                                 <td>
@@ -170,7 +182,9 @@
                                                 <td>
                                                     @if ($licence->valid_from)
                                                         @php
-                                                            $validFromDate = is_string($licence->valid_from) ? \Carbon\Carbon::parse($licence->valid_from) : $licence->valid_from;
+                                                            $validFromDate = is_string($licence->valid_from)
+                                                                ? \Carbon\Carbon::parse($licence->valid_from)
+                                                                : $licence->valid_from;
                                                         @endphp
                                                         {{ $validFromDate->format('d M Y') }}
                                                     @else
@@ -180,16 +194,21 @@
                                                 <td>
                                                     @if ($licence->valid_until)
                                                         @php
-                                                            $validUntilDate = is_string($licence->valid_until) ? \Carbon\Carbon::parse($licence->valid_until) : $licence->valid_until;
+                                                            $validUntilDate = is_string($licence->valid_until)
+                                                                ? \Carbon\Carbon::parse($licence->valid_until)
+                                                                : $licence->valid_until;
                                                             $now = \Carbon\Carbon::now();
                                                             $isExpired = $validUntilDate->isPast();
-                                                            $isExpiringSoon = !$isExpired && $validUntilDate->diffInDays($now) < 30;
+                                                            $isExpiringSoon =
+                                                                !$isExpired && $validUntilDate->diffInDays($now) < 30;
                                                         @endphp
                                                         {{ $validUntilDate->format('d M Y') }}
                                                         @if ($isExpired)
-                                                            <span class="badge bg-danger">{{ __('messages.expired') }}</span>
+                                                            <span
+                                                                class="badge bg-danger">{{ __('messages.expired') }}</span>
                                                         @elseif($isExpiringSoon)
-                                                            <span class="badge bg-warning">{{ __('messages.expiring_soon') }}</span>
+                                                            <span
+                                                                class="badge bg-warning">{{ __('messages.expiring_soon') }}</span>
                                                         @endif
                                                     @else
                                                         {{ __('messages.never') }}
