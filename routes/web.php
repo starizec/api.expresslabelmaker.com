@@ -40,7 +40,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
 // Authenticated routes
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [UserProfileController::class, 'index'])->name('profile');
-    Route::get('/profile', [UserProfileController::class, 'index'])->name('profile.index');
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 });
 

@@ -46,5 +46,6 @@ return [
     'valid_from' => 'Vrijedi od',
     'valid_until' => 'Vrijedi do',
     'usage_statistics' => 'Statistika korištenja',
-    'total_labels_created' => 'Ukupno izrađenih etiketa'
+    'total_labels_created' => 'Ukupno izrađenih etiketa',
+    'my_profile' => 'Moj profil',
 ]; 

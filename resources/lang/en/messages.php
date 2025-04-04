@@ -46,7 +46,5 @@ return [
     'valid_from' => 'Valid From',
     'valid_until' => 'Valid Until',
     'usage_statistics' => 'Usage Statistics',
-    'total_labels_created' => 'Total Labels Created',
-    'expiring_soon' => 'Expiring Soon',
-    // ... add all the same keys as in Croatian file
+    'total_labels_created' => 'Total Labels Created'
 ]; 

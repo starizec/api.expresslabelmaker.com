@@ -12,20 +12,22 @@
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="{{ url('/') }}">Početna <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="{{ url('/') }}">{{ __('messages.home') }} <span class="sr-only">(current)</span></a>
                 </li>
                 @guest
-                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">Login</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">Register</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">{{ __('messages.login') }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">{{ __('messages.register') }}</a></li>
                 @else
-                    <li class="nav-item"><a class="nav-link" href="{{ url('/profile') }}">My Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url('/profile') }}">{{ __('messages.my_profile') }}</a></li>
                     @if (Auth::user()->is_admin)
-                        <li class="nav-item"><a class="nav-link" href="{{ url('/admin') }}">Admin Panel</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url('/admin') }}">{{ __('messages.admin_panel') }}</a></li>
                     @endif
                     <li class="nav-item">
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form method="POST" action="{{ route('logout') }}" class="d-inline">
                             @csrf
-                            <button type="submit" class="nav-link">Logout</button>
+                            <button type="submit" class="nav-link border-0 bg-transparent">
+                                {{ __('messages.logout') }}
+                            </button>
                         </form>
                     </li>
                 @endguest
