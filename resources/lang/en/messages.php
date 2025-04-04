@@ -39,5 +39,14 @@ return [
     'active_licenses' => 'Active Licenses',
     'expiring_soon_count' => 'Expiring Soon',
     'sign_in' => 'Sign In',
+    'home' => 'Home',
+    'avatar' => 'Avatar',
+    'member_since' => 'Member since',
+    'no_licenses' => 'You don\'t have any licenses yet.',
+    'valid_from' => 'Valid From',
+    'valid_until' => 'Valid Until',
+    'usage_statistics' => 'Usage Statistics',
+    'total_labels_created' => 'Total Labels Created',
+    'expiring_soon' => 'Expiring Soon',
     // ... add all the same keys as in Croatian file
 ]; 

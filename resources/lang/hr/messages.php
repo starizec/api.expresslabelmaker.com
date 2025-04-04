@@ -39,4 +39,12 @@ return [
     'active_licenses' => 'Aktivne licence',
     'expiring_soon_count' => 'Uskoro ističu',
     'sign_in' => 'Prijava',
+    'home' => 'Početna',
+    'avatar' => 'Avatar',
+    'member_since' => 'Član od',
+    'no_licenses' => 'Nemate još nijednu licencu.',
+    'valid_from' => 'Vrijedi od',
+    'valid_until' => 'Vrijedi do',
+    'usage_statistics' => 'Statistika korištenja',
+    'total_labels_created' => 'Ukupno izrađenih etiketa'
 ]; 

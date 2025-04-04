@@ -17,10 +17,10 @@ class UserProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $licenses = Licence::where('user_id', $user->id)
-                          ->orderBy('created_at', 'desc')
-                          ->get();
+        $licences = Licence::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        return View::make('frontend.profile.index', compact('user', 'licenses'));
+        return View::make('frontend.profile.index', compact('user', 'licences'));
     }
-} 
+}
