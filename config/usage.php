@@ -2,5 +2,5 @@
 
 return [
     "trial" => 10,
-    "full" => 2000
+    "full" => 12000
 ];

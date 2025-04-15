@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\LanguageController;
+use App\Http\Controllers\DeliveryLocations\HR\OverseasController;
 
 // Public routes
 Route::get('/', function () {
@@ -52,3 +53,5 @@ Route::middleware('auth')->group(function () {
 
 // Language switcher
 Route::get('language/{lang}', [LanguageController::class, 'switchLang'])->name('language.switch');
+
+Route::get('/delivery-locations', [OverseasController::class, 'getDeliveryLocations'])->name('delivery-locations');

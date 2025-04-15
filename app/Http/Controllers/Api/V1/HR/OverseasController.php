@@ -12,6 +12,8 @@ use App\Classes\MultiParcelError;
 use App\Services\ErrorService;
 use App\Services\UserService;
 
+use App\Models\DeliveryLocation;
+
 class OverseasController extends Controller
 {
     public function createLabel(Request $request)
@@ -42,6 +44,7 @@ class OverseasController extends Controller
                 "CODValue" => !empty($parcel->cod_amount) ? $parcel->cod_amount : null,
                 "CODCurrency" => !empty($parcel->cod_amount) ? 0 : null,
                 "DeliveryRemark" => $parcel->sender_remark,
+                "CosigneeNotifyType" => 3,
             ]
         );
 
@@ -90,6 +93,8 @@ class OverseasController extends Controller
                 "apikey=$user->apiKey",
             [$pl_numbers]
         );
+
+        $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
 
         if ($parcelLabelResponse->successful()) {
             if (isset($parcelLabelResponseJson->status)) {
@@ -164,6 +169,7 @@ class OverseasController extends Controller
                     "CODValue" => !empty($parcel->parcel->cod_amount) ? $parcel->parcel->cod_amount : null,
                     "CODCurrency" => !empty($parcel->parcel->cod_amount) ? 0 : null,
                     "DeliveryRemark" => $parcel->parcel->sender_remark,
+                    "CosigneeNotifyType" => 3,
                 ]
             );
 
@@ -198,7 +204,12 @@ class OverseasController extends Controller
             $all_pl_numbers[] = $parcelResponseJson->shipmentid;
             $pl_numbers = $parcelResponseJson->shipmentid;
 
-            $parcelLabelResponse = Http::post(
+            $parcelLabelResponse = Http::accept('*/*')->withHeaders([
+                "xhrFields" => [
+                    'responseType' => 'blob'
+                ],
+                "content-type" => "application/x-www-form-urlencoded"
+            ])->post(
                 config('urls.hr.overseas') .
                     '/commitshipments?' .
                     "apikey=$user->apiKey",
@@ -284,4 +295,19 @@ class OverseasController extends Controller
             "errors" => $errors
         ], 201);
     }
+
+    public function getDeliveryLocations(){
+        $deliveryLocations = DeliveryLocation::where('country', 'HR')
+            ->where('courier', 'OVERSEAS')
+            ->get();
+
+        return response()->json([
+            "data" => [
+                "deliveryLocations" => $deliveryLocations
+            ],
+            "errors" => []
+        ], 201);
+    }
+
+
 }
