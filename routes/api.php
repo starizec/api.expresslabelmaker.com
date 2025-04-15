@@ -29,8 +29,8 @@ Route::middleware(['checkUserProperty', 'checkUserLicence'])->prefix('api/v1')->
                 Route::post('label', [App\Http\Controllers\Api\V1\HR\OverseasController::class, 'createLabel']);
                 Route::post('labels', [App\Http\Controllers\Api\V1\HR\OverseasController::class, 'createLabels']);
                 Route::post('collection-request', [App\Http\Controllers\Api\V1\HR\OverseasController::class, 'collectionRequest']);
-                Route::get('delivery-locations', [App\Http\Controllers\Api\V1\HR\OverseasController::class, 'getDeliveryLocations']);
             });
+            Route::get('delivery-locations', [App\Http\Controllers\Api\V1\HR\OverseasController::class, 'getDeliveryLocations']);
         });
 
         Route::middleware(['checkHrOverseasUserProperty'])->prefix('hp')->group(function () {
