@@ -37,7 +37,11 @@ class LicencesResource extends Resource
                         '3' => 'admin',
                     ]),
                 Forms\Components\DatePicker::make('valid_from')->default(now()),
-                Forms\Components\DatePicker::make('valid_until')->default(now()->addYear())
+                Forms\Components\DatePicker::make('valid_until')->default(now()->addYear()),
+                Forms\Components\TextInput::make('usage_limit')
+                    ->numeric()
+                    ->minValue(0)
+                    ->required()
             ]);
     }
 
