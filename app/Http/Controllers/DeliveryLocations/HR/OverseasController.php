@@ -17,7 +17,17 @@ class OverseasController extends Controller
         $responseJson = json_decode($response->body(), true);
 
         foreach ($responseJson['data'] as $item) {
-            if ($item['IsActive'] == false) {
+            if (
+                $item['IsActive'] == false ||
+                !isset($item['GeoLong']) ||
+                !isset($item['GeoLat']) ||
+                !$item['GeoLong'] ||
+                !$item['GeoLat'] ||
+                !is_numeric($item['GeoLong']) ||
+                !is_numeric($item['GeoLat']) ||
+                !str_contains((string) $item['GeoLong'], '.') ||
+                !str_contains((string) $item['GeoLat'], '.')
+            ) {
                 continue;
             }
 
@@ -29,14 +39,8 @@ class OverseasController extends Controller
                 'postal_code' => $item['Address']['ZipCode'],
                 'street' => $item['Address']['Street'],
                 'house_number' => $item['Address']['HouseNumber'] ?? null,
-                'lon' => (is_numeric($item['GeoLong'] ?? null) && abs($item['GeoLong']) <= 180)
-                    ? round($item['GeoLong'], 8)
-                    : null,
-
-                'lat' => (is_numeric($item['GeoLat'] ?? null) && abs($item['GeoLat']) <= 90)
-                    ? round($item['GeoLat'], 8)
-                    : null,
-
+                'lon' => $item['GeoLong'],
+                'lat' => $item['GeoLat'],
                 'name' => $item['Address']['Name'],
                 'type' => $item['Type'],
                 'description' => null,

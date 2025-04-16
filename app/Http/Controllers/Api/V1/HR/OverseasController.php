@@ -301,9 +301,48 @@ class OverseasController extends Controller
             ->where('courier', 'OVERSEAS')
             ->get();
 
+        $features = [];
+        foreach ($deliveryLocations as $location) {
+            $features[] = [
+                'type' => 'Feature',
+                'geometry' => [
+                    'type' => 'Point',
+                    'coordinates' => [(float)$location->lon, (float)$location->lat]
+                ],
+                'properties' => [
+                    'id' => $location->id,
+                    'location_id' => $location->location_id,
+                    'name' => $location->name,
+                    'place' => $location->place,
+                    'postal_code' => $location->postal_code,
+                    'street' => $location->street,
+                    'house_number' => $location->house_number,
+                    'type' => $location->type,
+                    'active' => $location->active,
+                ]
+            ];
+        }
+
+        $geojson = [
+            'type' => 'FeatureCollection',
+            'features' => $features
+        ];
+
+        // Save to file
+        $filename = 'overseas_delivery_locations_' . date('Y-m-d_H-i-s') . '.geojson';
+        $path = storage_path('app/public/geojson/' . $filename);
+        
+        // Ensure directory exists
+        if (!file_exists(dirname($path))) {
+            mkdir(dirname($path), 0755, true);
+        }
+        
+        file_put_contents($path, json_encode($geojson, JSON_PRETTY_PRINT));
+
         return response()->json([
             "data" => [
-                "deliveryLocations" => $deliveryLocations
+                "deliveryLocations" => $deliveryLocations,
+                "geojson_file" => $filename
             ],
             "errors" => []
         ], 201);

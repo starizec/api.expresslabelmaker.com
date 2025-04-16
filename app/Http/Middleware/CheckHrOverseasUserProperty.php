@@ -9,7 +9,7 @@ use App\Services\ErrorService;
 
 class CheckHrOverseasUserProperty
 {
-    public function handle(Request $request, Closure $next): Response
+        public function handle(Request $request, Closure $next): Response
     {
         if ($request->isJson()) {
             $jsonData = json_decode($request->getContent());
@@ -20,7 +20,7 @@ class CheckHrOverseasUserProperty
                 return response()->json([
                     "errors" => [
                         ErrorService::write(
-                            $jsonData['user']['apiKey'],
+                            $jsonData->user->apiKey,
                             400,
                             "Missing Overseas Api key.",
                             $request,

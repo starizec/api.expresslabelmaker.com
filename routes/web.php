@@ -41,6 +41,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('index', [CourierController::class, 'index']);
             Route::post('store', [CourierController::class, 'store']);
         });
+
+        Route::get('overseas/delivery-locations', [OverseasController::class, 'getDeliveryLocations'])->name('delivery-locations');
     });
 });
 
@@ -49,9 +51,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [UserProfileController::class, 'index'])->name('profile');
     Route::put('/profile/update', [UserProfileController::class, 'update'])->name('profile.update');
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
+
+
 });
 
 // Language switcher
 Route::get('language/{lang}', [LanguageController::class, 'switchLang'])->name('language.switch');
-
-Route::get('/delivery-locations', [OverseasController::class, 'getDeliveryLocations'])->name('delivery-locations');

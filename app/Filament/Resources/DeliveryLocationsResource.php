@@ -77,7 +77,14 @@ class DeliveryLocationsResource extends Resource
                         '0' => 'Inactive',
                     ]),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->defaultSort('created_at', 'desc')
+            ->headerActions([
+                Tables\Actions\Action::make('overseas')
+                    ->url(fn () => route('delivery-locations'))
+                    ->openUrlInNewTab()
+                    ->icon('heroicon-o-globe-alt')
+                    ->label('Overseas Locations'),
+            ]);
     }
 
     public static function getPages(): array
