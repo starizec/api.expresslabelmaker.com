@@ -19,6 +19,7 @@ class OverseasController extends Controller
         foreach ($responseJson['data'] as $item) {
             if (
                 $item['IsActive'] == false ||
+                $item['Delivery'] == false ||
                 !isset($item['GeoLong']) ||
                 !isset($item['GeoLat']) ||
                 !$item['GeoLong'] ||
@@ -31,10 +32,10 @@ class OverseasController extends Controller
                 continue;
             }
 
-            $deliveryLocation = DeliveryLocation::create([
+            DeliveryLocation::create([
                 'country' => 'HR',
                 'courier' => 'OVERSEAS',
-                'location_id' => $item['CenterID'],
+                'location_id' => $item['ShortName'],
                 'place' => $item['Address']['Place'],
                 'postal_code' => $item['Address']['ZipCode'],
                 'street' => $item['Address']['Street'],
@@ -49,7 +50,6 @@ class OverseasController extends Controller
             ]);
         }
 
-        // Delete old entries
         DeliveryLocation::where('country', 'HR')
             ->where('courier', 'OVERSEAS')
             ->whereDate('created_at', '!=', now()->format('Y-m-d'))
