@@ -37,7 +37,16 @@ class DeliveryLocationHeadersResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('courier.name'),
+                Tables\Columns\TextColumn::make('courier.country.short')
+                    ->label('Country'),
                 Tables\Columns\TextColumn::make('location_count'),
+                Tables\Columns\TextColumn::make('geojson_file_name'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -49,7 +58,8 @@ class DeliveryLocationHeadersResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getRelations(): array

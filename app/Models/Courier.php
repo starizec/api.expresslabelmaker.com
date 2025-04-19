@@ -10,7 +10,7 @@ class Courier extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'country_id'];
+    protected $fillable = ['name', 'country_id', 'short'];
 
     public function country(): BelongsTo
     {

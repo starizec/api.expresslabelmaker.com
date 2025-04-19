@@ -10,8 +10,7 @@ class DeliveryLocation extends Model
     use HasFactory;
 
     protected $fillable = [
-        'country',
-        'courier',
+        'header_id',
         'location_id',
         'place',
         'postal_code',
@@ -25,6 +24,11 @@ class DeliveryLocation extends Model
         'phone',
         'active'
     ];
+
+    public function header()
+    {
+        return $this->belongsTo(DeliveryLocationHeader::class);
+    }
 
     protected $casts = [
         'lon' => 'decimal:8',

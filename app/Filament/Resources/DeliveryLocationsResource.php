@@ -23,10 +23,12 @@ class DeliveryLocationsResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('country')
+                Tables\Columns\TextColumn::make('header.id')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('header.courier.name')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('courier')
+                Tables\Columns\TextColumn::make('header.courier.country.short')
                     ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('location_id')
@@ -80,7 +82,7 @@ class DeliveryLocationsResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->headerActions([
                 Tables\Actions\Action::make('overseas')
-                    ->url(fn () => route('delivery-locations'))
+                    ->url(fn() => route('delivery-locations'))
                     ->openUrlInNewTab()
                     ->icon('heroicon-o-globe-alt')
                     ->label('Overseas Locations'),

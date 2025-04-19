@@ -11,7 +11,8 @@ class DeliveryLocationHeader extends Model
 
     protected $fillable = [
         'courier_id',
-        'location_count'
+        'location_count',
+        'geojson_file_name'
     ];
 
     public function courier()
