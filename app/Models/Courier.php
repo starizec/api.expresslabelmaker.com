@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Courier extends Model
 {
@@ -12,9 +12,9 @@ class Courier extends Model
 
     protected $fillable = ['name', 'country_id'];
 
-    public function country(): HasOne
+    public function country(): BelongsTo
     {
-        return $this->hasOne(Country::class, 'id', 'country_id');
+        return $this->belongsTo(Country::class);
     }
 
 }

@@ -4,12 +4,28 @@ namespace App\Http\Controllers\DeliveryLocations\HR;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
+
+use App\Models\DeliveryLocationHeader;
 use App\Models\DeliveryLocation;
+use App\Models\Country;
+use App\Models\Courier;
 
 class OverseasController extends Controller
 {
     public function getDeliveryLocations()
     {
+        $courier = Courier::where('name', 'OVERSEAS')
+            ->whereHas('country', function ($query) {
+                $query->where('code', 'HR');
+            })
+            ->first();
+
+
+        $header = DeliveryLocationHeader::create([
+            'courier_id' => $courier->id,
+            'location_count' => 0
+        ]);
+
         $response = Http::withoutVerifying()->post(
             'https://api.overseas.hr/parcelshops?apikey=30c0de4c609d44be94e3a1ca044d7dfd'
         );
