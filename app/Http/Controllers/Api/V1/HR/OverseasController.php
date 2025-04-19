@@ -13,9 +13,23 @@ use App\Services\ErrorService;
 use App\Services\UserService;
 
 use App\Models\DeliveryLocation;
+use App\Models\Courier;
+use App\Models\DeliveryLocationHeader;
 
 class OverseasController extends Controller
 {
+    protected $courier;
+
+    public function __construct()
+    {
+        $this->courier = Courier::where('name', 'OVERSEAS')
+            ->whereHas('country', function ($query) {
+                $query->where('short', 'HR');
+            })
+            ->first();
+    }
+
+
     public function createLabel(Request $request)
     {
         $requestBody = $request->getContent();
@@ -31,7 +45,7 @@ class OverseasController extends Controller
             [
                 "Cosignee" => [
                     "Name" => $parcel->name1,
-                    "CountryCode" => "HR",
+                    "CountryCode" => $this->courier->country->short,
                     "Zipcode" => $parcel->pcode,
                     "City" => $parcel->city,
                     "StreetAndNumber" => $parcel->rPropNum,
@@ -156,7 +170,7 @@ class OverseasController extends Controller
                 [
                     "Cosignee" => [
                         "Name" => $parcel->parcel->name1,
-                        "CountryCode" => "HR",
+                        "CountryCode" => $this->courier->country->short,
                         "Zipcode" => $parcel->parcel->pcode,
                         "City" => $parcel->parcel->city,
                         "StreetAndNumber" => $parcel->parcel->rPropNum,
@@ -297,17 +311,15 @@ class OverseasController extends Controller
     }
 
     public function getDeliveryLocations(){
-        $deliveryLocations = DeliveryLocation::where('country', 'HR')
-            ->where('courier', 'OVERSEAS')
-            ->get();
+        $header = DeliveryLocationHeader::where('courier_id', $this->courier->id)->latest()->first();
+        $deliveryLocations = DeliveryLocation::where('header_id', $header->id)->get();
 
-        $features = [];
         foreach ($deliveryLocations as $location) {
             $features[] = [
                 'type' => 'Feature',
                 'geometry' => [
                     'type' => 'Point',
-                    'coordinates' => [(float)$location->lon, (float)$location->lat]
+                    'coordinates' => [(float) $location->lon, (float) $location->lat]
                 ],
                 'properties' => [
                     'id' => $location->id,
@@ -328,25 +340,33 @@ class OverseasController extends Controller
             'features' => $features
         ];
 
-        // Save to file
-        $filename = 'overseas_delivery_locations_' . date('Y-m-d_H-i-s') . '.geojson';
-        $path = storage_path('app/public/geojson/' . $filename);
-        
-        // Ensure directory exists
-        if (!file_exists(dirname($path))) {
-            mkdir(dirname($path), 0755, true);
-        }
-        
-        file_put_contents($path, json_encode($geojson, JSON_PRETTY_PRINT));
-
         return response()->json([
             "data" => [
-                "deliveryLocations" => $deliveryLocations,
-                "geojson_file" => $filename
+                "geojson" => $geojson
             ],
             "errors" => []
         ], 201);
     }
 
+    public function getDeliveryLocationsGeoJson() {
+        $header = DeliveryLocationHeader::where('courier_id', $this->courier->id)->latest()->first();
+        $file_name = $header->geojson_file_name;
 
+        $path = storage_path('app/public/geojson/' . $file_name);
+
+        if (!file_exists($path)) {
+            return response()->json([
+                "errors" => [
+                    "File not found"
+                ]
+            ], 404);
+        }
+
+        return response()->json([
+            "data" => [
+                "geojson_file" => base64_encode(file_get_contents($path))
+            ],
+            "errors" => []
+        ], 200);
+    }
 }

@@ -31,6 +31,7 @@ Route::middleware(['checkUserProperty', 'checkUserLicence'])->prefix('api/v1')->
                 Route::post('collection-request', [App\Http\Controllers\Api\V1\HR\OverseasController::class, 'collectionRequest']);
             });
             Route::post('delivery-locations', [App\Http\Controllers\Api\V1\HR\OverseasController::class, 'getDeliveryLocations']);
+            Route::post('delivery-locations-geojson', [App\Http\Controllers\Api\V1\HR\OverseasController::class, 'getDeliveryLocationsGeoJson']);
         });
 
         Route::middleware(['checkHrOverseasUserProperty'])->prefix('hp')->group(function () {
