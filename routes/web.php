@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\DeliveryLocations\HR\OverseasController;
+use App\Http\Controllers\DeliveryLocations\HR\DpdController;
 
 // Public routes
 Route::get('/', function () {
@@ -42,7 +43,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::post('store', [CourierController::class, 'store']);
         });
 
-        Route::get('overseas/delivery-locations', [OverseasController::class, 'getDeliveryLocations'])->name('delivery-locations');
+        Route::get('overseas/delivery-locations', [OverseasController::class, 'getDeliveryLocations'])->name('overseas-delivery-locations');
+        Route::get('dpd/delivery-locations', [DpdController::class, 'getDeliveryLocations'])->name('dpd-delivery-locations');
     });
 });
 

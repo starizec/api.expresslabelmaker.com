@@ -347,26 +347,4 @@ class OverseasController extends Controller
             "errors" => []
         ], 201);
     }
-
-    public function getDeliveryLocationsGeoJson() {
-        $header = DeliveryLocationHeader::where('courier_id', $this->courier->id)->latest()->first();
-        $file_name = $header->geojson_file_name;
-
-        $path = storage_path('app/public/geojson/' . $file_name);
-
-        if (!file_exists($path)) {
-            return response()->json([
-                "errors" => [
-                    "File not found"
-                ]
-            ], 404);
-        }
-
-        return response()->json([
-            "data" => [
-                "geojson_file" => base64_encode(file_get_contents($path))
-            ],
-            "errors" => []
-        ], 200);
-    }
 }

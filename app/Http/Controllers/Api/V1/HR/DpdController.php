@@ -12,8 +12,23 @@ use App\Classes\MultiParcelError;
 use App\Services\ErrorService;
 use App\Services\UserService;
 
+use App\Models\DeliveryLocationHeader;
+use App\Models\DeliveryLocation;
+use App\Models\Courier;
+
 class DpdController extends Controller
 {
+    protected $courier;
+
+    public function __construct()
+    {
+        $this->courier = Courier::where('name', 'DPD')
+            ->whereHas('country', function ($query) {
+                $query->where('short', 'HR');
+            })
+            ->first();
+    }
+
     public function createLabel(Request $request)
     {
         $requestBody = $request->getContent();
@@ -327,6 +342,44 @@ class DpdController extends Controller
                 "reference" => substr($parcelResponseJson->reference, 1, -1),
                 "code" => $parcelResponseJson->code
             ]
+        ], 201);
+    }
+
+    public function getDeliveryLocations(){
+        $header = DeliveryLocationHeader::where('courier_id', $this->courier->id)->latest()->first();
+        $deliveryLocations = DeliveryLocation::where('header_id', $header->id)->get();
+
+        foreach ($deliveryLocations as $location) {
+            $features[] = [
+                'type' => 'Feature',
+                'geometry' => [
+                    'type' => 'Point',
+                    'coordinates' => [(float) $location->lon, (float) $location->lat]
+                ],
+                'properties' => [
+                    'id' => $location->id,
+                    'location_id' => $location->location_id,
+                    'name' => $location->name,
+                    'place' => $location->place,
+                    'postal_code' => $location->postal_code,
+                    'street' => $location->street,
+                    'house_number' => $location->house_number,
+                    'type' => $location->type,
+                    'active' => $location->active,
+                ]
+            ];
+        }
+
+        $geojson = [
+            'type' => 'FeatureCollection',
+            'features' => $features
+        ];
+
+        return response()->json([
+            "data" => [
+                "geojson" => $geojson
+            ],
+            "errors" => []
         ], 201);
     }
 }

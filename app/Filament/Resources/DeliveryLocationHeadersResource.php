@@ -64,10 +64,15 @@ class DeliveryLocationHeadersResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->headerActions([
                 Tables\Actions\Action::make('overseas')
-                    ->url(fn() => route('delivery-locations'))
+                    ->url(fn() => route('overseas-delivery-locations'))
                     ->openUrlInNewTab()
                     ->icon('heroicon-o-globe-alt')
                     ->label('Overseas Locations'),
+                Tables\Actions\Action::make('dpd')
+                    ->url(fn() => route('dpd-delivery-locations'))
+                    ->openUrlInNewTab()
+                    ->icon('heroicon-o-globe-alt')
+                    ->label('DPD Locations'),
             ]);
     }
 

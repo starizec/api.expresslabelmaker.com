@@ -74,54 +74,5 @@ class OverseasController extends Controller
             'location_count' => DeliveryLocation::where('header_id', $header->id)->count()
         ]);
 
-        $this->createDeliveryLocationsGeoJson($header->id);
-    }
-
-    public function createDeliveryLocationsGeoJson($header_id)
-    {
-        $deliveryLocations = DeliveryLocation::where('header_id', $header_id)
-            ->get();
-
-        $features = [];
-
-        foreach ($deliveryLocations as $location) {
-            $features[] = [
-                'type' => 'Feature',
-                'geometry' => [
-                    'type' => 'Point',
-                    'coordinates' => [(float) $location->lon, (float) $location->lat]
-                ],
-                'properties' => [
-                    'id' => $location->id,
-                    'location_id' => $location->location_id,
-                    'name' => $location->name,
-                    'place' => $location->place,
-                    'postal_code' => $location->postal_code,
-                    'street' => $location->street,
-                    'house_number' => $location->house_number,
-                    'type' => $location->type,
-                    'active' => $location->active,
-                ]
-            ];
-        }
-
-        $geojson = [
-            'type' => 'FeatureCollection',
-            'features' => $features
-        ];
-
-        $filename = $header_id . '_' . now()->format('Y-m-d_H-i-s') . '.geojson';
-        
-        $path = storage_path('app/public/geojson/' . $filename);
-
-        if (!file_exists(dirname($path))) {
-            mkdir(dirname($path), 0755, true);
-        }
-
-        file_put_contents($path, json_encode($geojson, JSON_PRETTY_PRINT));
-
-        DeliveryLocationHeader::where('id', $header_id)->update([
-            'geojson_file_name' => $filename
-        ]);
     }
 }
