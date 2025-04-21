@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\DeliveryLocations\HR\OverseasController;
 use App\Http\Controllers\DeliveryLocations\HR\DpdController;
+use App\Http\Controllers\DeliveryLocations\HR\HpController;
 
 // Public routes
 Route::get('/', function () {
@@ -45,6 +46,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
         Route::get('overseas/delivery-locations', [OverseasController::class, 'getDeliveryLocations'])->name('overseas-delivery-locations');
         Route::get('dpd/delivery-locations', [DpdController::class, 'getDeliveryLocations'])->name('dpd-delivery-locations');
+        Route::get('hp/delivery-locations', [HpController::class, 'getDeliveryLocations'])->name('hp-delivery-locations');
     });
 });
 

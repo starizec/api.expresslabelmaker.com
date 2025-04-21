@@ -73,6 +73,11 @@ class DeliveryLocationHeadersResource extends Resource
                     ->openUrlInNewTab()
                     ->icon('heroicon-o-globe-alt')
                     ->label('DPD Locations'),
+                Tables\Actions\Action::make('hp')
+                    ->url(fn() => route('hp-delivery-locations'))
+                    ->openUrlInNewTab()
+                    ->icon('heroicon-o-globe-alt')
+                    ->label('HP Locations'),
             ]);
     }
 
