@@ -19,12 +19,15 @@ class DeliveryLocationsResource extends Resource
 
     protected static ?string $navigationLabel = 'Delivery Locations';
 
+    protected static ?string $navigationGroup = 'Delivery Locations';
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('header.id')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('header.courier.name')
                     ->sortable()
                     ->searchable(),
@@ -80,13 +83,7 @@ class DeliveryLocationsResource extends Resource
                     ]),
             ])
             ->defaultSort('created_at', 'desc')
-            ->headerActions([
-                Tables\Actions\Action::make('overseas')
-                    ->url(fn() => route('delivery-locations'))
-                    ->openUrlInNewTab()
-                    ->icon('heroicon-o-globe-alt')
-                    ->label('Overseas Locations'),
-            ]);
+            ;
     }
 
     public static function getPages(): array

@@ -25,17 +25,11 @@ class OverseasController extends Controller
 
     public function getDeliveryLocations()
     {
-        $header = DeliveryLocationHeader::where('courier_id', $this->courier->id)
-            ->latest()
-            ->first();
-
-        if (!$header) {
-            $header = DeliveryLocationHeader::create([
-                'courier_id' => $this->courier->id,
-                'location_count' => 0,
-                'geojson_file_name' => 'U_IZRADI'
-            ]);
-        }
+        $header = DeliveryLocationHeader::create([
+            'courier_id' => $this->courier->id,
+            'location_count' => 0,
+            'geojson_file_name' => 'U_IZRADI'
+        ]);
 
         $response = Http::withoutVerifying()->post(
             config('urls.hr.overseas') . '/parcelshops?apikey=' . env('HR_OVERSEAS_API_KEY')

@@ -19,6 +19,8 @@ class CouriersResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
 
+    protected static ?string $navigationGroup = 'Couriers';
+
     public static function form(Form $form): Form
     {
         return $form

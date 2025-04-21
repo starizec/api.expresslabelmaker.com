@@ -19,6 +19,8 @@ class DeliveryLocationHeadersResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationGroup = 'Delivery Locations';
+
     public static function form(Form $form): Form
     {
         return $form
@@ -59,7 +61,14 @@ class DeliveryLocationHeadersResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('created_at', 'desc');
+            ->defaultSort('created_at', 'desc')
+            ->headerActions([
+                Tables\Actions\Action::make('overseas')
+                    ->url(fn() => route('delivery-locations'))
+                    ->openUrlInNewTab()
+                    ->icon('heroicon-o-globe-alt')
+                    ->label('Overseas Locations'),
+            ]);
     }
 
     public static function getRelations(): array

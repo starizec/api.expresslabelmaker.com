@@ -20,6 +20,8 @@ class ApiErrorsResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-exclamation-triangle';
 
+    protected static ?string $navigationGroup = 'Logs';
+
     public static function form(Form $form): Form
     {
         return $form
