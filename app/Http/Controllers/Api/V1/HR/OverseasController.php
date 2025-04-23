@@ -45,7 +45,7 @@ class OverseasController extends Controller
             [
                 "Cosignee" => [
                     "Name" => $parcel->name1,
-                    "CountryCode" => $this->courier->country->short,
+                    "CountryCode" => 'HR',
                     "Zipcode" => $parcel->pcode,
                     "City" => $parcel->city,
                     "StreetAndNumber" => $parcel->rPropNum,
