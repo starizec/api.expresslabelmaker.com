@@ -67,6 +67,14 @@ return [
             'days' => 14,
         ],
 
+        'hr-overseas' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/hr-overseas.log'),
+            'level' => 'error',
+            'days' => 30,
+            'permission' => 0644,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

@@ -11,6 +11,7 @@ use App\Classes\MultiParcelError;
 
 use App\Services\ErrorService;
 use App\Services\UserService;
+use App\Services\HR\OverseasLogger;
 
 use App\Models\DeliveryLocation;
 use App\Models\Courier;
@@ -26,7 +27,7 @@ class OverseasController extends Controller
             ->whereHas('country', function ($query) {
                 $query->where('short', 'HR');
             })
-            ->first();
+            ->firstOrFail();
     }
 
 
@@ -39,75 +40,62 @@ class OverseasController extends Controller
         $parcel = $jsonData->parcel;
 
         $parcelResponse = Http::withoutVerifying()->post(
-            config('urls.hr.overseas') .
-                '/createshipment?' .
-                "apikey=$user->apiKey",
-            [
-                "Cosignee" => [
-                    "Name" => $parcel->name1,
-                    "CountryCode" => strtoupper($this->courier->country->short),
-                    "Zipcode" => $parcel->pcode,
-                    "City" => $parcel->city,
-                    "StreetAndNumber" => $parcel->rPropNum,
-                    "NotifyGSM" => $parcel->phone,
-                    "NotifyEmail" => $parcel->email,
-                ],
-                "UnitAmount" => $parcel->num_of_parcel,
-                "Ref1" => $parcel->order_number,
-                "NumberOfCollies" => $parcel->num_of_parcel,
-                "CODValue" => !empty($parcel->cod_amount) ? $parcel->cod_amount : null,
-                "CODCurrency" => !empty($parcel->cod_amount) ? 0 : null,
-                "DeliveryRemark" => $parcel->sender_remark,
-                "CosigneeNotifyType" => 3,
-            ]
+            config('urls.hr.overseas') . "/createshipment?apikey=$user->apiKey",
+            $this->prepareParcelPayload($parcel)
         );
 
         $parcelResponseJson = json_decode($parcelResponse->body());
-        
-        if ($parcelResponse->successful()) {
-            if ($parcelResponseJson->status > 0) {
-                return response()->json([
-                    "errors" => [
-                        ErrorService::write(
-                            $user->email,
-                            400,
-                            substr($parcelResponseJson->status . ' - ' . json_encode($parcelResponseJson->error), 0, 250),
-                            $request,
-                            "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
-                            json_encode($parcel)
-                        )
-                    ],
-                ], 400);
-            }
-        } else {
+
+        if ($parcelResponse->successful() && $parcelResponseJson->status > 0) {
+            OverseasLogger::apiError(
+                $user->email,
+                $user->domain,
+                $parcelResponseJson->status,
+                $parcelResponseJson->error,
+                $request,
+                "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
+                json_encode($parcel)
+            );
+
             return response()->json([
                 "errors" => [
-                    ErrorService::write(
-                        $user->email,
-                        $parcelResponse->status(),
-                        $parcelResponse->status() . " - Overseas Server error",
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
-                        json_encode($parcel)
-                    )
+                    'code' => $parcelResponseJson->status,
+                    'message' => $parcelResponseJson->error
+                ],
+            ], 400);
+        } elseif (!$parcelResponse->successful()) {
+            OverseasLogger::apiError(
+                $user->email,
+                $user->domain,
+                $parcelResponse->status(),
+                $parcelResponse->status() . " - Overseas Server error",
+                $request,
+                "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
+                json_encode($parcel)
+            );
+
+            return response()->json([
+                "errors" => [
+                    'code' => $parcelResponse->status(),
+                    'message' => $parcelResponse->status() . " - Overseas Server error"
                 ]
             ], $parcelResponse->status());
         }
 
         $pl_numbers = $parcelResponseJson->shipmentid;
-        
+
         $parcelLabelResponse = Http::withoutVerifying()->accept('*/*')->withHeaders([
             "xhrFields" => [
                 'responseType' => 'blob'
             ],
             "content-type" => "application/x-www-form-urlencoded"
         ])->post(
-            config('urls.hr.overseas') .
+                config('urls.hr.overseas') .
                 '/commitshipments?' .
                 "apikey=$user->apiKey",
-            [$pl_numbers]
-        );
-        
+                [$pl_numbers]
+            );
+
         $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
 
         if ($parcelLabelResponse->successful()) {
@@ -120,7 +108,7 @@ class OverseasController extends Controller
                             $parcelLabelResponseJson->status . ' - ' . json_encode($parcelResponseJson->error),
                             $request,
                             "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
-                            json_encode( $parcel)
+                            json_encode($parcel)
                         )
                     ],
                 ], 400);
@@ -164,27 +152,8 @@ class OverseasController extends Controller
 
         foreach ($parcels as $parcel) {
             $parcelResponse = Http::withoutVerifying()->post(
-                config('urls.hr.overseas') .
-                    '/createshipment?' .
-                    "apikey=$user->apiKey",
-                [
-                    "Cosignee" => [
-                        "Name" => $parcel->parcel->name1,
-                        "CountryCode" => strtoupper($this->courier->country->short),
-                        "Zipcode" => $parcel->parcel->pcode,
-                        "City" => $parcel->parcel->city,
-                        "StreetAndNumber" => $parcel->parcel->rPropNum,
-                        "NotifyGSM" => $parcel->parcel->phone,
-                        "NotifyEmail" => $parcel->parcel->email,
-                    ],
-                    "UnitAmount" => $parcel->parcel->num_of_parcel,
-                    "Ref1" => $parcel->parcel->order_number,
-                    "NumberOfCollies" => $parcel->parcel->num_of_parcel,
-                    "CODValue" => !empty($parcel->parcel->cod_amount) ? $parcel->parcel->cod_amount : null,
-                    "CODCurrency" => !empty($parcel->parcel->cod_amount) ? 0 : null,
-                    "DeliveryRemark" => $parcel->parcel->sender_remark,
-                    "CosigneeNotifyType" => 3,
-                ]
+                config('urls.hr.overseas') . "/createshipment?apikey=$user->apiKey",
+                $this->prepareParcelPayload($parcel)
             );
 
             $parcelResponseJson = json_decode($parcelResponse->body());
@@ -224,11 +193,11 @@ class OverseasController extends Controller
                 ],
                 "content-type" => "application/x-www-form-urlencoded"
             ])->post(
-                config('urls.hr.overseas') .
+                    config('urls.hr.overseas') .
                     '/commitshipments?' .
                     "apikey=$user->apiKey",
-                [$pl_numbers]
-            );
+                    [$pl_numbers]
+                );
 
             $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
 
@@ -264,8 +233,8 @@ class OverseasController extends Controller
 
         $allParcelLabelResponse = Http::withoutVerifying()->post(
             config('urls.hr.overseas') .
-                '/reprintlabels?' .
-                "apikey=$user->apiKey",
+            '/reprintlabels?' .
+            "apikey=$user->apiKey",
             $all_pl_numbers
         );
 
@@ -310,7 +279,8 @@ class OverseasController extends Controller
         ], 201);
     }
 
-    public function getDeliveryLocations(){
+    public function getDeliveryLocations()
+    {
         $header = DeliveryLocationHeader::where('courier_id', $this->courier->id)->latest()->first();
         $deliveryLocations = DeliveryLocation::where('header_id', $header->id)->get();
 
@@ -346,5 +316,27 @@ class OverseasController extends Controller
             ],
             "errors" => []
         ], 201);
+    }
+
+    protected function prepareParcelPayload($parcel)
+    {
+        return [
+            "Cosignee" => [
+                "Name" => $parcel->name1,
+                "CountryCode" => strtoupper($this->courier->country->short),
+                "Zipcode" => $parcel->pcode,
+                "City" => $parcel->city,
+                "StreetAndNumber" => $parcel->rPropNum,
+                "NotifyGSM" => $parcel->phone,
+                "NotifyEmail" => $parcel->email,
+            ],
+            "UnitAmount" => $parcel->num_of_parcel,
+            "Ref1" => $parcel->order_number,
+            "NumberOfCollies" => $parcel->num_of_parcel,
+            "CODValue" => !empty($parcel->cod_amount) ? $parcel->cod_amount : null,
+            "CODCurrency" => !empty($parcel->cod_amount) ? 0 : null,
+            "DeliveryRemark" => $parcel->sender_remark ?? null,
+            "CosigneeNotifyType" => 3,
+        ];
     }
 }
