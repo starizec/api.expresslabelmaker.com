@@ -337,6 +337,7 @@ class OverseasController extends Controller
             "CODCurrency" => !empty($parcel->cod_amount) ? 0 : null,
             "DeliveryRemark" => $parcel->sender_remark ?? null,
             "Remark" => $parcel->sender_remark ?? null,
+            "Ref3" => $parcel->sender_remark ?? null,
             "CosigneeNotifyType" => 3,
         ];
     }
