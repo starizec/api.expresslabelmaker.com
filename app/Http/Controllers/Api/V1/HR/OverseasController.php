@@ -38,7 +38,7 @@ class OverseasController extends Controller
         $user = $jsonData->user;
         $parcel = $jsonData->parcel;
 
-        $parcelResponse = Http::post(
+        $parcelResponse = Http::withoutVerifying()->post(
             config('urls.hr.overseas') .
                 '/createshipment?' .
                 "apikey=$user->apiKey",
@@ -71,7 +71,7 @@ class OverseasController extends Controller
                         ErrorService::write(
                             $user->email,
                             400,
-                            $parcelResponseJson->status . ' - ' . json_encode($parcelResponseJson->error),
+                            substr($parcelResponseJson->status . ' - ' . json_encode($parcelResponseJson->error), 0, 250),
                             $request,
                             "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
                             json_encode($parcel)
@@ -96,7 +96,7 @@ class OverseasController extends Controller
 
         $pl_numbers = $parcelResponseJson->shipmentid;
 
-        $parcelLabelResponse = Http::accept('*/*')->withHeaders([
+        $parcelLabelResponse = Http::withoutVerifying()->accept('*/*')->withHeaders([
             "xhrFields" => [
                 'responseType' => 'blob'
             ],
@@ -163,14 +163,14 @@ class OverseasController extends Controller
         $all_pl_numbers = [];
 
         foreach ($parcels as $parcel) {
-            $parcelResponse = Http::post(
+            $parcelResponse = Http::withoutVerifying()->post(
                 config('urls.hr.overseas') .
                     '/createshipment?' .
                     "apikey=$user->apiKey",
                 [
                     "Cosignee" => [
                         "Name" => $parcel->parcel->name1,
-                        "CountryCode" => $this->courier->country->short,
+                        "CountryCode" => 'HR',
                         "Zipcode" => $parcel->parcel->pcode,
                         "City" => $parcel->parcel->city,
                         "StreetAndNumber" => $parcel->parcel->rPropNum,
@@ -218,7 +218,7 @@ class OverseasController extends Controller
             $all_pl_numbers[] = $parcelResponseJson->shipmentid;
             $pl_numbers = $parcelResponseJson->shipmentid;
 
-            $parcelLabelResponse = Http::accept('*/*')->withHeaders([
+            $parcelLabelResponse = Http::withoutVerifying()->accept('*/*')->withHeaders([
                 "xhrFields" => [
                     'responseType' => 'blob'
                 ],
@@ -262,7 +262,7 @@ class OverseasController extends Controller
             $data[] = new MultiParcelResponse($parcel->order_number, $pl_numbers, $parcelLabelResponse["labelsbase64"]);
         }
 
-        $allParcelLabelResponse = Http::post(
+        $allParcelLabelResponse = Http::withoutVerifying()->post(
             config('urls.hr.overseas') .
                 '/reprintlabels?' .
                 "apikey=$user->apiKey",
