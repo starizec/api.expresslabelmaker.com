@@ -153,7 +153,7 @@ class OverseasController extends Controller
         foreach ($parcels as $parcel) {
             $parcelResponse = Http::withoutVerifying()->post(
                 config('urls.hr.overseas') . "/createshipment?apikey=$user->apiKey",
-                $this->prepareParcelPayload($parcel)
+                $this->prepareParcelPayload($parcel->parcel)
             );
 
             $parcelResponseJson = json_decode($parcelResponse->body());
