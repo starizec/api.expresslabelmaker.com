@@ -44,20 +44,20 @@ class OverseasController extends Controller
                 "apikey=$user->apiKey",
             [
                 "Cosignee" => [
-                    "Name" => $parcel->name1,
-                    "CountryCode" => 'HR',
-                    "Zipcode" => $parcel->pcode,
-                    "City" => $parcel->city,
-                    "StreetAndNumber" => $parcel->rPropNum,
-                    "NotifyGSM" => $parcel->phone,
-                    "NotifyEmail" => $parcel->email,
+                    "Name" => $parcel->parcel->name1,
+                    "CountryCode" => strtoupper($this->courier->country->short),
+                    "Zipcode" => $parcel->parcel->pcode,
+                    "City" => $parcel->parcel->city,
+                    "StreetAndNumber" => $parcel->parcel->rPropNum,
+                    "NotifyGSM" => $parcel->parcel->phone,
+                    "NotifyEmail" => $parcel->parcel->email,
                 ],
-                "UnitAmount" => $parcel->num_of_parcel,
-                "Ref1" => $parcel->order_number,
-                "NumberOfCollies" => $parcel->num_of_parcel,
-                "CODValue" => !empty($parcel->cod_amount) ? $parcel->cod_amount : null,
-                "CODCurrency" => !empty($parcel->cod_amount) ? 0 : null,
-                "DeliveryRemark" => $parcel->sender_remark,
+                "UnitAmount" => $parcel->parcel->num_of_parcel,
+                "Ref1" => $parcel->parcel->order_number,
+                "NumberOfCollies" => $parcel->parcel->num_of_parcel,
+                "CODValue" => !empty($parcel->parcel->cod_amount) ? $parcel->parcel->cod_amount : null,
+                "CODCurrency" => !empty($parcel->parcel->cod_amount) ? 0 : null,
+                "DeliveryRemark" => $parcel->parcel->sender_remark,
                 "CosigneeNotifyType" => 3,
             ]
         );
@@ -170,7 +170,7 @@ class OverseasController extends Controller
                 [
                     "Cosignee" => [
                         "Name" => $parcel->parcel->name1,
-                        "CountryCode" => 'HR',
+                        "CountryCode" => strtoupper($this->courier->country->short),
                         "Zipcode" => $parcel->parcel->pcode,
                         "City" => $parcel->parcel->city,
                         "StreetAndNumber" => $parcel->parcel->rPropNum,
