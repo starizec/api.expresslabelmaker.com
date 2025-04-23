@@ -120,7 +120,7 @@ class OverseasController extends Controller
                             $parcelLabelResponseJson->status . ' - ' . json_encode($parcelResponseJson->error),
                             $request,
                             "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
-                            json_encode($parcel)
+                            json_encode( $parcel)
                         )
                     ],
                 ], 400);
