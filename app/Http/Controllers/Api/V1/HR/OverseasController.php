@@ -136,6 +136,8 @@ class OverseasController extends Controller
 
         UserService::addUsage($user);
 
+        OverseasLogger::usage($user->email, $user->domain, $jsonData);
+
         return response()->json([
             "data" => [
                 "parcels" => $pl_numbers,
@@ -170,7 +172,7 @@ class OverseasController extends Controller
                     $error_message,
                     $request,
                     "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
-                    json_encode($parcel->parcel)
+                    $parcel->parcel
                 );
                 $errors[] = [
                     'order_number' => $parcel->order_number ?? 'unknown',
@@ -199,7 +201,7 @@ class OverseasController extends Controller
                     $error_message,
                     $request,
                     "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
-                    json_encode($parcel->parcel)
+                    $parcel->parcel
                 );
 
                 $errors[] = [
@@ -239,7 +241,7 @@ class OverseasController extends Controller
                     $error_message,
                     $request,
                     "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
-                    json_encode($parcel->parcel)
+                    $parcel->parcel
                 );
 
                 $errors[] = [
@@ -287,6 +289,8 @@ class OverseasController extends Controller
                 ], 400);
             }
         }
+
+        OverseasLogger::usage($user->email, $user->domain, $jsonData);
 
         return response()->json([
             "data" => [

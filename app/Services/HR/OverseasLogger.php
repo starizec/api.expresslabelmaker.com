@@ -13,7 +13,7 @@ class OverseasLogger
 
     public static function apiError($user, $domain, $status, $error, $request, $stack_trace, $log)
     {
-        self::error('Overseas API Error', [
+        Log::channel('hr-overseas')->error('HR OVerseas API Error', [
             'user' => $user,
             'domain' => $domain,
             'status' => $status,
@@ -24,11 +24,12 @@ class OverseasLogger
         ]);
     }
 
-    public static function validationError($error, $parcel)
+    public static function usage($user, $domain, $request)
     {
-        self::error('Overseas Validation Error', [
-            'error' => $error,
-            'parcel' => $parcel
+        Log::channel('hr-overseas')->info('HR OVerseas Usage', [
+            'user' => $user,
+            'domain' => $domain,
+            'request' => $request
         ]);
     }
-} 
+}
