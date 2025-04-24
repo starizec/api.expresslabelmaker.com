@@ -12,15 +12,12 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\DeliveryLocations\HR\OverseasController;
 use App\Http\Controllers\DeliveryLocations\HR\DpdController;
 use App\Http\Controllers\DeliveryLocations\HR\HpController;
-use Arcanedev\LogViewer\Facades\LogViewer;
 
 // Public routes
 Route::get('/', function () {
     return view('frontend.index.index');
 })->name('frontend.index');
-Route::get('/test-log-files', function () {
-    return response()->json(LogViewer::all());
-});
+
 // Guest routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

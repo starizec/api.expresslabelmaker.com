@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\V1\HR;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 use App\Classes\MultiParcelResponse;
 use App\Classes\MultiParcelError;
@@ -16,6 +18,7 @@ use App\Services\HR\OverseasLogger;
 use App\Models\DeliveryLocation;
 use App\Models\Courier;
 use App\Models\DeliveryLocationHeader;
+
 
 class OverseasController extends Controller
 {
@@ -30,7 +33,6 @@ class OverseasController extends Controller
             ->firstOrFail();
     }
 
-
     public function createLabel(Request $request)
     {
         $requestBody = $request->getContent();
@@ -39,6 +41,30 @@ class OverseasController extends Controller
         $user = $jsonData->user;
         $parcel = $jsonData->parcel;
 
+        try {
+            $this->validateParcel($parcel);
+        } catch (ValidationException $e) {
+            $error_message = implode(' | ', collect($e->errors())->flatten()->all());
+
+            OverseasLogger::apiError(
+                $user->email,
+                $user->domain,
+                422,
+                $error_message,
+                $request,
+                "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
+                ""
+            );
+
+            return response()->json([
+                'errors' =>
+                    [
+                        'order_number' => $parcel->order_number ?? 'unknown',
+                        'error_message' => $error_message
+                    ]
+            ], 422);
+        }
+
         $parcelResponse = Http::withoutVerifying()->post(
             config('urls.hr.overseas') . "/createshipment?apikey=$user->apiKey",
             $this->prepareParcelPayload($parcel)
@@ -46,38 +72,25 @@ class OverseasController extends Controller
 
         $parcelResponseJson = json_decode($parcelResponse->body());
 
-        if ($parcelResponse->successful() && $parcelResponseJson->status > 0) {
-            OverseasLogger::apiError(
-                $user->email,
-                $user->domain,
-                $parcelResponseJson->status,
-                $parcelResponseJson->error,
-                $request,
-                "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
-                json_encode($parcel)
-            );
+        if (($parcelResponse->successful() && $parcelResponseJson->status > 0) || !$parcelResponse->successful()) {
+            $error_message = $parcelResponse->successful()
+                ? collect($parcelResponseJson->validations)->pluck('Message')->implode(' | ')
+                : $parcelResponse->status() . " - Overseas Server error";
 
-            return response()->json([
-                "errors" => [
-                    'code' => $parcelResponseJson->status,
-                    'message' => $parcelResponseJson->error
-                ],
-            ], 400);
-        } elseif (!$parcelResponse->successful()) {
             OverseasLogger::apiError(
                 $user->email,
                 $user->domain,
                 $parcelResponse->status(),
-                $parcelResponse->status() . " - Overseas Server error",
+                $error_message,
                 $request,
                 "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
-                json_encode($parcel)
+                ""
             );
 
             return response()->json([
                 "errors" => [
-                    'code' => $parcelResponse->status(),
-                    'message' => $parcelResponse->status() . " - Overseas Server error"
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'Overseas poruka: ' . $error_message
                 ]
             ], $parcelResponse->status());
         }
@@ -98,34 +111,27 @@ class OverseasController extends Controller
 
         $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
 
-        if ($parcelLabelResponse->successful()) {
-            if ($parcelLabelResponseJson->status > 0) {
-                return response()->json([
-                    "errors" => [
-                        ErrorService::write(
-                            $user->email,
-                            400,
-                            $parcelLabelResponseJson->status . ' - ' . json_encode($parcelResponseJson->error),
-                            $request,
-                            "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
-                            json_encode($parcel)
-                        )
-                    ],
-                ], 400);
-            }
-        } else {
+        if (($parcelLabelResponse->successful() && $parcelLabelResponseJson->status > 0) || !$parcelLabelResponse->successful()) {
+            $error_message = $parcelLabelResponse->successful()
+                ? collect($parcelLabelResponseJson->validations)->pluck('Message')->implode(' | ')
+                : $parcelLabelResponse->status() . " - Overseas Server error";
+
+            OverseasLogger::apiError(
+                $user->email,
+                $user->domain,
+                $parcelLabelResponse->status(),
+                $error_message,
+                $request,
+                "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
+                ""
+            );
+
             return response()->json([
                 "errors" => [
-                    ErrorService::write(
-                        $user->email,
-                        $parcelLabelResponse->status(),
-                        $parcelLabelResponse->status() . ' - Overseas Server error',
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
-                        json_encode($parcel)
-                    )
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'Overseas poruka: ' . $error_message
                 ]
-            ], $parcelLabelResponse->status());
+            ], $parcelResponse->status());
         }
 
         UserService::addUsage($user);
@@ -149,8 +155,31 @@ class OverseasController extends Controller
         $data = [];
         $errors = [];
         $all_pl_numbers = [];
+        $allParcelLabelResponse["labelsbase64"] = [];
 
         foreach ($parcels as $parcel) {
+            try {
+                $this->validateParcel($parcel->parcel);
+            } catch (ValidationException $e) {
+                $error_message = implode(' | ', collect($e->errors())->flatten()->all());
+
+                OverseasLogger::apiError(
+                    $user->email,
+                    $user->domain,
+                    422,
+                    $error_message,
+                    $request,
+                    "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
+                    json_encode($parcel->parcel)
+                );
+                $errors[] = [
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => $error_message
+                ];
+
+                continue;
+            }
+
             $parcelResponse = Http::withoutVerifying()->post(
                 config('urls.hr.overseas') . "/createshipment?apikey=$user->apiKey",
                 $this->prepareParcelPayload($parcel->parcel)
@@ -158,30 +187,27 @@ class OverseasController extends Controller
 
             $parcelResponseJson = json_decode($parcelResponse->body());
 
-            if ($parcelResponse->successful()) {
-                if ($parcelResponseJson->status > 0) {
-                    $error = ErrorService::write(
-                        $user->email,
-                        $parcelResponseJson->status,
-                        substr($parcelResponseJson->status . ' - ' . json_encode($parcelResponseJson->error), 0, 250),
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
-                        json_encode($parcel)
-                    );
+            if (($parcelResponse->successful() && $parcelResponseJson->status > 0) || !$parcelResponse->successful()) {
+                $error_message = $parcelResponse->successful()
+                    ? collect($parcelResponseJson->validations)->pluck('Message')->implode(' | ')
+                    : $parcelResponse->status() . " - Overseas Server error";
 
-                    $errors[] = new MultiParcelError($parcel->order_number, $error['error_id'], $error['error_details']);
-                }
-            } else {
-                $error = ErrorService::write(
+                OverseasLogger::apiError(
                     $user->email,
+                    $user->domain,
                     $parcelResponse->status(),
-                    $parcelResponse->status() . 'Overseas Server error',
+                    $error_message,
                     $request,
                     "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
-                    json_encode($parcel)
+                    json_encode($parcel->parcel)
                 );
 
-                $errors[] = new MultiParcelError($parcel->order_number, $error['error_id'], $error['error_details']);
+                $errors[] = [
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'Overseas poruka: ' . $error_message
+                ];
+
+                continue;
             }
 
             $all_pl_numbers[] = $parcelResponseJson->shipmentid;
@@ -201,73 +227,65 @@ class OverseasController extends Controller
 
             $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
 
-            if ($parcelLabelResponse->successful()) {
-                if ($parcelLabelResponseJson->status > 0) {
-                    $error = ErrorService::write(
-                        $user->email,
-                        $parcelLabelResponseJson->status,
-                        substr($parcelResponseJson->status . ' - ' . json_encode($parcelResponseJson->error), 0, 250),
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
-                        json_encode($parcel)
-                    );
+            if (($parcelLabelResponse->successful() && $parcelLabelResponseJson->status > 0) || !$parcelLabelResponse->successful()) {
+                $error_message = $parcelLabelResponse->successful()
+                    ? collect($parcelLabelResponseJson->validations)->pluck('Message')->implode(' | ')
+                    : $parcelLabelResponse->status() . " - Overseas Server error";
 
-                    $errors[] = new MultiParcelError($parcel->order_number, $error['error_id'], $error['error_details']);
-                }
-            } else {
-                $error = ErrorService::write(
+                OverseasLogger::apiError(
                     $user->email,
+                    $user->domain,
                     $parcelLabelResponse->status(),
-                    $parcelLabelResponse->status() . 'Overseas Server error',
+                    $error_message,
                     $request,
                     "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
-                    json_encode($parcel)
+                    json_encode($parcel->parcel)
                 );
 
-                $errors[] = new MultiParcelError($parcel->order_number, $error['error_id'], $error['error_details']);
+                $errors[] = [
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'Overseas poruka: ' . $error_message
+                ];
+
+                continue;
             }
 
             UserService::addUsage($user);
             $data[] = new MultiParcelResponse($parcel->order_number, $pl_numbers, $parcelLabelResponse["labelsbase64"]);
         }
 
-        $allParcelLabelResponse = Http::withoutVerifying()->post(
-            config('urls.hr.overseas') .
-            '/reprintlabels?' .
-            "apikey=$user->apiKey",
-            $all_pl_numbers
-        );
+        if (count($all_pl_numbers) > 0) {
+            $allParcelLabelResponse = Http::withoutVerifying()->post(
+                config('urls.hr.overseas') .
+                '/reprintlabels?' .
+                "apikey=$user->apiKey",
+                $all_pl_numbers
+            );
 
-        $allParcelLabelResponseJson = json_decode($allParcelLabelResponse->body());
+            $allParcelLabelResponseJson = json_decode($allParcelLabelResponse->body());
 
-        if ($allParcelLabelResponse->successful()) {
-            if ($allParcelLabelResponseJson->status > 0) {
+            if (($allParcelLabelResponse->successful() && $allParcelLabelResponseJson->status > 0) || !$allParcelLabelResponse->successful()) {
+                $error_message = $allParcelLabelResponse->successful()
+                    ? collect($allParcelLabelResponseJson->validations)->pluck('Message')->implode(' | ')
+                    : $allParcelLabelResponse->status() . " - Overseas Server error";
+
+                OverseasLogger::apiError(
+                    $user->email,
+                    $user->domain,
+                    $allParcelLabelResponse->status(),
+                    $error_message,
+                    $request,
+                    "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
+                    ""
+                );
+
                 return response()->json([
                     "errors" => [
-                        $error = ErrorService::write(
-                            $user->email,
-                            $allParcelLabelResponseJson->status,
-                            substr($allParcelLabelResponseJson->status . ' ' . json_encode($allParcelLabelResponseJson->error), 0, 250),
-                            $request,
-                            "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
-                            json_encode($parcel)
-                        )
-                    ],
+                        'order_number' => "unknown",
+                        'error_message' => "Overseas poruka: $error_message"
+                    ]
                 ], 400);
             }
-        } else {
-            return response()->json([
-                "errors" => [
-                    $error = ErrorService::write(
-                        $user->email,
-                        $allParcelLabelResponse->status(),
-                        $allParcelLabelResponse->status() . " - DPD Server error",
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
-                        json_encode($parcel)
-                    )
-                ]
-            ], $allParcelLabelResponse->status());
         }
 
         return response()->json([
@@ -330,15 +348,82 @@ class OverseasController extends Controller
                 "NotifyGSM" => $parcel->phone,
                 "NotifyEmail" => $parcel->email,
             ],
+            "CosigneeNotifyType" => 3,
+            "NumberOfCollies" => $parcel->num_of_parcel,
             "UnitAmount" => $parcel->num_of_parcel,
             "Ref1" => $parcel->order_number,
-            "NumberOfCollies" => $parcel->num_of_parcel,
+            "Ref3" => $parcel->sender_remark ?? null,
             "CODValue" => !empty($parcel->cod_amount) ? $parcel->cod_amount : null,
             "CODCurrency" => !empty($parcel->cod_amount) ? 0 : null,
+
             "DeliveryRemark" => $parcel->sender_remark ?? null,
             "Remark" => $parcel->sender_remark ?? null,
-            "Ref3" => $parcel->sender_remark ?? null,
-            "CosigneeNotifyType" => 3,
+
+
         ];
     }
+
+    protected function validateParcel($parcel)
+    {
+        $rules = [
+            'name1' => 'required|string|max:255',
+            'pcode' => 'required|string|max:5|regex:/^[0-9]+$/',
+            'city' => 'required|string|max:255',
+            'rPropNum' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'num_of_parcel' => 'required|integer|min:1',
+            'order_number' => 'required|string|max:50',
+            'sender_remark' => 'nullable|string|max:255',
+            'cod_amount' => 'nullable|numeric|min:0',
+        ];
+
+        $messages = [
+            'name1.required' => 'Ime i prezime je obavezno',
+            'name1.string' => 'Ime i prezime mora biti tekst',
+            'name1.max' => 'Ime i prezime ne smije biti duže od 255 znakova',
+
+            'pcode.required' => 'Poštanski broj je obavezan',
+            'pcode.string' => 'Poštanski broj mora biti tekst',
+            'pcode.max' => 'Poštanski broj ne smije biti duži od 5 znakova',
+            'pcode.regex' => 'Poštanski broj smije sadržavati samo brojeve',
+
+            'city.required' => 'Grad je obavezan',
+            'city.string' => 'Grad mora biti tekst',
+            'city.max' => 'Grad ne smije biti duži od 255 znakova',
+
+            'rPropNum.required' => 'Adresa je obavezna',
+            'rPropNum.string' => 'Adresa mora biti tekst',
+            'rPropNum.max' => 'Adresa ne smije biti duža od 255 znakova',
+
+            'phone.string' => 'Telefon mora biti tekst',
+            'phone.max' => 'Telefon ne smije biti duži od 20 znakova',
+
+            'email.email' => 'Email mora biti u ispravnom formatu',
+            'email.max' => 'Email ne smije biti duži od 255 znakova',
+
+            'num_of_parcel.required' => 'Broj paketa je obavezan',
+            'num_of_parcel.integer' => 'Broj paketa mora biti cijeli broj',
+            'num_of_parcel.min' => 'Broj paketa mora biti veći od 0',
+
+            'order_number.required' => 'Broj narudžbe je obavezan',
+            'order_number.string' => 'Broj narudžbe mora biti tekst',
+            'order_number.max' => 'Broj narudžbe ne smije biti duži od 50 znakova',
+
+            'sender_remark.string' => 'Napomena mora biti tekst',
+            'sender_remark.max' => 'Napomena ne smije biti duža od 255 znakova',
+
+            'cod_amount.numeric' => 'Iznos COD-a mora biti broj',
+            'cod_amount.min' => 'Iznos COD-a mora biti veći od 0',
+        ];
+
+        $validator = Validator::make((array) $parcel, $rules, $messages);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+
+        return true;
+    }
+
 }
