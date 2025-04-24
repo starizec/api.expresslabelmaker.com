@@ -35,6 +35,14 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
             ])
+            ->navigationItems([
+                \Filament\Navigation\NavigationItem::make()
+                    ->label('Logs')
+                    ->icon('heroicon-o-document-text')
+                    ->url('/log-viewer')
+                    ->openUrlInNewTab()
+                    ->sort(100),
+            ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 Widgets\AccountWidget::class,
