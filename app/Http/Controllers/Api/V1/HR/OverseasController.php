@@ -284,6 +284,110 @@ class OverseasController extends Controller
         ], 201);
     }
 
+    public function collectionRequest(Request $request)
+    {
+        $requestBody = $request->getContent();
+        $jsonData = json_decode($requestBody);
+
+        $user = $jsonData->user;
+        $parcel = $jsonData->parcel;
+
+        try {
+            $this->validateCollection($parcel);
+        } catch (ValidationException $e) {
+            $error_message = implode(' | ', collect($e->errors())->flatten()->all());
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
+            return response()->json([
+                'errors' =>
+                    [
+                        'order_number' => $parcel->order_number ?? 'unknown',
+                        'error_message' => $error_message
+                    ]
+            ], 422);
+        }
+
+        $parcelResponse = Http::withoutVerifying()->post(
+            config('urls.hr.overseas') . "/createshipment?apikey=$user->apiKey",
+            $this->prepareParcelPayload($parcel)
+        );
+
+        $parcelResponseJson = json_decode($parcelResponse->body());
+
+        if (($parcelResponse->successful() && $parcelResponseJson->status > 0) || !$parcelResponse->successful()) {
+            $error_message = $parcelResponse->successful()
+                ? collect($parcelResponseJson->validations)->pluck('Message')->implode(' | ')
+                : $parcelResponse->status() . " - Overseas Server error";
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
+            return response()->json([
+                "errors" => [
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'Overseas poruka: ' . $error_message
+                ]
+            ], $parcelResponse->status());
+        }
+
+        $pl_numbers = $parcelResponseJson->shipmentid;
+
+        $parcelLabelResponse = Http::withoutVerifying()->accept('*/*')->withHeaders([
+            "xhrFields" => [
+                'responseType' => 'blob'
+            ],
+            "content-type" => "application/x-www-form-urlencoded"
+        ])->post(
+                config('urls.hr.overseas') .
+                '/commitshipments?' .
+                "apikey=$user->apiKey",
+                [$pl_numbers]
+            );
+
+        $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
+
+        if (($parcelLabelResponse->successful() && $parcelLabelResponseJson->status > 0) || !$parcelLabelResponse->successful()) {
+            $error_message = $parcelLabelResponse->successful()
+                ? collect($parcelLabelResponseJson->validations)->pluck('Message')->implode(' | ')
+                : $parcelLabelResponse->status() . " - Overseas Server error";
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
+            return response()->json([
+                "errors" => [
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'Overseas poruka: ' . $error_message
+                ]
+            ], $parcelResponse->status());
+        }
+
+        UserService::addUsage($user);
+
+        ApiUsageLogger::apiUsage($this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain, $request);
+
+        return response()->json([
+            "data" => [
+                "parcels" => $pl_numbers,
+                "label" => $parcelLabelResponse["labelsbase64"]
+            ]
+        ], 201);
+    }
+
     public function getDeliveryLocations()
     {
         $header = DeliveryLocationHeader::where('courier_id', $this->courier->id)->latest()->first();
@@ -350,6 +454,35 @@ class OverseasController extends Controller
         ];
     }
 
+    protected function prepareCollectionPayload($parcel)
+    {
+        return [
+            "Sender" => [
+                "Name" => $parcel->cname1,
+                "CountryCode" => strtoupper($this->courier->country->short),
+                "Zipcode" => $parcel->cpostal,
+                "City" => $parcel->ccity,
+                "StreetAndNumber" => $parcel->cstreet,
+                "NotifyGSM" => $parcel->cphone,
+                "NotifyEmail" => $parcel->cemail,
+            ],
+            "Cosignee" => [
+                "Name" => $parcel->name1,
+                "CountryCode" => strtoupper($this->courier->country->short),
+                "Zipcode" => $parcel->pcode,
+                "City" => $parcel->city,
+                "StreetAndNumber" => $parcel->rPropNum,
+                "NotifyGSM" => $parcel->phone,
+                "NotifyEmail" => $parcel->email,
+            ],
+            "IsSenderNonCustomer" => true,
+            "CosigneeNotifyType" => 0,
+            "NumberOfCollies" => $parcel->num_of_parcel,
+            "UnitAmount" => $parcel->num_of_parcel,
+            "Ref1" => $parcel->order_number
+        ];
+    }
+
     protected function validateParcel($parcel)
     {
         $rules = [
@@ -402,6 +535,90 @@ class OverseasController extends Controller
 
             'cod_amount.numeric' => 'Iznos COD-a mora biti broj',
             'cod_amount.min' => 'Iznos COD-a mora biti veći od 0',
+        ];
+
+        $validator = Validator::make((array) $parcel, $rules, $messages);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+
+        return true;
+    }
+
+    protected function validateCollection($parcel)
+    {
+        $rules = [
+            'cname1' => 'required|string|max:255',
+            'cpostal' => 'required|string|max:5|regex:/^[0-9]+$/',
+            'ccity' => 'required|string|max:255',
+            'cstreet' => 'required|string|max:255',
+            'cphone' => 'nullable|string|max:20',
+            'cemail' => 'nullable|email|max:255',
+            'name1' => 'required|string|max:255',
+            'pcode' => 'required|string|max:5|regex:/^[0-9]+$/',
+            'city' => 'required|string|max:255',
+            'rPropNum' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+            'num_of_parcel' => 'required|integer|min:1',
+            'order_number' => 'required|string|max:50',
+        ];
+
+        $messages = [
+            'cname1.required' => 'Ime i prezime pošiljatelja je obavezno',
+            'cname1.string' => 'Ime i prezime pošiljatelja mora biti tekst',
+            'cname1.max' => 'Ime i prezime pošiljatelja ne smije biti duže od 255 znakova',
+
+            'cpostal.required' => 'Poštanski broj pošiljatelja je obavezan',
+            'cpostal.string' => 'Poštanski broj pošiljatelja mora biti tekst',
+            'cpostal.max' => 'Poštanski broj pošiljatelja ne smije biti duži od 5 znakova',
+            'cpostal.regex' => 'Poštanski broj pošiljatelja smije sadržavati samo brojeve',
+
+            'ccity.required' => 'Grad pošiljatelja je obavezan',
+            'ccity.string' => 'Grad pošiljatelja mora biti tekst',
+            'ccity.max' => 'Grad pošiljatelja ne smije biti duži od 255 znakova',
+
+            'cstreet.required' => 'Adresa pošiljatelja je obavezna',
+            'cstreet.string' => 'Adresa pošiljatelja mora biti tekst',
+            'cstreet.max' => 'Adresa pošiljatelja ne smije biti duža od 255 znakova',
+
+            'cphone.string' => 'Telefon pošiljatelja mora biti tekst',
+            'cphone.max' => 'Telefon pošiljatelja ne smije biti duži od 20 znakova',
+
+            'cemail.email' => 'Email pošiljatelja mora biti u ispravnom formatu',
+            'cemail.max' => 'Email pošiljatelja ne smije biti duži od 255 znakova',
+
+            'name1.required' => 'Ime i prezime primatelja je obavezno',
+            'name1.string' => 'Ime i prezime primatelja mora biti tekst',
+            'name1.max' => 'Ime i prezime primatelja ne smije biti duže od 255 znakova',
+
+            'pcode.required' => 'Poštanski broj primatelja je obavezan',
+            'pcode.string' => 'Poštanski broj primatelja mora biti tekst',
+            'pcode.max' => 'Poštanski broj primatelja ne smije biti duži od 5 znakova',
+            'pcode.regex' => 'Poštanski broj primatelja smije sadržavati samo brojeve',
+
+            'city.required' => 'Grad primatelja je obavezan',
+            'city.string' => 'Grad primatelja mora biti tekst',
+            'city.max' => 'Grad primatelja ne smije biti duži od 255 znakova',
+
+            'rPropNum.required' => 'Adresa primatelja je obavezna',
+            'rPropNum.string' => 'Adresa primatelja mora biti tekst',
+            'rPropNum.max' => 'Adresa primatelja ne smije biti duža od 255 znakova',
+
+            'phone.string' => 'Telefon primatelja mora biti tekst',
+            'phone.max' => 'Telefon primatelja ne smije biti duži od 20 znakova',
+
+            'email.email' => 'Email primatelja mora biti u ispravnom formatu',
+            'email.max' => 'Email primatelja ne smije biti duži od 255 znakova',
+
+            'num_of_parcel.required' => 'Broj paketa je obavezan',
+            'num_of_parcel.integer' => 'Broj paketa mora biti cijeli broj',
+            'num_of_parcel.min' => 'Broj paketa mora biti veći od 0',
+
+            'order_number.required' => 'Broj narudžbe je obavezan',
+            'order_number.string' => 'Broj narudžbe mora biti tekst',
+            'order_number.max' => 'Broj narudžbe ne smije biti duži od 50 znakova',
         ];
 
         $validator = Validator::make((array) $parcel, $rules, $messages);
