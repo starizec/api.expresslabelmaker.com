@@ -5,12 +5,16 @@ namespace App\Http\Controllers\Api\V1\HR;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 use App\Classes\MultiParcelResponse;
 use App\Classes\MultiParcelError;
 
 use App\Services\ErrorService;
 use App\Services\UserService;
+use App\Services\Logger\ApiErrorLogger;
+use App\Services\Logger\ApiUsageLogger;
 
 use App\Models\DeliveryLocationHeader;
 use App\Models\DeliveryLocation;
@@ -37,46 +41,57 @@ class DpdController extends Controller
         $user = $jsonData->user;
         $parcel = $jsonData->parcel;
 
-        $parcelResponse = Http::post(config('urls.hr.dpd') .
+        try {
+            $this->validateParcel($parcel);
+        } catch (ValidationException $e) {
+            $error_message = implode(' | ', collect($e->errors())->flatten()->all());
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
+            return response()->json([
+                'errors' =>
+                    [
+                        'order_number' => $parcel->order_number ?? 'unknown',
+                        'error_message' => $error_message
+                    ]
+            ], 422);
+        }
+
+        $parcelResponse = Http::withoutVerifying()->post(config('urls.hr.dpd') .
             '/parcel/parcel_import?' .
             "username=$user->username&password=$user->password&" .
-            http_build_query($parcel));
+            http_build_query($this->prepareParcelPayload($parcel)));
 
         $parcelResponseJson = json_decode($parcelResponse->body());
 
-        if ($parcelResponse->successful()) {
-            if ($parcelResponseJson->status === 'err') {
-                return response()->json([
-                    "errors" => [
-                        ErrorService::write(
-                            $user->email,
-                            400,
-                            $parcelResponseJson->status . ' - ' . $parcelResponseJson->errlog,
-                            $request,
-                            "App\Http\Controllers\Api\V1\HR\DpdController@createLabel::" . __LINE__,
-                            json_encode($parcel)
-                        )
-                    ],
-                ], 400);
-            }
-        } else {
+        if (($parcelResponse->successful() && $parcelResponseJson->status === 'err') || !$parcelResponse->successful()) {
+            $error_message = $parcelResponse->successful()
+                ? $parcelResponseJson->errlog
+                : $parcelResponse->status() . " - DPD Server error";
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
             return response()->json([
                 "errors" => [
-                    ErrorService::write(
-                        $user->email,
-                        $parcelResponse->status(),
-                        $parcelResponse->status() . " - DPD Server error",
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabel::" . __LINE__,
-                        json_encode($parcel)
-                    )
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'DPD poruka: ' . $error_message
                 ]
             ], $parcelResponse->status());
         }
 
         $pl_numbers = implode(",", $parcelResponseJson->pl_number);
 
-        $parcelLabelResponse = Http::accept('*/*')->withHeaders([
+        $parcelLabelResponse = Http::withoutVerifying()->accept('*/*')->withHeaders([
             "xhrFields" => [
                 'responseType' => 'blob'
             ],
@@ -88,37 +103,29 @@ class DpdController extends Controller
 
         $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
 
-        if ($parcelLabelResponse->successful()) {
-            if (isset($parcelLabelResponseJson->status)) {
-                return response()->json([
-                    "errors" => [
-                        ErrorService::write(
-                            $user->email,
-                            400,
-                            $parcelLabelResponseJson->status . ' - ' . $parcelLabelResponseJson->errlog,
-                            $request,
-                            "App\Http\Controllers\Api\V1\HR\DpdController@createLabel::" . __LINE__,
-                            json_encode($parcel)
-                        )
-                    ],
-                ], 400);
-            }
-        } else {
+        if (($parcelLabelResponse->successful() && $parcelResponseJson->status === 'err') || !$parcelLabelResponse->successful()) {
+            $error_message = $parcelLabelResponse->successful()
+                ? $parcelLabelResponseJson->errlog
+                : $parcelLabelResponse->status() . " - DPD Server error";
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
             return response()->json([
                 "errors" => [
-                    ErrorService::write(
-                        $user->email,
-                        $parcelLabelResponse->status(),
-                        $parcelLabelResponse->status() . ' - DPD Server error',
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabel::" . __LINE__,
-                        json_encode($parcel)
-                    )
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'DPD poruka: ' . $error_message
                 ]
-            ], $parcelLabelResponse->status());
+            ], $parcelResponse->status());
         }
 
         UserService::addUsage($user);
+
+        ApiUsageLogger::apiUsage($this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain, $request);
 
         return response()->json([
             "data" => [
@@ -139,45 +146,60 @@ class DpdController extends Controller
         $data = [];
         $errors = [];
         $all_pl_numbers = [];
+        $allParcelLabelResponseJson = null;
 
         foreach ($parcels as $parcel) {
-            $parcelResponse = Http::post(config('urls.hr.dpd') .
+            try {
+                $this->validateParcel($parcel->parcel);
+            } catch (ValidationException $e) {
+                $error_message = implode(' | ', collect($e->errors())->flatten()->all());
+
+                ApiErrorLogger::apiError(
+                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                    $request,
+                    $error_message,
+                    __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+                );
+
+                $errors[] = [
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => $error_message
+                ];
+
+                continue;
+            }
+
+            $parcelResponse = Http::withoutVerifying()->post(config('urls.hr.dpd') .
                 '/parcel/parcel_import?' .
                 "username=$user->username&password=$user->password&" .
-                http_build_query($parcel->parcel));
+                http_build_query($this->prepareParcelPayload($parcel->parcel)));
 
             $parcelResponseJson = json_decode($parcelResponse->body());
 
-            if ($parcelResponse->successful()) {
-                if ($parcelResponseJson->status === 'err') {
-                    $error = ErrorService::write(
-                        $user->email,
-                        $parcelResponseJson->status,
-                        $parcelResponseJson->status . ' ' . $parcelResponseJson->errlog,
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
-                        json_encode($parcel)
-                    );
+            if (($parcelResponse->successful() && $parcelResponseJson->status === 'err') || !$parcelResponse->successful()) {
+                $error_message = $parcelResponse->successful()
+                    ? $parcelResponseJson->errlog
+                    : $parcelResponse->status() . " - DPD Server error";
 
-                    $errors[] = new MultiParcelError($parcel->order_number, $error['error_id'], $error['error_details']);
-                }
-            } else {
-                $error = ErrorService::write(
-                    $user->email,
-                    $parcelResponse->status(),
-                    $parcelResponse->status() . 'DPD Server error',
+                ApiErrorLogger::apiError(
+                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
                     $request,
-                    "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
-                    json_encode($parcel)
+                    $error_message,
+                    __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
                 );
 
-                $errors[] = new MultiParcelError($parcel->order_number, $error['error_id'], $error['error_details']);
+                $errors[] = [
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'Overseas poruka: ' . $error_message
+                ];
+
+                continue;
             }
 
             $all_pl_numbers[] = $parcelResponseJson->pl_number;
             $pl_numbers = implode(",", $parcelResponseJson->pl_number);
 
-            $parcelLabelResponse = Http::accept('*/*')->withHeaders([
+            $parcelLabelResponse = Http::withoutVerifying()->accept('*/*')->withHeaders([
                 "xhrFields" => [
                     'responseType' => 'blob'
                 ],
@@ -189,83 +211,72 @@ class DpdController extends Controller
 
             $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
 
-            if ($parcelLabelResponse->successful()) {
-                if (isset($parcelLabelResponseJson->status)) {
-                    $error = ErrorService::write(
-                        $user->email,
-                        $parcelLabelResponseJson->status,
-                        $parcelLabelResponseJson->status . ' ' . $parcelLabelResponseJson->errlog,
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
-                        json_encode($parcel)
-                    );
+            if (($parcelLabelResponse->successful() && $parcelResponseJson->status === 'err') || !$parcelLabelResponse->successful()) {
+                $error_message = $parcelLabelResponse->successful()
+                    ? $parcelLabelResponseJson->errlog
+                    : $parcelLabelResponse->status() . " - DPD Server error";
 
-                    $errors[] = new MultiParcelError($parcel->order_number, $error['error_id'], $error['error_details']);
-                }
-            } else {
-                $error = ErrorService::write(
-                    $user->email,
-                    $parcelLabelResponse->status(),
-                    $parcelLabelResponse->status() . 'DPD Server error',
+                ApiErrorLogger::apiError(
+                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
                     $request,
-                    "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
-                    json_encode($parcel)
+                    $error_message,
+                    __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
                 );
 
-                $errors[] = new MultiParcelError($parcel->order_number, $error['error_id'], $error['error_details']);
+                $errors[] = [
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'Overseas poruka: ' . $error_message
+                ];
+
+                continue;
             }
 
             UserService::addUsage($user);
+
             $data[] = new MultiParcelResponse($parcel->order_number, $pl_numbers, base64_encode($parcelLabelResponse->body()));
         }
 
-        $all_pl_numbers = implode(',', array_merge(...$all_pl_numbers));
+        if (count($all_pl_numbers) > 0) {
+            $all_pl_numbers = implode(',', array_merge(...$all_pl_numbers));
 
-        $allParcelLabelResponse = Http::accept('*/*')->withHeaders([
-            "xhrFields" => [
-                'responseType' => 'blob'
-            ],
-            "content-type" => "application/x-www-form-urlencoded"
-        ])->post(config('urls.hr.dpd') .
-                '/parcel/parcel_print?' .
-                "username=$user->username&password=$user->password&" .
-                "parcels=$all_pl_numbers");
+            $allParcelLabelResponse = Http::withoutVerifying()->accept('*/*')->withHeaders([
+                "xhrFields" => [
+                    'responseType' => 'blob'
+                ],
+                "content-type" => "application/x-www-form-urlencoded"
+            ])->post(config('urls.hr.dpd') .
+                    '/parcel/parcel_print?' .
+                    "username=$user->username&password=$user->password&" .
+                    "parcels=$all_pl_numbers");
 
-        $allParcelLabelResponseJson = json_decode($allParcelLabelResponse->body());
+            $allParcelLabelResponseJson = json_decode($allParcelLabelResponse->body());
 
-        if ($allParcelLabelResponse->successful()) {
-            if (isset($allParcelLabelResponseJson->status)) {
+            if (($allParcelLabelResponse->successful() && isset($allParcelLabelResponseJson->status)) || !$allParcelLabelResponse->successful()) {
+                $error_message = $allParcelLabelResponse->successful()
+                    ? $allParcelLabelResponseJson->errlog
+                    : $allParcelLabelResponse->status() . " - DPD Server error";
+
+                ApiErrorLogger::apiError(
+                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                    $request,
+                    $error_message,
+                    __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+                );
+
                 return response()->json([
                     "errors" => [
-                        $error = ErrorService::write(
-                            $user->email,
-                            $allParcelLabelResponseJson->status,
-                            $allParcelLabelResponseJson->status . ' ' . $allParcelLabelResponseJson->errlog,
-                            $request,
-                            "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
-                            json_encode($parcel)
-                        )
-                    ],
-                ], 400);
+                        'order_number' => $parcel->order_number ?? 'unknown',
+                        'error_message' => 'DPD poruka: ' . $error_message
+                    ]
+                ], $parcelResponse->status());
             }
-        } else {
-            return response()->json([
-                "errors" => [
-                    $error = ErrorService::write(
-                        $user->email,
-                        $allParcelLabelResponse->status(),
-                        $allParcelLabelResponse->status() . " - DPD Server error",
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\DpdController@createLabels::" . __LINE__,
-                        json_encode($parcel)
-                    )
-                ]
-            ], $allParcelLabelResponse->status());
+
+            $allParcelLabelResponseJson = base64_encode($allParcelLabelResponse->body());
         }
 
         return response()->json([
             "data" => [
-                "label" => base64_encode($allParcelLabelResponse->body()),
+                "label" => $allParcelLabelResponseJson,
                 "parcels" => $data
             ],
             "errors" => $errors
@@ -345,7 +356,8 @@ class DpdController extends Controller
         ], 201);
     }
 
-    public function getDeliveryLocations(){
+    public function getDeliveryLocations()
+    {
         $header = DeliveryLocationHeader::where('courier_id', $this->courier->id)->latest()->first();
         $deliveryLocations = DeliveryLocation::where('header_id', $header->id)->get();
 
@@ -382,4 +394,111 @@ class DpdController extends Controller
             "errors" => []
         ], 201);
     }
+
+    protected function prepareParcelPayload($parcel)
+    {
+        return [
+            "name1" => $parcel->name1,
+            "street" => $parcel->street,
+            "rPropNum" => $parcel->rPropNum,
+            "city" => $parcel->city,
+            "country" => strtoupper($this->courier->country->short),
+            "pcode" => $parcel->pcode,
+            "email" => $parcel->email ?? null,
+            "phone" => $parcel->phone ?? null,
+            "contact" => $parcel->contact ?? null,
+            "sender_remark" => $parcel->sender_remark ?? null,
+            "weight" => !empty($parcel->weight) ? (float) $parcel->weight : null,
+            "num_of_parcel" => (int) $parcel->num_of_parcel,
+            "order_number" => $parcel->order_number ?? null,
+            "parcel_type" => $parcel->parcel_type,
+            "cod_amount" => !empty($parcel->cod_amount) ? (float) $parcel->cod_amount : null,
+            "cod_purpose" => $parcel->cod_purpose ?? null,
+            "pudo_id" => $parcel->pudo_id ?? null,
+        ];
+    }
+
+
+    protected function validateParcel($parcel)
+    {
+        $rules = [
+            'name1' => 'required|string|max:35',
+            'name2' => 'nullable|string|max:35',
+            'contact' => 'nullable|string|max:35',
+            'street' => 'required|string|max:35',
+            'rPropNum' => 'required|string|max:8',
+            'city' => 'required|string|max:35',
+            'pcode' => 'required|string|max:9|regex:/^[0-9]+$/',
+            'email' => 'nullable|email|max:50',
+            'phone' => 'nullable|string|max:30',
+
+            'sender_remark' => 'nullable|string|max:50',
+            'weight' => 'nullable|numeric|min:0.01',
+            'num_of_parcel' => 'required|integer|min:1',
+            'order_number' => 'nullable|string|max:20',
+            'order_number2' => 'nullable|string|max:20',
+            'parcel_type' => 'required|string|max:20',
+            'parcel_cod_type' => 'nullable|in:avg,all,firstonly',
+            'cod_amount' => 'nullable|numeric|min:0',
+            'cod_purpose' => 'nullable|string|max:14',
+            'predict' => 'nullable|in:1',
+            'return_of_document' => 'nullable|in:1',
+            'is_id_check' => 'nullable|in:1',
+            'id_check_receiver' => 'nullable|string|max:35',
+            'id_check_num' => 'nullable|string|max:5',
+            'sender_name' => 'nullable|string|max:30',
+            'sender_city' => 'nullable|string|max:30',
+            'sender_pcode' => 'nullable|string|max:9|regex:/^[0-9]+$/',
+            'sender_street' => 'nullable|string|max:30',
+            'sender_phone' => 'nullable|string|max:20',
+            'sender_email' => 'nullable|email|max:100',
+            'pudo_id' => 'nullable|string|max:7',
+            'dimension' => 'nullable|regex:/^[0-9]{1,3}[0-9]{1,3}[0-9]{1,3}$/',
+            'return_name' => 'nullable|string|max:35',
+            'return_name2' => 'nullable|string|max:35',
+            'return_street' => 'nullable|string|max:35',
+            'return_PropNum' => 'nullable|string|max:8',
+            'return_city' => 'nullable|string|max:35',
+            'return_pcode' => 'nullable|string|max:9|regex:/^[0-9]+$/',
+            'return_phone' => 'nullable|string|max:20',
+        ];
+
+        $messages = [
+            'name1.required' => 'Ime primatelja je obavezno',
+            'street.required' => 'Ulica primatelja je obavezna',
+            'rPropNum.required' => 'Kućni broj je obavezan',
+            'city.required' => 'Grad je obavezan',
+            'pcode.required' => 'Poštanski broj je obavezan',
+            'pcode.regex' => 'Poštanski broj smije sadržavati samo brojeve',
+            'email.email' => 'Email nije u ispravnom formatu',
+            'phone.max' => 'Telefon ne smije biti duži od 30 znakova',
+
+            'weight.numeric' => 'Težina mora biti broj',
+            'weight.min' => 'Težina mora biti veća od 0',
+
+            'num_of_parcel.required' => 'Broj paketa je obavezan',
+            'num_of_parcel.integer' => 'Broj paketa mora biti cijeli broj',
+            'num_of_parcel.min' => 'Broj paketa mora biti najmanje 1',
+
+            'parcel_type.required' => 'Vrsta paketa je obavezna',
+            'parcel_cod_type.in' => 'Nepoznata vrijednost za način raspodjele COD-a',
+            'cod_amount.numeric' => 'Iznos pouzeća mora biti broj',
+            'cod_amount.min' => 'Iznos pouzeća mora biti veći ili jednak 0',
+            'cod_purpose.max' => 'Referenca pouzeća ne smije biti duža od 14 znakova',
+            'predict.in' => 'Vrijednost za Predict mora biti 1',
+            'return_of_document.in' => 'Vrijednost za povrat dokumentacije mora biti 1',
+            'is_id_check.in' => 'Vrijednost za ID provjeru mora biti 1',
+            'dimension.regex' => 'Dimenzije moraju biti unijete kao niz bez razdjelnika (npr. 100110120)',
+        ];
+
+        $validator = Validator::make((array) $parcel, $rules, $messages);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+
+        return true;
+    }
+
+
 }
