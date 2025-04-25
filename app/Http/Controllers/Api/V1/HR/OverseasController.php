@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 use App\Classes\MultiParcelResponse;
-use App\Classes\MultiParcelError;
 
-use App\Services\ErrorService;
 use App\Services\UserService;
 use App\Services\HR\OverseasLogger;
+use App\Services\Logger\ApiErrorLogger;
+use App\Services\Logger\ApiUsageLogger;
 
 use App\Models\DeliveryLocation;
 use App\Models\Courier;
@@ -46,14 +46,12 @@ class OverseasController extends Controller
         } catch (ValidationException $e) {
             $error_message = implode(' | ', collect($e->errors())->flatten()->all());
 
-            OverseasLogger::apiError(
-                $user->email,
-                $user->domain,
-                422,
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name,
                 $error_message,
                 $request,
-                "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
-                ""
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
             );
 
             return response()->json([
@@ -77,14 +75,12 @@ class OverseasController extends Controller
                 ? collect($parcelResponseJson->validations)->pluck('Message')->implode(' | ')
                 : $parcelResponse->status() . " - Overseas Server error";
 
-            OverseasLogger::apiError(
-                $user->email,
-                $user->domain,
-                $parcelResponse->status(),
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name,
                 $error_message,
                 $request,
-                "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
-                ""
+                $parcelResponse,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
             );
 
             return response()->json([
@@ -116,14 +112,12 @@ class OverseasController extends Controller
                 ? collect($parcelLabelResponseJson->validations)->pluck('Message')->implode(' | ')
                 : $parcelLabelResponse->status() . " - Overseas Server error";
 
-            OverseasLogger::apiError(
-                $user->email,
-                $user->domain,
-                $parcelLabelResponse->status(),
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name,
                 $error_message,
                 $request,
-                "App\Http\Controllers\Api\V1\HR\OverseasController@createLabel::" . __LINE__,
-                ""
+                $parcelLabelResponse,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
             );
 
             return response()->json([
@@ -136,7 +130,7 @@ class OverseasController extends Controller
 
         UserService::addUsage($user);
 
-        OverseasLogger::usage($user->email, $user->domain, $jsonData);
+        ApiUsageLogger::apiUsage($this->courier->country->short . ' - ' . $this->courier->name, $user->domain, $request);
 
         return response()->json([
             "data" => [
@@ -165,15 +159,14 @@ class OverseasController extends Controller
             } catch (ValidationException $e) {
                 $error_message = implode(' | ', collect($e->errors())->flatten()->all());
 
-                OverseasLogger::apiError(
-                    $user->email,
-                    $user->domain,
-                    422,
+                ApiErrorLogger::apiError(
+                    $this->courier->country->short . ' - ' . $this->courier->name,
                     $error_message,
                     $request,
-                    "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
-                    $parcel->parcel
+                    $error_message,
+                    __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
                 );
+
                 $errors[] = [
                     'order_number' => $parcel->order_number ?? 'unknown',
                     'error_message' => $error_message
@@ -194,14 +187,12 @@ class OverseasController extends Controller
                     ? collect($parcelResponseJson->validations)->pluck('Message')->implode(' | ')
                     : $parcelResponse->status() . " - Overseas Server error";
 
-                OverseasLogger::apiError(
-                    $user->email,
-                    $user->domain,
-                    $parcelResponse->status(),
+                ApiErrorLogger::apiError(
+                    $this->courier->country->short . ' - ' . $this->courier->name,
                     $error_message,
                     $request,
-                    "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
-                    $parcel->parcel
+                    $parcelResponse,
+                    __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
                 );
 
                 $errors[] = [
@@ -234,14 +225,12 @@ class OverseasController extends Controller
                     ? collect($parcelLabelResponseJson->validations)->pluck('Message')->implode(' | ')
                     : $parcelLabelResponse->status() . " - Overseas Server error";
 
-                OverseasLogger::apiError(
-                    $user->email,
-                    $user->domain,
-                    $parcelLabelResponse->status(),
+                ApiErrorLogger::apiError(
+                    $this->courier->country->short . ' - ' . $this->courier->name,
                     $error_message,
                     $request,
-                    "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
-                    $parcel->parcel
+                    $parcelLabelResponse,
+                    __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
                 );
 
                 $errors[] = [
@@ -253,6 +242,8 @@ class OverseasController extends Controller
             }
 
             UserService::addUsage($user);
+
+            ApiUsageLogger::apiUsage($this->courier->country->short . ' - ' . $this->courier->name, $user->domain, $request);
             $data[] = new MultiParcelResponse($parcel->order_number, $pl_numbers, $parcelLabelResponse["labelsbase64"]);
         }
 
@@ -271,14 +262,12 @@ class OverseasController extends Controller
                     ? collect($allParcelLabelResponseJson->validations)->pluck('Message')->implode(' | ')
                     : $allParcelLabelResponse->status() . " - Overseas Server error";
 
-                OverseasLogger::apiError(
-                    $user->email,
-                    $user->domain,
-                    $allParcelLabelResponse->status(),
+                ApiErrorLogger::apiError(
+                    $this->courier->country->short . ' - ' . $this->courier->name,
                     $error_message,
                     $request,
-                    "App\Http\Controllers\Api\V1\HR\OverseasController@createLabels::" . __LINE__,
-                    ""
+                    $allParcelLabelResponse,
+                    __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
                 );
 
                 return response()->json([
@@ -290,7 +279,7 @@ class OverseasController extends Controller
             }
         }
 
-        OverseasLogger::usage($user->email, $user->domain, $jsonData);
+        ApiUsageLogger::apiUsage($this->courier->country->short . ' - ' . $this->courier->name, $user->domain, $request);
 
         return response()->json([
             "data" => [

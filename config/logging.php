@@ -75,6 +75,22 @@ return [
             'permission' => 0644,
         ],
 
+        'api-error' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/api-error.log'),
+            'level' => 'error',
+            'days' => 30,
+            'permission' => 0644,
+        ],
+
+        'api-usage' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/api-usage.log'),
+            'level' => 'info',
+            'days' => 30,
+            'permission' => 0644,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
