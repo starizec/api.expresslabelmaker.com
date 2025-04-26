@@ -5,20 +5,55 @@ namespace App\Http\Controllers\Api\V1\HR;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-
-use App\Classes\MultiParcelResponse;
-use App\Classes\MultiParcelError;
-
-use App\Services\ErrorService;
-use App\Services\UserService;
-
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+use App\Services\Logger\ApiErrorLogger;
+use App\Services\AdressService;
 use App\Models\Courier;
 use App\Models\DeliveryLocationHeader;
 use App\Models\DeliveryLocation;
+use App\Services\UserService;
+use App\Services\ApiUsageLogger;
 
 class HpController extends Controller
 {
     protected $courier;
+    protected $token;
+    protected $user;
+
+    protected $additionalServices = [
+        1 => "Uručiti osobno",
+        3 => "Uručenje subotom",
+        4 => "S povratnicom",
+        9 => "Plaćanje pouzećem (Otkupnina)",
+        30 => "Slanje obavijesti primatelju",
+        32 => "Slanje poruke e-pošte primatelju",
+        47 => "Konsolidirana pošiljka",
+    ];
+
+    protected $barcodeTypes = [
+        0 => "Predefiniran range dobiven od HP-a",
+        1 => "Barcode dobiven u odgovoru iz sustava pri kreiranju pošiljke",
+    ];
+
+    protected $services = [
+        24 => "Paletizirana pošiljka",
+        26 => "Paket 24 D+1",
+        29 => "Paket 24 D+2",
+        32 => "Paket 24 D+3",
+        38 => "Paket 24 D+4",
+    ];
+
+    protected $payedBy = [
+        1 => "Pošiljatelj",
+        2 => "Primatelj",
+    ];
+
+    protected $deliveryTypes = [
+        "ADR" => 1,
+        "PU" => 2,
+        "PAK" => 3,
+    ];
 
     public function __construct()
     {
@@ -34,260 +69,132 @@ class HpController extends Controller
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
 
-        $user = $jsonData->user;
+        $this->user = $jsonData->user;
         $parcel = $jsonData->parcel;
+        $errors = [];
 
-        // TODO: Replace with actual HP API endpoint and authentication
-        $hpApiUrl = config('urls.hr.hp'); 
-        // Placeholder: Example API call structure
-        $parcelResponse = Http::withHeaders([
-            // Add necessary HP API headers, e.g., Authorization
-            // 'Authorization' => 'Bearer YOUR_HP_API_TOKEN',
-            'Content-Type' => 'application/json',
-        ])->post($hpApiUrl . '/create-label', [
-            'username' => $user->username, 
-            'password' => $user->password, 
-            'parcel_data' => $parcel, // Structure according to HP API
-        ]);
+        try {
+            $this->validateParcel($parcel);
+        } catch (ValidationException $e) {
+            $error_message = implode(' | ', collect($e->errors())->flatten()->all());
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
+            return response()->json([
+                'errors' =>
+                    [
+                        'order_number' => $parcel->order_number ?? 'unknown',
+                        'error_message' => $error_message
+                    ]
+            ], 422);
+        }
+
+        $this->token = $this->getToken()['accessToken'];
+
+        $parcelResponse = Http::withoutVerifying()
+            ->withHeaders([
+                'Authorization' => 'Bearer ' . $this->token
+            ])
+            ->post(
+                config('urls.hr.hp') . "/shipment/create_shipment_orders",
+                [
+                    'parcels' => [$this->prepareParcelPayload($parcel)]
+                ]
+            );
 
         $parcelResponseJson = json_decode($parcelResponse->body());
 
-        if ($parcelResponse->successful()) {
-            // TODO: Adapt error checking based on HP API response structure
-            if (isset($parcelResponseJson->status) && $parcelResponseJson->status === 'err') {
-                return response()->json([
-                    "errors" => [
-                        ErrorService::write(
-                            $user->email,
-                            400,
-                            $parcelResponseJson->status . ' - ' . ($parcelResponseJson->errlog ?? 'HP API Error'),
-                            $request,
-                            "App\Http\Controllers\Api\V1\HR\HpController@createLabel::" . __LINE__,
-                            json_encode($parcel)
-                        )
-                    ],
-                ], 400);
+        foreach ($parcelResponseJson->ShipmentOrdersList as $shipmentOrder) {
+            if ($shipmentOrder->ErrorCode != null) {
+                $errors[] = $shipmentOrder->ErrorCode . " - " . $shipmentOrder->ErrorMessage;
             }
-        } else {
+        }
+
+        if (($parcelResponse->successful() && count($errors) > 0) || !$parcelResponse->successful()) {
+            $error_message = $parcelResponse->successful()
+                ? implode(' | ', collect($errors)->flatten()->all())
+                : $parcelResponse->status() . " - HP Server error";
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
             return response()->json([
                 "errors" => [
-                    ErrorService::write(
-                        $user->email,
-                        $parcelResponse->status(),
-                        $parcelResponse->status() . " - HP Server error",
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\HpController@createLabel::" . __LINE__,
-                        json_encode($parcel)
-                    )
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'Overseas poruka: ' . $error_message
                 ]
             ], $parcelResponse->status());
         }
 
-        // TODO: Extract parcel numbers and label data based on HP API response
-        $parcel_numbers = $parcelResponseJson->parcel_number ?? 'N/A'; // Placeholder
-        $label_data = $parcelResponseJson->label_data ?? ''; // Placeholder
+        $pl_numbers = [];
 
-        // TODO: Potentially fetch label separately if needed (like DPD)
-        // If HP API requires a separate call to fetch the label, implement it here.
-        
-        UserService::addUsage($user);
-
-        return response()->json([
-            "data" => [
-                "parcels" => $parcel_numbers,
-                "label" => base64_encode($label_data) // Encode as base64 for JSON
-            ]
-        ], 201);
-    }
-
-    
-    public function createLabels(Request $request)
-    {
-        $requestBody = $request->getContent();
-        $jsonData = json_decode($requestBody);
-
-        $user = $jsonData->user;
-        $parcelsData = $jsonData->parcels;
-
-        $responses = [];
-        $errors = [];
-        $all_parcel_identifiers = [];
-
-        // TODO: Replace with actual HP API endpoint and authentication
-        $hpApiUrl = config('urls.hr.hp'); 
-        
-        foreach ($parcelsData as $parcelItem) {
-            // Placeholder: Example API call structure for each parcel
-            $parcelResponse = Http::withHeaders([
-                // Add necessary HP API headers
-                'Content-Type' => 'application/json',
-            ])->post($hpApiUrl . '/create-label', [
-                'username' => $user->username, 
-                'password' => $user->password, 
-                'parcel_data' => $parcelItem->parcel, // Structure according to HP API
-                'order_ref' => $parcelItem->order_number
-            ]);
-
-            $parcelResponseJson = json_decode($parcelResponse->body());
-
-            if ($parcelResponse->successful()) {
-                // TODO: Adapt error checking based on HP API response structure
-                if (isset($parcelResponseJson->status) && $parcelResponseJson->status === 'err') {
-                    $error = ErrorService::write(
-                        $user->email,
-                        $parcelResponseJson->status,
-                        $parcelResponseJson->status . ' ' . ($parcelResponseJson->errlog ?? 'HP API Error'),
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\HpController@createLabels::" . __LINE__,
-                        json_encode($parcelItem)
-                    );
-                    $errors[] = new MultiParcelError($parcelItem->order_number, $error['error_id'], $error['error_details']);
-                    continue; // Skip to next parcel on error
-                }
-                
-                // TODO: Extract successful parcel identifier (e.g., parcel number)
-                $parcel_number = $parcelResponseJson->parcel_number ?? 'N/A';
-                $all_parcel_identifiers[] = $parcel_number;
-
-                // Add successful response (adjust structure as needed)
-                $responses[] = new MultiParcelResponse($parcelItem->order_number, $parcel_number, null); // No individual label for now
-                UserService::addUsage($user);
-
-            } else {
-                $error = ErrorService::write(
-                    $user->email,
-                    $parcelResponse->status(),
-                    $parcelResponse->status() . ' - HP Server error',
-                    $request,
-                    "App\Http\Controllers\Api\V1\HR\HpController@createLabels::" . __LINE__,
-                    json_encode($parcelItem)
-                );
-                $errors[] = new MultiParcelError($parcelItem->order_number, $error['error_id'], $error['error_details']);
+        foreach ($parcelResponseJson->ShipmentOrdersList as $shipmentOrder) {
+            foreach ($shipmentOrder->Packages as $package) {
+                $pl_numbers[]["barcode"] = $package->barcode;
             }
         }
+        $data = [
+            'client_reference_number' => $parcel->order_number,
+            'barcodes' => $pl_numbers,
+            'A4' => true
+        ];
 
-        // TODO: Implement logic to fetch a combined label PDF if HP API supports it
-        $combinedLabelData = '';
-        if (!empty($all_parcel_identifiers)) {
-            // Example: Make API call to get combined label
-            $combinedLabelResponse = Http::withHeaders([
-                // Add necessary HP API headers
-                'Content-Type' => 'application/json',
-            ])->post($hpApiUrl . '/print-labels', [
-                'username' => $user->username, 
-                'password' => $user->password, 
-                'parcel_numbers' => $all_parcel_identifiers, // Send identifiers of successfully created parcels
-            ]);
-            
-            if ($combinedLabelResponse->successful()) {
-                // TODO: Extract combined label data (assuming PDF content)
-                 $combinedLabelData = $combinedLabelResponse->body();
-            } else {
-                 // Handle error fetching combined label - log it, maybe add to errors array
-                 ErrorService::write(
-                    $user->email,
-                    $combinedLabelResponse->status(),
-                    'Failed to fetch combined HP label', 
-                    $request, 
-                    "App\Http\Controllers\Api\V1\HR\HpController@createLabels::" . __LINE__,
-                    json_encode($all_parcel_identifiers)
-                 );
-            }
-        }
-        
-        return response()->json([
-            "data" => [
-                "label" => base64_encode($combinedLabelData), // Combined label
-                "parcels" => $responses // Individual parcel statuses
-            ],
-            "errors" => $errors
-        ], 201);
-    }
+        $parcelLabelResponse = Http::withoutVerifying()
+            ->withHeaders([
+                'Authorization' => 'Bearer ' . $this->token,
+                'Accept' => 'application/json'
+            ])
+            ->get(
+                config('urls.hr.hp') . "/shipment/get_shipping_labels",
+                $data
+            );
 
-    
-    public function collectionRequest(Request $request)
-    {
-        $requestBody = $request->getContent();
-        $jsonData = json_decode($requestBody);
+        $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
 
-        $user = $jsonData->user;
-        $pickupData = $jsonData->pickup_data;
+        if (!$parcelLabelResponse->successful() || $parcelLabelResponseJson->ErrorCode != null) {
+            $error_message = $parcelLabelResponse->successful()
+                ? $parcelLabelResponseJson->ErrorCode . " - " . $parcelLabelResponseJson->ErrorMessage
+                : $parcelLabelResponse->status() . " - Overseas Server error";
 
-        // TODO: Replace with actual HP API endpoint and authentication
-        $hpApiUrl = config('urls.hr.hp');
 
-        // Placeholder: Example API call structure
-        $collectionResponse = Http::withHeaders([
-             // Add necessary HP API headers
-            'Content-Type' => 'application/json',
-        ])->post($hpApiUrl . '/collection-request', [
-            'username' => $user->username,
-            'password' => $user->password,
-            'pickup_details' => $pickupData, // Structure according to HP API
-        ]);
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
 
-        $collectionResponseJson = json_decode($collectionResponse->body());
-
-        if ($collectionResponse->successful()) {
-            // TODO: Adapt error checking based on HP API response structure
-            if (isset($collectionResponseJson->status) && $collectionResponseJson->status === 'Error') {
-                return response()->json([
-                    "errors" => [
-                        ErrorService::write(
-                            $user->email,
-                            400,
-                            $collectionResponseJson->status . ' ' . ($collectionResponseJson->errlog ?? 'HP API Error'),
-                            $request,
-                            "App\Http\Controllers\Api\V1\HR\HpController@collectionRequest::" . __LINE__,
-                            json_encode($pickupData)
-                        )
-                    ],
-                ], 400);
-            }
-            
-            // TODO: Validate required response fields from HP API
-             if (!isset($collectionResponseJson->reference) || !isset($collectionResponseJson->pickup_id)) {
-                return response()->json([
-                    "errors" => [
-                        ErrorService::write(
-                            $user->email,
-                            400,
-                            'Missing required data in HP API response.',
-                            $request,
-                            "App\Http\Controllers\Api\V1\HR\HpController@collectionRequest::" . __LINE__,
-                            json_encode($pickupData)
-                        )
-                    ],
-                ], 400);
-            }
-
-        } else {
             return response()->json([
                 "errors" => [
-                    ErrorService::write(
-                        $user->email,
-                        $collectionResponse->status(),
-                        $collectionResponse->status() . " - HP Server error",
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\HpController@collectionRequest::" . __LINE__,
-                        json_encode($pickupData)
-                    )
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'Overseas poruka: ' . $error_message
                 ]
-            ], $collectionResponse->status());
+            ], $parcelLabelResponse->status());
         }
 
-        // No usage added for collection requests? Or maybe it should?
-        // UserService::addUsage($user); 
-        
+        UserService::addUsage($this->user);
+
+        ApiUsageLogger::apiUsage($this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain, $request);
+
         return response()->json([
             "data" => [
-                "reference" => $collectionResponseJson->reference ?? 'N/A',
-                "pickup_id" => $collectionResponseJson->pickup_id ?? 'N/A'
+                "parcels" => $pl_numbers,
+                "label" => $parcelLabelResponseJson->PackageLabel
             ]
         ], 201);
     }
 
-    public function getDeliveryLocations(){
+    public function getDeliveryLocations()
+    {
         $header = DeliveryLocationHeader::where('courier_id', $this->courier->id)->latest()->first();
         $deliveryLocations = DeliveryLocation::where('header_id', $header->id)->get();
 
@@ -324,4 +231,127 @@ class HpController extends Controller
             "errors" => []
         ], 201);
     }
+
+    protected function getToken()
+    {
+        $response = Http::withoutVerifying()->post(
+            config('urls.hr.hp-auth') . "/authentication/client_auth",
+            [
+                'username' => $this->user->username,
+                'password' => $this->user->password
+            ]
+        );
+
+        return $response->json();
+    }
+
+    protected function prepareParcelPayload($parcel)
+    {
+        $additionalServices = [["additional_service_id" => 30]];
+
+        if ($parcel->cod_amount) {
+            $additionalServices[] = ["additional_service_id" => 9];
+        }
+
+        $adressService = new AdressService();
+        $senderAdress = $adressService->splitAddress($parcel->sender_adress);
+        $recipientAdress = $adressService->splitAddress($parcel->recipient_adress);
+
+        return [
+            "client_reference_number" => (string) $parcel->order_number,
+            "service" => (string) 26,
+            "payed_by" => 1,
+            "delivery_type" => (int) $this->deliveryTypes[$parcel->delivery_type],
+            "payment_value" => (float) $parcel->cod_amount ?? null,
+            "value" => (float) $parcel->cod_amount ?? null,
+            "parcel_size" => (string) $parcel->cod_amount ? "M" : null,
+
+            "reference_field_B" => (string) $parcel->order_number,
+            "reference_field_C" => (string) $parcel->parcel_ref_1 ?? null,
+            "reference_field_D" => (string) $parcel->parcel_ref_2 ?? null,
+
+            "sender" => [
+                "sender_name" => (string) $parcel->sender_name,
+                "sender_phone" => (string) $parcel->sender_phone,
+                "sender_email" => (string) $parcel->sender_email ?? null,
+                "sender_street" => (string) $senderAdress['street'],
+                "sender_hnum" => (string) $senderAdress['house_number'],
+                "sender_hnum_suffix" => (string) $senderAdress['house_number_suffix'],
+                "sender_zip" => (string) $parcel->sender_postal_code,
+                "sender_city" => (string) $parcel->sender_city,
+                "sender_pickup_center" => null,
+            ],
+
+            "recipient" => [
+                "recipient_name" => (string) $parcel->recipient_name,
+                "recipient_phone" => (string) $parcel->recipient_phone,
+                "recipient_email" => (string) $parcel->recipient_email ?? null,
+                "recipient_street" => (string) $recipientAdress['street'],
+                "recipient_hnum" => (string) $recipientAdress['house_number'],
+                "recipient_hnum_suffix" => (string) $recipientAdress['house_number_suffix'],
+                "recipient_zip" => (string) $parcel->recipient_postal_code,
+                "recipient_city" => (string) $parcel->recipient_city,
+                "recipient_pickup_center" => (string) $parcel->location_id ?? null,
+            ],
+            "additional_services" => $additionalServices,
+            "packages" => [
+                [
+                    "barcode" => "",
+                    "barcode_type" => 1,
+                    "barcode_client" => (string) $parcel->order_number,
+                    "weight" => (float) $parcel->parcel_weight
+                ]
+            ]
+        ];
+    }
+
+    protected function validateParcel($parcel)
+    {
+        $rules = [
+            'order_number' => 'required|string|max:255',
+            'delivery_type' => 'required|string|in:ADR,PU,PAK',
+            'cod_amount' => 'nullable|numeric|min:0',
+            'parcel_ref_1' => 'nullable|string|max:255',
+            'parcel_ref_2' => 'nullable|string|max:255',
+
+            'sender_name' => 'required|string|max:255',
+            'sender_phone' => 'required|string|max:30',
+            'sender_email' => 'nullable|email|max:255',
+            'sender_adress' => 'required|string|max:255',
+            'sender_postal_code' => 'required|string|max:5|regex:/^[0-9]+$/',
+            'sender_city' => 'required|string|max:255',
+
+            'recipient_name' => 'required|string|max:255',
+            'recipient_phone' => 'required|string|max:30',
+            'recipient_email' => 'nullable|email|max:255',
+            'recipient_adress' => 'required|string|max:255',
+            'recipient_postal_code' => 'required|string|max:5|regex:/^[0-9]+$/',
+            'recipient_city' => 'required|string|max:255',
+
+            'location_id' => 'nullable|string|max:50',
+            'parcel_weight' => 'required|numeric|min:0.01',
+        ];
+
+        $messages = [
+            'order_number.required' => 'Broj narudžbe je obavezan.',
+            'delivery_type.required' => 'Tip dostave je obavezan.',
+            'cod_amount.numeric' => 'Iznos pouzeća mora biti broj.',
+            'sender_email.email' => 'Email pošiljatelja mora biti ispravan.',
+            'recipient_email.email' => 'Email primatelja mora biti ispravan.',
+            'parcel_weight.required' => 'Težina paketa je obavezna.',
+            'parcel_weight.min' => 'Težina paketa mora biti veća od 0.',
+        ];
+
+        $data = (array) $parcel;
+
+        $validator = Validator::make($data, $rules, $messages);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
+
+        return true;
+    }
+
+
 }
