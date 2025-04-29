@@ -7,7 +7,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <h1 class="display-4">ExpressLabelMaker</h1>
+                    <h1 class="display-4" style="font-size: 34px;">ExpressLabelMaker.com</h1>
                     <p class="lead mb-4">Automatizirana izrada adresnica za WooCommerce trgovine</p>
                     <div class="mb-4">
                         <ul class="list-unstyled">
@@ -25,7 +25,7 @@
                     </div>
                     <a href="#download" class="btn btn-light btn-lg me-3">Preuzmi plugin</a>
                 </div>
-                <div class="col-md-6 text-center">
+                <div class="col-md-6 text-center d-none d-md-block">
                     <img src="{{ asset('assets/vectors/undraw_delivery-address_409g_1.svg') }}"
                         alt="ExpressLabelMaker Preview" class="img-fluid">
                 </div>
@@ -149,6 +149,69 @@
 
     <section class="py-5 bg-light">
         <div class="container">
+            <h2 class="fw-bold text-center mb-4">Zašto odabrati ExpressLabelMaker?</h2>
+            <p class="text-center text-muted mb-5">Pogledajte usporedbu ključnih značajki između nas i ostalih rješenja.
+            </p>
+
+            <div class="table-responsive rounded overflow-hidden">
+                <table class="table table-bordered text-center align-middle mb-0">
+                    <thead class="table-primary" style="background-color: #045cb8;">
+                        <tr>
+                            <th class="text-start" style="color: #fff;">Naziv značajke</th>
+                            <th style="color: #fff;">ExpressLabelMaker</th>
+                            <th style="color: #fff;">Ostali</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-start">Izrada pojedinačne adresnice</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-start">Izrada više adresnica odjednom</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-start">Dostava na paketomate</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td class="text-start">Pregled statusa dostave</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td class="text-start">Jedna licenca za sve kurirske službe</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td class="text-start">Izrada prikupa iz narudžbe</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td class="text-start">Intuitivni prikaz greški</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td class="text-start">Upravljanje spremljenim adresnicama</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="py-5">
+        <div class="container">
             <h2 class="fw-bold text-center mb-4">Koliko vremena možete uštedjeti?</h2>
             <p class="text-center text-muted mb-5">Ručno izrađivanje adresnica troši vaše dragocjeno vrijeme. Pomoću našeg
                 plugina možete ga bolje iskoristiti.</p>
@@ -180,15 +243,15 @@
             const totalMinutes = count * 5;
             const hours = Math.floor(totalMinutes / 60);
             const minutes = totalMinutes % 60;
-    
+
             document.getElementById('lablesCreated').textContent = `${count}`;
             document.getElementById('timeSaved').textContent =
                 `${totalMinutes} minuta (${hours} ${hours === 1 ? 'sat' : 'sata'} i ${minutes} ${minutes === 1 ? 'minuta' : 'minuta'})`;
         }
-    
+
         document.addEventListener('DOMContentLoaded', updateTimeSaved);
     </script>
-    
+
 
     <section class="py-5 bg-primary text-white text-center"
         style="background: linear-gradient(to right, #045cb8, #047adb)" id="download">
