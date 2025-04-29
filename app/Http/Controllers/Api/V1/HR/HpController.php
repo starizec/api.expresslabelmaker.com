@@ -13,7 +13,7 @@ use App\Models\Courier;
 use App\Models\DeliveryLocationHeader;
 use App\Models\DeliveryLocation;
 use App\Services\UserService;
-use App\Services\ApiUsageLogger;
+use App\Services\Logger\ApiUsageLogger;
 
 class HpController extends Controller
 {
