@@ -33,6 +33,37 @@
         </div>
     </header>
 
+    <section class="py-5 bg-light">
+        <div class="container text-center">
+            <h2 class="fw-bold mb-4">Podržane kurirske službe</h2>
+            <p class="mb-5 text-muted">Express Label Maker trenutno podržava sljedeće kurirske službe za generiranje
+                adresnica i praćenje paketa:</p>
+
+            <div class="row justify-content-center g-4">
+                <div class="col-6 col-md-3">
+                    <img src="{{ asset('assets/logos/dpd-logo.png') }}" alt="DPD logo" class="img-fluid mb-2"
+                        style="max-height: 60px;">
+                    <p class="fw-semibold">DPD</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <img src="{{ asset('assets/logos/overseas-logo.png') }}" alt="Overseas Express logo"
+                        class="img-fluid mb-2" style="max-height: 60px;">
+                    <p class="fw-semibold">Overseas Express</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <img src="{{ asset('assets/logos/GLS-logo.svg') }}" alt="GLS logo" class="img-fluid mb-2"
+                        style="max-height: 60px;">
+                    <p class="fw-semibold">GLS</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <img src="{{ asset('assets/logos/posta-logo.png') }}" alt="Hrvatska pošta logo" class="img-fluid mb-2"
+                        style="max-height: 60px;">
+                    <p class="fw-semibold">Hrvatska pošta</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="py-5">
         <div class="container">
             <h2 class="mb-4 fw-bold">Mogućnosti Express Label Makera</h2>
@@ -117,37 +148,50 @@
     </section>
 
     <section class="py-5 bg-light">
-        <div class="container text-center">
-            <h2 class="fw-bold mb-4">Podržane kurirske službe</h2>
-            <p class="mb-5 text-muted">Express Label Maker trenutno podržava sljedeće kurirske službe za generiranje
-                adresnica i praćenje paketa:</p>
+        <div class="container">
+            <h2 class="fw-bold text-center mb-4">Koliko vremena možete uštedjeti?</h2>
+            <p class="text-center text-muted mb-5">Ručno izrađivanje adresnica troši vaše dragocjeno vrijeme. Pomoću našeg
+                plugina možete ga bolje iskoristiti.</p>
 
-            <div class="row justify-content-center g-4">
-                <div class="col-6 col-md-3">
-                    <img src="{{ asset('assets/logos/dpd-logo.png') }}" alt="DPD logo" class="img-fluid mb-2"
-                        style="max-height: 60px;">
-                    <p class="fw-semibold">DPD</p>
-                </div>
-                <div class="col-6 col-md-3">
-                    <img src="{{ asset('assets/logos/overseas-logo.png') }}" alt="Overseas Express logo"
-                        class="img-fluid mb-2" style="max-height: 60px;">
-                    <p class="fw-semibold">Overseas Express</p>
-                </div>
-                <div class="col-6 col-md-3">
-                    <img src="{{ asset('assets/logos/GLS-logo.svg') }}" alt="GLS logo" class="img-fluid mb-2"
-                        style="max-height: 60px;">
-                    <p class="fw-semibold">GLS</p>
-                </div>
-                <div class="col-6 col-md-3">
-                    <img src="{{ asset('assets/logos/posta-logo.png') }}" alt="Hrvatska pošta logo"
-                        class="img-fluid mb-2" style="max-height: 60px;">
-                    <p class="fw-semibold">Hrvatska pošta</p>
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-8">
+                    <div class="card p-4 shadow-sm border-0">
+                        <label for="addressCount" class="form-label fw-semibold">Broj adresnica <strong
+                                id="lablesCreated">50</strong></label>
+                        <input type="range" class="form-range" min="1" max="1000" step="1"
+                            id="addressCount" value="50" oninput="updateTimeSaved()">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>1</span>
+                            <span>1000</span>
+                        </div>
+
+                        <p class="text-center fs-5">Ušteda s ExpressLabelMaker.com: <strong id="timeSaved">250 minuta (4
+                                sata i 10 minuta)</strong></p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="py-5 bg-primary text-white text-center" style="background: linear-gradient(to right, #045cb8, #047adb)" id="download">
+    <script>
+        function updateTimeSaved() {
+            const slider = document.getElementById('addressCount');
+            const count = parseInt(slider.value);
+            const totalMinutes = count * 5;
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+    
+            document.getElementById('lablesCreated').textContent = `${count}`;
+            document.getElementById('timeSaved').textContent =
+                `${totalMinutes} minuta (${hours} ${hours === 1 ? 'sat' : 'sata'} i ${minutes} ${minutes === 1 ? 'minuta' : 'minuta'})`;
+        }
+    
+        document.addEventListener('DOMContentLoaded', updateTimeSaved);
+    </script>
+    
+
+    <section class="py-5 bg-primary text-white text-center"
+        style="background: linear-gradient(to right, #045cb8, #047adb)" id="download">
         <div class="container">
             <h2 class="mb-4">Besplatno isprobajte</h2>
             <p class="lead">Svi korisnici dobivaju <strong>10 besplatnih izrada adresnica</strong>.</p>
