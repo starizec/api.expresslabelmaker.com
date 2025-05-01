@@ -74,4 +74,6 @@ return [
     'new_domain_notification' => 'New domain added to your account.',
     'new_domain_added' => 'New domain :domain added to your account.',
     'pending' => 'Pending',
+    'licence_renewal_notification' => 'Licence renewed for :domain.',
+    'licence_renewal_added' => 'Licence for :domain is renewed and is valid until :valid_until.',
 ]; 

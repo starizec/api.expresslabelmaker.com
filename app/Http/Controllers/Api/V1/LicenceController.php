@@ -13,6 +13,7 @@ use App\Services\DomainService;
 use App\Services\Logger\ApiErrorLogger;
 use App\Services\ErrorService;
 
+use App\Notifications\LicenceRenewalNotification;
 
 use App\Models\User;
 use App\Models\Domain;
@@ -147,7 +148,7 @@ class LicenceController extends Controller
                 "errors" => [
                     [
                         'error_message' => 'User does not exist.'
-                    ]   
+                    ]
                 ],
             ], 403);
         }
@@ -165,7 +166,7 @@ class LicenceController extends Controller
                 $request,
                 'User does not exist.',
                 __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
-            );  
+            );
 
             return response()->json([
                 "errors" => [
@@ -189,7 +190,7 @@ class LicenceController extends Controller
 
     public function buy($licence_uid)
     {
-        if(!Licence::where('licence_uid', $licence_uid)->exists()){
+        if (!Licence::where('licence_uid', $licence_uid)->exists()) {
             ApiErrorLogger::apiError(
                 $licence_uid . ' - Invalid licence key.',
                 $licence_uid,
@@ -250,8 +251,9 @@ class LicenceController extends Controller
         ], 201);
     }
 
-    public function renew($licence_uid){
-        if(!Licence::where('licence_uid', $licence_uid)->exists()){
+    public function renew($licence_uid)
+    {
+        if (!Licence::where('licence_uid', $licence_uid)->exists()) {
             ApiErrorLogger::apiError(
                 $licence_uid . ' - Invalid licence key.',
                 $licence_uid,
@@ -272,7 +274,7 @@ class LicenceController extends Controller
             ->with(['domain', 'user'])
             ->latest()
             ->first();
-            
+
         $new_licence = Licence::create([
             'user_id' => $licence->user->id,
             'domain_id' => $licence->domain->id,
@@ -282,6 +284,8 @@ class LicenceController extends Controller
             'usage_limit' => config('usage.full'),
             'licence_type_id' => config('licence-types.full')
         ]);
+
+        $new_licence->user->notify(new LicenceRenewalNotification($new_licence));
 
         return response()->json([
             'licence' => $new_licence->licence_uid,
