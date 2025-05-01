@@ -57,6 +57,11 @@ class User extends Authenticatable implements FilamentUser
         return Str::endsWith($this->email, '@emedia.hr') && $this->hasVerifiedEmail();
     }
 
+    public function getNameAttribute(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name) ?: $this->email;
+    }
+
     /**
      * Send the welcome notification with password setup instructions.
      *

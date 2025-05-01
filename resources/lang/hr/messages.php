@@ -72,4 +72,5 @@ return [
 
     'new_domain_notification' => 'Nova domena je dodana na vaš račun.',
     'new_domain_added' => 'Domena :domain je dodana na vaš račun.',
+    'pending' => 'Nadolazeća',
 ]; 

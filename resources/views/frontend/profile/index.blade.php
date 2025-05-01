@@ -7,7 +7,8 @@
         <div class="row">
             <!-- Logo centered above the form -->
             <div class="col-12 text-center mb-4">
-                <img src="{{ asset('assets/logo-white.png') }}" alt="{{ config('app.name') }}" class="img-fluid" style="max-height: 80px;">
+                <img src="{{ asset('assets/logo-white.png') }}" alt="{{ config('app.name') }}" class="img-fluid"
+                    style="max-height: 80px;">
             </div>
 
             <!-- Profile Information Form -->
@@ -159,6 +160,7 @@
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
+                                            <th>{{ __('messages.domain') }}</th>
                                             <th>{{ __('messages.license_key') }}</th>
                                             <th>{{ __('messages.status') }}</th>
                                             <th>{{ __('messages.usage') }}</th>
@@ -170,54 +172,54 @@
                                         @foreach ($licences as $licence)
                                             <tr>
                                                 <td>
+                                                    {{ $licence->domain->name }}
+                                                </td>
+                                                <td>
                                                     <div class="d-flex align-items-center">
                                                         <span class="text-monospace">{{ $licence->licence_uid }}</span>
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    @if ($licence->is_active)
-                                                        <span class="badge bg-success">{{ __('messages.active') }}</span>
-                                                    @else
-                                                        <span class="badge bg-danger">{{ __('messages.inactive') }}</span>
-                                                    @endif
+                                                    @php
+                                                        $today = \Carbon\Carbon::now();
+                                                        $validFromDate = is_string($licence->valid_from)
+                                                            ? \Carbon\Carbon::parse($licence->valid_from)
+                                                            : $licence->valid_from;
+                                                        $validUntilDate = is_string($licence->valid_until)
+                                                            ? \Carbon\Carbon::parse($licence->valid_until)
+                                                            : $licence->valid_until;
+                                                        
+                                                        if ($today->between($validFromDate, $validUntilDate)) {
+                                                            $status = 'active';
+                                                            $badgeClass = 'bg-success';
+                                                        } elseif ($today->gt($validUntilDate)) {
+                                                            $status = 'inactive';
+                                                            $badgeClass = 'bg-danger';
+                                                        } else {
+                                                            $status = 'pending';
+                                                            $badgeClass = 'bg-warning';
+                                                        }
+                                                    @endphp
+                                                    <span class="badge {{ $badgeClass }}">{{ __('messages.' . $status) }}</span>
                                                 </td>
                                                 <td>
                                                     {{ $licence->usage }} / {{ $licence->usage_limit ?? '∞' }}
                                                 </td>
                                                 <td>
-                                                    @if ($licence->valid_from)
-                                                        @php
-                                                            $validFromDate = is_string($licence->valid_from)
-                                                                ? \Carbon\Carbon::parse($licence->valid_from)
-                                                                : $licence->valid_from;
-                                                        @endphp
-                                                        {{ $validFromDate->format('d M Y') }}
-                                                    @else
-                                                        {{ __('messages.never') }}
-                                                    @endif
+                                                    @php
+                                                        $validFromDate = is_string($licence->valid_from)
+                                                            ? \Carbon\Carbon::parse($licence->valid_from)
+                                                            : $licence->valid_from;
+                                                    @endphp
+                                                    {{ $validFromDate->format('d.m.Y') }}
                                                 </td>
                                                 <td>
-                                                    @if ($licence->valid_until)
-                                                        @php
-                                                            $validUntilDate = is_string($licence->valid_until)
-                                                                ? \Carbon\Carbon::parse($licence->valid_until)
-                                                                : $licence->valid_until;
-                                                            $now = \Carbon\Carbon::now();
-                                                            $isExpired = $validUntilDate->isPast();
-                                                            $isExpiringSoon =
-                                                                !$isExpired && $validUntilDate->diffInDays($now) < 30;
-                                                        @endphp
-                                                        {{ $validUntilDate->format('d M Y') }}
-                                                        @if ($isExpired)
-                                                            <span
-                                                                class="badge bg-danger">{{ __('messages.expired') }}</span>
-                                                        @elseif($isExpiringSoon)
-                                                            <span
-                                                                class="badge bg-warning">{{ __('messages.expiring_soon') }}</span>
-                                                        @endif
-                                                    @else
-                                                        {{ __('messages.never') }}
-                                                    @endif
+                                                    @php
+                                                        $validUntilDate = is_string($licence->valid_until)
+                                                            ? \Carbon\Carbon::parse($licence->valid_until)
+                                                            : $licence->valid_until;
+                                                    @endphp
+                                                    {{ $validUntilDate->format('d.m.Y') }}
                                                 </td>
                                             </tr>
                                         @endforeach

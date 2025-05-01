@@ -49,11 +49,11 @@ class LicencesResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('domain.name')->sortable(),
-                Tables\Columns\TextColumn::make('user.email')->sortable(),
+                Tables\Columns\TextColumn::make('domain.name')->copyable(),
+                Tables\Columns\TextColumn::make('user.email')->copyable(),
                 Tables\Columns\TextColumn::make('usage')->sortable(),
                 Tables\Columns\TextColumn::make('usage_limit')->sortable(),
-                Tables\Columns\TextColumn::make('licence_uid'),
+                Tables\Columns\TextColumn::make('licence_uid')->copyable(),
                 Tables\Columns\TextColumn::make('valid_from')->date('d.m.Y')->sortable(),
                 Tables\Columns\TextColumn::make('valid_until')->date('d.m.Y')->sortable()
             ])
@@ -83,6 +83,28 @@ class LicencesResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('buy')
+                    ->action(function (Licence $record, $livewire) {
+                        app(\App\Http\Controllers\Api\V1\LicenceController::class)->buy($record->licence_uid);
+/*                         $livewire->refreshTable(); */
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Buy Licence')
+                    ->modalDescription('Are you sure you want to buy this licence?')
+                    ->modalSubmitActionLabel('Yes, buy it')
+                    ->icon('heroicon-o-currency-dollar')
+                    ->color('success'),
+                Tables\Actions\Action::make('renew')
+                    ->action(function (Licence $record, $livewire) {
+                        app(\App\Http\Controllers\Api\V1\LicenceController::class)->renew($record->licence_uid);
+/*                         $livewire->refreshTable(); */
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Renew Licence')
+                    ->modalDescription('Are you sure you want to renew this licence?')
+                    ->modalSubmitActionLabel('Yes, renew it')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

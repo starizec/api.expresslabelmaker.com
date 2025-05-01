@@ -73,4 +73,5 @@ return [
 
     'new_domain_notification' => 'New domain added to your account.',
     'new_domain_added' => 'New domain :domain added to your account.',
+    'pending' => 'Pending',
 ]; 

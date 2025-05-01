@@ -92,7 +92,7 @@ class LicenceController extends Controller
             'domain_id' => $domain->id,
             'licence_uid' => Uuid::uuid4()->toString(),
             'valid_from' => Carbon::today()->toDateString(),
-            'valid_until' => null,
+            'valid_until' => Carbon::today()->addYear()->toDateString(),
             'licence_type_id' => config('licence-types.trial'),
             'usage_limit' => config('usage.trial')
         ]);
@@ -116,10 +116,17 @@ class LicenceController extends Controller
             !Domain::where('name', DomainService::parseDomain($data->domain))->exists() ||
             !Licence::where('licence_uid', $data->licence)->exists()
         ) {
+            ApiErrorLogger::apiError(
+                $data->domain . ' - Invalid licence key.',
+                $request,
+                'Invalid licence key.',
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
             return response()->json([
                 "errors" => [
                     [
-                        ErrorService::write($data->email, 403, "User does not exist.", $request, "App\Http\Controllers\Api\V1\LicenceController@check" . __LINE__, '')
+                        'error_message' => 'Invalid licence key.'
                     ]
                 ],
             ], 403);
@@ -129,9 +136,18 @@ class LicenceController extends Controller
         $domain = Domain::where('name', DomainService::parseDomain($data->domain))->first();
 
         if (!Licence::where('user_id', $user->id)->where('domain_id', $domain->id)->where('licence_uid', $data->licence)->exists()) {
+            ApiErrorLogger::apiError(
+                $user->email . ' - User does not exist.',
+                $request,
+                'User does not exist.',
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
             return response()->json([
                 "errors" => [
-                    ErrorService::write($data->email, 403, "User does not exist.", $request, "App\Http\Controllers\Api\V1\LicenceController@check" . __LINE__, '')
+                    [
+                        'error_message' => 'User does not exist.'
+                    ]   
                 ],
             ], 403);
         }
@@ -139,13 +155,23 @@ class LicenceController extends Controller
         $licence = Licence::where('user_id', $user->id)
             ->where('domain_id', $domain->id)
             ->where('licence_uid', $data->licence)
-            ->latest()
+            ->whereDate('valid_from', '<=', now())
+            ->whereDate('valid_until', '>=', now())
             ->first();
 
         if ($licence->user_id != $user->id || $licence->domain_id != $domain->id) {
+            ApiErrorLogger::apiError(
+                $user->email . ' - User does not exist.',
+                $request,
+                'User does not exist.',
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );  
+
             return response()->json([
                 "errors" => [
-                    ErrorService::write($data->email, 403, "User does not exist.", $request, "App\Http\Controllers\Api\V1\LicenceController@check" . __LINE__, '')
+                    [
+                        'error_message' => 'User does not exist.'
+                    ]
                 ],
             ], 403);
         }
@@ -161,78 +187,106 @@ class LicenceController extends Controller
         ], 201);
     }
 
-    public function buy(Request $request)
+    public function buy($licence_uid)
     {
-        $requestBody = $request->getContent();
-        $jsonData = json_decode($requestBody);
+        if(!Licence::where('licence_uid', $licence_uid)->exists()){
+            ApiErrorLogger::apiError(
+                $licence_uid . ' - Invalid licence key.',
+                $licence_uid,
+                'Invalid licence key.',
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
 
-        $data = $jsonData->user;
-
-        if ($data->licence != 'full') {
-            return response()->json([
-                "errors" => [
-                    ErrorService::write($data->email, 403, "Invalid trial licence key.", $request, "App\Http\Controllers\Api\V1\LicenceController@buy" . __LINE__, ''),
-                ],
-            ], 403);
-        }
-
-        if (
-            !User::where('email', $data->email)->exists() ||
-            !Domain::where('name', DomainService::parseDomain($data->domain))->exists()
-        ) {
             return response()->json([
                 "errors" => [
                     [
-                        ErrorService::write($data->email, 403, "User does not exist.", $request, "App\Http\Controllers\Api\V1\LicenceController@buy" . __LINE__, '')
+                        'error_message' => 'Invalid licence key.'
                     ]
                 ],
             ], 403);
         }
 
-        $user = User::where('email', $data->email)->first();
-        $domain = Domain::where('name', DomainService::parseDomain($data->domain))->first();
+        $licence = Licence::where('licence_uid', $licence_uid)
+            ->with(['domain', 'user'])
+            ->latest()
+            ->first();
 
-        if (!Licence::where('user_id', $user->id)->where('domain_id', $domain->id)->exists()) {
+        if ($licence->licence_type_id != config('licence-types.trial')) {
+            ApiErrorLogger::apiError(
+                $licence->domain->name . ' - ' . $licence->user->email . ' - Full licence already exists.',
+                $licence_uid,
+                'Full licence already exists.',
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
             return response()->json([
                 "errors" => [
-                    ErrorService::write($data->email, 403, "User does not exist.", $request, "App\Http\Controllers\Api\V1\LicenceController@buy" . __LINE__, '')
+                    [
+                        'error_message' => 'Full licence already exists.'
+                    ]
                 ],
             ], 403);
         }
 
-        $licence = Licence::where('user_id', $user->id)
-            ->where('domain_id', $domain->id)
+        $update_licence = Licence::where('user_id', $licence->user->id)
+            ->where('domain_id', $licence->domain->id)
+            ->where('licence_uid', $licence_uid)
+            ->latest()
             ->first();
 
-        //Full licenca
-        if (!is_null($licence->valid_until) && !is_null($licence->valid_until) && $licence->licence_type_id === config('licence-types.full')) {
-            $licence_start = $licence->valid_until;
-            $licence_end = Carbon::parse($licence_start)->addYear()->toDateString();
-
-            //Trial licenca
-        } else if (is_null($licence->valid_until) && $licence->licence_type_id === config('licence-types.trial')) {
-            $licence_start = Carbon::today()->toDateString();
-            $licence_end = Carbon::today()->addYear()->toDateString();
-        }
-
-        $new_licence = Licence::create([
-            'user_id' => $user->id,
-            'domain_id' => $domain->id,
-            'licence_uid' => $licence->licence_uid,
-            'valid_from' => $licence_start,
-            'valid_until' => $licence_end,
+        $update_licence->update([
             'licence_type_id' => config('licence-types.full'),
             'usage_limit' => config('usage.full')
         ]);
 
         return response()->json([
+            'licence' => $update_licence->licence_uid,
+            'domain' => $update_licence->domain->name,
+            'user' => $update_licence->user->email,
+            'valid_from' => $update_licence->valid_from,
+            'valid_until' => $update_licence->valid_until,
+            'usage' => $update_licence->usage,
+            'usage_limit' => $update_licence->usage_limit,
+        ], 201);
+    }
+
+    public function renew($licence_uid){
+        if(!Licence::where('licence_uid', $licence_uid)->exists()){
+            ApiErrorLogger::apiError(
+                $licence_uid . ' - Invalid licence key.',
+                $licence_uid,
+                'Invalid licence key.',
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
+            return response()->json([
+                "errors" => [
+                    [
+                        'error_message' => 'Invalid licence key.'
+                    ]
+                ],
+            ], 403);
+        }
+
+        $licence = Licence::where('licence_uid', $licence_uid)
+            ->with(['domain', 'user'])
+            ->latest()
+            ->first();
+            
+        $new_licence = Licence::create([
+            'user_id' => $licence->user->id,
+            'domain_id' => $licence->domain->id,
+            'licence_uid' => $licence->licence_uid,
+            'valid_from' => Carbon::parse($licence->valid_until)->addDay()->toDateString(),
+            'valid_until' => Carbon::parse($licence->valid_until)->addYear()->addDay()->toDateString(),
+            'usage_limit' => config('usage.full'),
+            'licence_type_id' => config('licence-types.full')
+        ]);
+
+        return response()->json([
             'licence' => $new_licence->licence_uid,
-            'domain' => $domain->name,
-            'user' => $user->email,
-            'valid_from' => $new_licence->valid_from,
-            'valid_until' => $new_licence->valid_until,
-            'usage' => $new_licence->usage,
-            'usage_limit' => $new_licence->usage_limit,
+            'domain' => $new_licence->domain->name,
+            'user' => $new_licence->user->email,
         ], 201);
     }
 }
