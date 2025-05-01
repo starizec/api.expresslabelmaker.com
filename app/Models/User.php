@@ -21,10 +21,8 @@ class User extends Authenticatable implements FilamentUser
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
         'email',
         'password',
-        'wp_user_id',
         'is_admin',
         'first_name',
         'last_name',

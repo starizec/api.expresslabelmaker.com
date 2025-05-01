@@ -18,8 +18,7 @@ class UserController extends Controller
 
         if (!User::where('email', $data->email)->exists()) {
             User::create([
-                'email' => $data->email,
-                'wp_user_id' => $data->wp_user_id
+                'email' => $data->email
             ]);
 
             return response()->json([

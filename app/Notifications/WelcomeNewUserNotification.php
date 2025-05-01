@@ -41,13 +41,13 @@ class WelcomeNewUserNotification extends Notification implements ShouldQueue
         $resetUrl = $this->resetUrl($notifiable);
         
         return (new MailMessage)
-            ->subject(Lang::get('Welcome to ExpressLabelMaker'))
-            ->greeting(Lang::get('Hello!'))
-            ->line(Lang::get('Your account has been created on ExpressLabelMaker.'))
-            ->line(Lang::get('Please set up your password to get started.'))
-            ->action(Lang::get('Set Your Password'), $resetUrl)
-            ->line(Lang::get('This password setup link will expire in :count minutes.', ['count' => config('auth.passwords.users.expire')]))
-            ->line(Lang::get('If you did not create an account, no further action is required.'));
+            ->subject(Lang::get('auth.welcome_subject'))
+            ->greeting(Lang::get('auth.welcome_greeting'))
+            ->line(Lang::get('auth.welcome_message'))
+            ->line(Lang::get('auth.welcome_password_setup'))
+            ->action(Lang::get('auth.welcome_password_button'), $resetUrl)
+            ->line(Lang::get('auth.welcome_password_expiry', ['count' => config('auth.passwords.users.expire')]))
+            ->line(Lang::get('auth.welcome_no_action'));
     }
 
     /**
