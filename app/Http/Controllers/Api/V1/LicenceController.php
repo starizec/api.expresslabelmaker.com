@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Hash;
 use App\Services\DomainService;
 use App\Services\Logger\ApiErrorLogger;
 use App\Services\ErrorService;
-use App\Services\UserService;
 
 
 use App\Models\User;
@@ -62,17 +61,21 @@ class LicenceController extends Controller
             ], 403);
         }
 
+        $isNewUser = false;
+
         if (User::where('email', $data->email)->exists()) {
             $user = User::where('email', $data->email)->first();
         } else {
             // Generate a random password for the new user
             $randomPassword = Str::random(16);
-            
+
             $user = User::create([
                 'email' => $data->email,
                 'password' => Hash::make($randomPassword),
             ]);
-            
+
+            $isNewUser = true;
+
             // Send password setup notification
             $user->sendPasswordSetupNotification();
         }
@@ -81,6 +84,8 @@ class LicenceController extends Controller
             'name' => $data->domain,
             'user_id' => $user->id
         ]);
+
+        $domain->sendNewDomainNotification($domain->name);
 
         $licence = Licence::create([
             'user_id' => $user->id,

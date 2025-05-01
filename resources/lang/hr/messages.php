@@ -69,4 +69,7 @@ return [
     'password_reset_success' => 'Vaša lozinka je uspješno promijenjena.',
     'password_reset_token_invalid' => 'Ovaj link za promjenu lozinke je nevažeći.',
     'password_reset_token_expired' => 'Ovaj link za promjenu lozinke je istekao.',
+
+    'new_domain_notification' => 'Nova domena je dodana na vaš račun.',
+    'new_domain_added' => 'Domena :domain je dodana na vaš račun.',
 ]; 

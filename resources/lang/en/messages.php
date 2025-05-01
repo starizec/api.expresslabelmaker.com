@@ -70,4 +70,7 @@ return [
     'password_reset_success' => 'Your password has been reset successfully.',
     'password_reset_token_invalid' => 'This password reset token is invalid.',
     'password_reset_token_expired' => 'This password reset token has expired.',
+
+    'new_domain_notification' => 'New domain added to your account.',
+    'new_domain_added' => 'New domain :domain added to your account.',
 ]; 
