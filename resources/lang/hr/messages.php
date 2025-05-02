@@ -76,4 +76,7 @@ return [
 
     'licence_renewal_notification' => 'Obnova licence za :domain.',
     'licence_renewal_added' => 'Licenca obnovljena za domenu :domain je obnovljena i vrijedi do :valid_until.',
+
+    'licence_bought_notification' => 'Licenca kupljena za :domain.',
+    'licence_bought_added' => 'Licenca za domenu :domain je kupljena i vrijedi do :valid_until.',
 ]; 

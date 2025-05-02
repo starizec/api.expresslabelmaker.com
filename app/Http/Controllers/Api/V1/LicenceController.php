@@ -14,6 +14,7 @@ use App\Services\Logger\ApiErrorLogger;
 use App\Services\ErrorService;
 
 use App\Notifications\LicenceRenewalNotification;
+use App\Notifications\LicenceBoughtNotification;
 
 use App\Models\User;
 use App\Models\Domain;
@@ -239,6 +240,8 @@ class LicenceController extends Controller
             'licence_type_id' => config('licence-types.full'),
             'usage_limit' => config('usage.full')
         ]);
+
+        $update_licence->user->notify(new LicenceBoughtNotification($update_licence));
 
         return response()->json([
             'licence' => $update_licence->licence_uid,

@@ -171,6 +171,7 @@ class OverseasController extends Controller
                 continue;
             }
 
+            
             $parcelResponse = Http::withoutVerifying()->post(
                 config('urls.hr.overseas') . "/createshipment?apikey=$user->apiKey",
                 $this->prepareParcelPayload($parcel->parcel)

@@ -76,4 +76,7 @@ return [
     'pending' => 'Pending',
     'licence_renewal_notification' => 'Licence renewed for :domain.',
     'licence_renewal_added' => 'Licence for :domain is renewed and is valid until :valid_until.',
+
+    'licence_bought_notification' => 'Licence bought for :domain.',
+    'licence_bought_added' => 'Licence for :domain is bought and is valid until :valid_until.',
 ]; 
