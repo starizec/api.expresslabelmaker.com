@@ -8,10 +8,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
-use App\Classes\MultiParcelResponse;
-use App\Classes\MultiParcelError;
-
-use App\Services\ErrorService;
 use App\Services\UserService;
 use App\Services\Logger\ApiErrorLogger;
 use App\Services\Logger\ApiUsageLogger;
@@ -56,8 +52,11 @@ class DpdController extends Controller
             return response()->json([
                 'errors' =>
                     [
-                        'order_number' => $parcel->order_number ?? 'unknown',
-                        'error_message' => $error_message
+                        [
+                            'order_number' => $parcel->order_number ?? 'unknown',
+                            'error_code' => '700',
+                            'error_message' => $error_message
+                        ]
                     ]
             ], 422);
         }
@@ -83,8 +82,11 @@ class DpdController extends Controller
 
             return response()->json([
                 "errors" => [
-                    'order_number' => $parcel->order_number ?? 'unknown',
-                    'error_message' => 'DPD poruka: ' . $error_message
+                    [
+                        'order_number' => $parcel->order_number ?? 'unknown',
+                        'error_code' => '600',
+                        'error_message' => 'DPD poruka: ' . $error_message
+                    ]
                 ]
             ], $parcelResponse->status());
         }
@@ -117,8 +119,11 @@ class DpdController extends Controller
 
             return response()->json([
                 "errors" => [
-                    'order_number' => $parcel->order_number ?? 'unknown',
-                    'error_message' => 'DPD poruka: ' . $error_message
+                    [
+                        'order_number' => $parcel->order_number ?? 'unknown',
+                        'error_code' => '600',
+                        'error_message' => 'DPD poruka: ' . $error_message
+                    ]
                 ]
             ], $parcelResponse->status());
         }
@@ -131,7 +136,8 @@ class DpdController extends Controller
             "data" => [
                 "parcels" => $pl_numbers,
                 "label" => base64_encode($parcelLabelResponse->body()) // Encode as base64 for JSON
-            ]
+            ],
+            "errors" => []
         ], 201);
     }
 
@@ -163,6 +169,7 @@ class DpdController extends Controller
 
                 $errors[] = [
                     'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_code' => '700',
                     'error_message' => $error_message
                 ];
 
@@ -190,7 +197,8 @@ class DpdController extends Controller
 
                 $errors[] = [
                     'order_number' => $parcel->order_number ?? 'unknown',
-                    'error_message' => 'Overseas poruka: ' . $error_message
+                    'error_code' => '600',
+                    'error_message' => 'DPD poruka: ' . $error_message
                 ];
 
                 continue;
@@ -225,7 +233,8 @@ class DpdController extends Controller
 
                 $errors[] = [
                     'order_number' => $parcel->order_number ?? 'unknown',
-                    'error_message' => 'Overseas poruka: ' . $error_message
+                    'error_code' => '600',
+                    'error_message' => 'DPD poruka: ' . $error_message
                 ];
 
                 continue;
@@ -233,7 +242,11 @@ class DpdController extends Controller
 
             UserService::addUsage($user);
 
-            $data[] = new MultiParcelResponse($parcel->order_number, $pl_numbers, base64_encode($parcelLabelResponse->body()));
+            $data[] = [ 
+                'order_number' => $parcel->order_number ?? 'unknown',
+                'parcel_number' => $pl_numbers,
+                'label' => base64_encode($parcelLabelResponse->body())
+            ];
         }
 
         if (count($all_pl_numbers) > 0) {
@@ -285,14 +298,13 @@ class DpdController extends Controller
 
     public function collectionRequest(Request $request)
     {
-
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
 
         $user = $jsonData->user;
         $parcel = $jsonData->parcel;
 
-        $parcelResponse = Http::accept('*/*')->withHeaders([
+        $parcelResponse = Http::withoutVerifying()->accept('*/*')->withHeaders([
             "content-type" => "application/x-www-form-urlencoded"
         ])->post(config('urls.hr.dpd') .
                 '/collection_request/cr_import?' .
@@ -301,47 +313,27 @@ class DpdController extends Controller
 
         $parcelResponseJson = json_decode($parcelResponse->body());
 
-        if ($parcelResponse->successful()) {
-            if ($parcelResponseJson->status === 'Error') {
-                return response()->json([
-                    "errors" => [
-                        ErrorService::write(
-                            $user->email,
-                            400,
-                            $parcelResponseJson->status . ' ' . $parcelResponseJson->errlog,
-                            $request,
-                            "App\Http\Controllers\Api\V1\HR\DpdController@collectionRequest::" . __LINE__,
-                            json_encode($parcel)
-                        )
-                    ],
-                ], 400);
-            }
+        if (($parcelResponse->successful() && $parcelResponseJson->status === 'err') || !$parcelResponse->successful()) {
+            $error_message = $parcelResponse->successful()
+                ? $parcelResponseJson->errlog
+                : $parcelResponse->status() . " - DPD Server error";
 
-            if ($parcelResponseJson->reference === null) {
-                return response()->json([
-                    "errors" => [
-                        ErrorService::write(
-                            $user->email,
-                            400,
-                            'Missing parcel data.',
-                            $request,
-                            "App\Http\Controllers\Api\V1\HR\DpdController@collectionRequest::" . __LINE__,
-                            json_encode($parcel)
-                        )
-                    ],
-                ], 400);
-            }
-        } else {
+            $error_message = $parcelResponseJson->reference === null ? 'Missing parcel data.' : $error_message;
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
             return response()->json([
                 "errors" => [
-                    ErrorService::write(
-                        $user->email,
-                        $parcelResponse->status(),
-                        $parcelResponse->status() . " - DPD Server error",
-                        $request,
-                        "App\Http\Controllers\Api\V1\HR\DpdController@collectionRequest::" . __LINE__,
-                        json_encode($parcel)
-                    )
+                    [
+                        'order_number' => $parcel->order_number ?? 'unknown',
+                        'error_code' => '600',
+                        'error_message' => 'DPD poruka: ' . $error_message
+                    ]
                 ]
             ], $parcelResponse->status());
         }
