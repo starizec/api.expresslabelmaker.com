@@ -8,12 +8,6 @@ Route::middleware(['checkUserProperty', 'checkUserLicence'])->prefix('api/v1')->
         Route::post('/check', [App\Http\Controllers\Api\V1\LicenceController::class, 'check']);
     });
 
-    Route::prefix('user')->group(function () {
-        Route::post('/create', [App\Http\Controllers\Api\V1\UserController::class, 'create'])->withoutMiddleware(['checkUserLicence', 'checkUserProperty']);
-    });
-
-    Route::post('/parcel-statuses', [App\Http\Controllers\Api\V1\StatusController::class, 'get']);
-
     Route::prefix('hr')->group(function () {
         Route::middleware(['checkHrDpdUserProperty'])->prefix('dpd')->group(function () {
             Route::prefix('create')->group(function () {

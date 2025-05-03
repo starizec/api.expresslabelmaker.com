@@ -41,7 +41,10 @@ class LicenceController extends Controller
             return response()->json([
                 'errors' =>
                     [
-                        'error_message' => 'Domain already registered. Enter your licence code.'
+                        [
+                            'error_message' => 'Domain already registered. Enter your licence code.',
+                            'error_code' => '600'
+                        ]
                     ]
             ], 403);
         }
@@ -58,7 +61,10 @@ class LicenceController extends Controller
             return response()->json([
                 'errors' =>
                     [
-                        'error_message' => 'Invalid trial licence key.'
+                        [
+                            'error_message' => 'Invalid trial licence key.',
+                            'error_code' => '801'
+                        ]
                     ]
             ], 403);
         }
@@ -128,7 +134,8 @@ class LicenceController extends Controller
             return response()->json([
                 "errors" => [
                     [
-                        'error_message' => 'Invalid licence key.'
+                        'error_message' => 'Invalid licence key.',
+                        'error_code' => '801'
                     ]
                 ],
             ], 403);
@@ -148,7 +155,8 @@ class LicenceController extends Controller
             return response()->json([
                 "errors" => [
                     [
-                        'error_message' => 'User does not exist.'
+                        'error_message' => 'User does not exist.',
+                        'error_code' => '802'
                     ]
                 ],
             ], 403);
@@ -172,7 +180,8 @@ class LicenceController extends Controller
             return response()->json([
                 "errors" => [
                     [
-                        'error_message' => 'User does not exist.'
+                        'error_message' => 'User does not exist.',
+                        'error_code' => '802'
                     ]
                 ],
             ], 403);
@@ -202,7 +211,8 @@ class LicenceController extends Controller
             return response()->json([
                 "errors" => [
                     [
-                        'error_message' => 'Invalid licence key.'
+                        'error_message' => 'Invalid licence key.',
+                        'error_code' => '801'
                     ]
                 ],
             ], 403);
@@ -224,7 +234,8 @@ class LicenceController extends Controller
             return response()->json([
                 "errors" => [
                     [
-                        'error_message' => 'Full licence already exists.'
+                        'error_message' => 'Full licence already exists.',
+                        'error_code' => '803'
                     ]
                 ],
             ], 403);
@@ -267,7 +278,8 @@ class LicenceController extends Controller
             return response()->json([
                 "errors" => [
                     [
-                        'error_message' => 'Invalid licence key.'
+                        'error_message' => 'Invalid licence key.',
+                        'error_code' => '801'
                     ]
                 ],
             ], 403);
