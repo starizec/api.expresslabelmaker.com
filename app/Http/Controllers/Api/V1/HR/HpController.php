@@ -87,10 +87,13 @@ class HpController extends Controller
 
             return response()->json([
                 'errors' =>
+                [
                     [
                         'order_number' => $parcel->order_number ?? 'unknown',
-                        'error_message' => $error_message
+                        'error_message' => $error_message,
+                        'error_code' => '703'
                     ]
+                ]
             ], 422);
         }
 
@@ -130,7 +133,8 @@ class HpController extends Controller
             return response()->json([
                 "errors" => [
                     'order_number' => $parcel->order_number ?? 'unknown',
-                    'error_message' => 'Overseas poruka: ' . $error_message
+                    'error_message' => 'HP poruka: ' . $error_message,
+                    'error_code' => '603'
                 ]
             ], $parcelResponse->status());
         }
@@ -142,11 +146,6 @@ class HpController extends Controller
                 $pl_numbers[]["barcode"] = $package->barcode;
             }
         }
-        $data = [
-            'client_reference_number' => $parcel->order_number,
-            'barcodes' => $pl_numbers,
-            'A4' => true
-        ];
 
         $parcelLabelResponse = Http::withoutVerifying()
             ->withHeaders([
@@ -155,7 +154,11 @@ class HpController extends Controller
             ])
             ->get(
                 config('urls.hr.hp') . "/shipment/get_shipping_labels",
-                $data
+                [
+                    'client_reference_number' => $parcel->order_number,
+                    'barcodes' => $pl_numbers,
+                    'A4' => true
+                ]
             );
 
         $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
@@ -175,8 +178,11 @@ class HpController extends Controller
 
             return response()->json([
                 "errors" => [
-                    'order_number' => $parcel->order_number ?? 'unknown',
-                    'error_message' => 'Overseas poruka: ' . $error_message
+                    [
+                        'order_number' => $parcel->order_number ?? 'unknown',
+                        'error_message' => 'HP poruka: ' . $error_message,
+                        'error_code' => '603'
+                    ]
                 ]
             ], $parcelLabelResponse->status());
         }
