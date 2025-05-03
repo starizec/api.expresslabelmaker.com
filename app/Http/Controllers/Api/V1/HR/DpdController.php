@@ -136,8 +136,7 @@ class DpdController extends Controller
             "data" => [
                 "parcels" => $pl_numbers,
                 "label" => base64_encode($parcelLabelResponse->body()) // Encode as base64 for JSON
-            ],
-            "errors" => []
+            ]
         ], 201);
     }
 
@@ -382,8 +381,7 @@ class DpdController extends Controller
         return response()->json([
             "data" => [
                 "geojson" => $geojson
-            ],
-            "errors" => []
+            ]
         ], 201);
     }
 

@@ -233,8 +233,7 @@ class HpController extends Controller
         return response()->json([
             "data" => [
                 "geojson" => $geojson
-            ],
-            "errors" => []
+            ]
         ], 201);
     }
 

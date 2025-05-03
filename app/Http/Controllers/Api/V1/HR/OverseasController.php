@@ -11,7 +11,6 @@ use Illuminate\Validation\ValidationException;
 use App\Classes\MultiParcelResponse;
 
 use App\Services\UserService;
-use App\Services\HR\OverseasLogger;
 use App\Services\Logger\ApiErrorLogger;
 use App\Services\Logger\ApiUsageLogger;
 
@@ -56,8 +55,11 @@ class OverseasController extends Controller
             return response()->json([
                 'errors' =>
                     [
-                        'order_number' => $parcel->order_number ?? 'unknown',
-                        'error_message' => $error_message
+                        [
+                            'order_number' => $parcel->order_number ?? 'unknown',
+                            'error_message' => $error_message,
+                            'error_code' => '701'
+                        ]
                     ]
             ], 422);
         }
@@ -82,9 +84,13 @@ class OverseasController extends Controller
             );
 
             return response()->json([
-                "errors" => [
-                    'order_number' => $parcel->order_number ?? 'unknown',
-                    'error_message' => 'Overseas poruka: ' . $error_message
+                "errors" => 
+                [
+                    [
+                        'order_number' => $parcel->order_number ?? 'unknown',
+                        'error_message' => 'Overseas poruka: ' . $error_message,
+                        'error_code' => '601'
+                    ]
                 ]
             ], $parcelResponse->status());
         }
@@ -119,8 +125,11 @@ class OverseasController extends Controller
 
             return response()->json([
                 "errors" => [
-                    'order_number' => $parcel->order_number ?? 'unknown',
-                    'error_message' => 'Overseas poruka: ' . $error_message
+                    [
+                        'order_number' => $parcel->order_number ?? 'unknown',
+                        'error_message' => 'Overseas poruka: ' . $error_message,
+                        'error_code' => '601'
+                    ]
                 ]
             ], $parcelResponse->status());
         }
@@ -165,7 +174,8 @@ class OverseasController extends Controller
 
                 $errors[] = [
                     'order_number' => $parcel->order_number ?? 'unknown',
-                    'error_message' => $error_message
+                    'error_message' => $error_message,
+                    'error_code' => '701'
                 ];
 
                 continue;
@@ -193,7 +203,8 @@ class OverseasController extends Controller
 
                 $errors[] = [
                     'order_number' => $parcel->order_number ?? 'unknown',
-                    'error_message' => 'Overseas poruka: ' . $error_message
+                    'error_message' => 'Overseas poruka: ' . $error_message,
+                    'error_code' => '601'
                 ];
 
                 continue;
@@ -230,7 +241,8 @@ class OverseasController extends Controller
 
                 $errors[] = [
                     'order_number' => $parcel->order_number ?? 'unknown',
-                    'error_message' => 'Overseas poruka: ' . $error_message
+                    'error_message' => 'Overseas poruka: ' . $error_message,
+                    'error_code' => '601'
                 ];
 
                 continue;
@@ -266,7 +278,8 @@ class OverseasController extends Controller
                 return response()->json([
                     "errors" => [
                         'order_number' => "unknown",
-                        'error_message' => "Overseas poruka: $error_message"
+                        'error_message' => "Overseas poruka: $error_message",
+                        'error_code' => '601'
                     ]
                 ], 400);
             }
@@ -280,8 +293,7 @@ class OverseasController extends Controller
             "data" => [
                 "label" => $allParcelLabelResponse["labelsbase64"],
                 "parcels" => $data
-            ],
-            "errors" => $errors
+            ]
         ], 201);
     }
 
@@ -308,8 +320,11 @@ class OverseasController extends Controller
             return response()->json([
                 'errors' =>
                     [
-                        'order_number' => $parcel->order_number ?? 'unknown',
-                        'error_message' => $error_message
+                        [
+                            'order_number' => $parcel->order_number ?? 'unknown',
+                            'error_message' => $error_message,
+                            'error_code' => '701'
+                        ]
                     ]
             ], 422);
         }
@@ -335,8 +350,11 @@ class OverseasController extends Controller
 
             return response()->json([
                 "errors" => [
-                    'order_number' => $parcel->order_number ?? 'unknown',
-                    'error_message' => 'Overseas poruka: ' . $error_message
+                    [
+                        'order_number' => $parcel->order_number ?? 'unknown',
+                        'error_message' => 'Overseas poruka: ' . $error_message,
+                        'error_code' => '601'
+                    ]
                 ]
             ], $parcelResponse->status());
         }
@@ -371,8 +389,11 @@ class OverseasController extends Controller
 
             return response()->json([
                 "errors" => [
-                    'order_number' => $parcel->order_number ?? 'unknown',
-                    'error_message' => 'Overseas poruka: ' . $error_message
+                    [
+                        'order_number' => $parcel->order_number ?? 'unknown',
+                        'error_message' => 'Overseas poruka: ' . $error_message,
+                        'error_code' => '601'
+                    ]
                 ]
             ], $parcelResponse->status());
         }
@@ -423,8 +444,7 @@ class OverseasController extends Controller
         return response()->json([
             "data" => [
                 "geojson" => $geojson
-            ],
-            "errors" => []
+            ]
         ], 201);
     }
 
@@ -450,8 +470,6 @@ class OverseasController extends Controller
 
             "DeliveryRemark" => $parcel->sender_remark ?? null,
             "Remark" => $parcel->sender_remark ?? null,
-
-
         ];
     }
 
