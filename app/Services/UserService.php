@@ -25,20 +25,6 @@ class UserService
         }
     }
 
-    static public function resetUSage(UserClass $user)
-    {
-        $licence = Licence::where('licence_uid', $user->licence)->first();
-
-        if ($licence) {
-            $licence->usage = 0;
-            $licence->save();
-
-            return response()->json(['data' => $licence], 201);
-        } else {
-            return response()->json(['error' => 'User not found.'], 404);
-        }
-    }
-
     static public function checkUserLicence($user, $pl_no)
     {
 
@@ -46,7 +32,8 @@ class UserService
         if (!Licence::where('licence_uid', $user->licence)->exists()) {
             return [
                 "status" => 403,
-                "message" => "Licence does not exist."
+                "message" => "Licence does not exist.",
+                "error_code" => "801"
             ];
         }
 
@@ -57,7 +44,8 @@ class UserService
         if ($user->email != $user_l->email) {
             return [
                 "status" => 403,
-                "message" => "Wrong licence email."
+                "message" => "Wrong licence email.",
+                "error_code" => "802"
             ];
         }
         
@@ -66,44 +54,51 @@ class UserService
         if ($user->domain != $domain_l->name) {
             return [
                 "status" => 403,
-                "message" => "Wrong licence domain."
+                "message" => "Wrong licence domain.",
+                "error_code" => "805"
             ];
         }
 
         if ($licence->licence_type_id == config('licence-types.admin')) { //Ako je admin može sve
             return [
                 "status" => 204,
-                "message" => "Licence OK"
+                "message" => "Licence OK",
+                "error_code" => null
             ];
         } elseif ($licence->licence_type_id == config('licence-types.trial')) { //Trial verzija
             if (($licence->usage + $pl_no) > $licence->usage_limit) { // Ako je presao limit
                 return [
                     "status" => 403,
-                    "message" => "Monthly usage reached. " . $licence->usage_limit - $licence->usage . " remain while trying " . $pl_no
+                    "message" => "Usage limit reached. " . $licence->usage_limit - $licence->usage . " remain while trying " . $pl_no,
+                    "error_code" => "807"
                 ];
             } else {
                 return [
                     "status" => 204,
-                    "message" => "Licence OK."
+                    "message" => "Licence OK.",
+                    "error_code" => null
                 ];
             }
         } elseif ($licence->licence_type_id == config('licence-types.full')) { //Full verzija
             if (($licence->usage + $pl_no) > $licence->usage_limit) { // Ako je presao limit
                 return [
                     "status" => 403,
-                    "message" => "Monthly usage reached. " . $licence->usage_limit - $licence->usage . " remain while trying " . $pl_no
+                    "message" => "Usage limit reached. " . $licence->usage_limit - $licence->usage . " remain while trying " . $pl_no,
+                    "error_code" => "807"
                 ];
             } else {
                 $today = time();
                 if ($today > strtotime($licence->valid_until)) { // Ako je licenca istekla
                     return [
                         "status" => 403,
-                        "message" => "Licence expired."
+                        "message" => "Licence expired.",
+                        "error_code" => "808"
                     ];
                 } else {
                     return [
                         "status" => 204,
-                        "message" => "Licence OK."
+                        "message" => "Licence OK.",
+                        "error_code" => null
                     ];
                 }
             }

@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use App\Services\ErrorService;
+use App\Services\Logger\ApiErrorLogger;
 
 class CheckUserProperty
 {
@@ -19,22 +19,33 @@ class CheckUserProperty
                 (!isset($jsonData->user->domain) || !isset($jsonData->user->email) || !isset($jsonData->user->licence)) ||
                 (!is_string($jsonData->user->domain) || !is_string($jsonData->user->email) || !is_string($jsonData->user->licence))
             ) {
+                ApiErrorLogger::apiError(
+                    "806 - Missing user properties.",
+                    $request,
+                    "806 - Missing user properties.",
+                    __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+                );
+
                 return response()->json([
                     "errors" => [
-                        ErrorService::write(
-                            "",
-                            400,
-                            "Missing user properties.",
-                            $request,
-                            "namespace App\Http\Middleware\CheckUserProperty@handle::" . __LINE__,
-                            ""
-                        )
+                        [
+                            'error_message' => "Missing user properties.",
+                            'error_code' => "806"
+                        ],
                     ],
                 ], 400);
             }
         } else {
+            ApiErrorLogger::apiError(
+                "804 - Invalid request format. Expecting JSON.",
+                $request,
+                "804 - Invalid request format. Expecting JSON.",
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
             return response()->json([
-                "error" => "Invalid request format. Expecting JSON."
+                "error" => "804 - Invalid request format. Expecting JSON.",
+                "error_code" => "804"
             ], 400);
         }
 
