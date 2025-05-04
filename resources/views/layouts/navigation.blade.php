@@ -4,7 +4,7 @@
             <img src="{{ asset('assets/logo.png') }}" alt="Company Logo" height="40" class="d-inline-block">
         </a>
 
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
             aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -33,10 +33,10 @@
                 @endguest
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         {{ strtoupper(app()->getLocale()) }}
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                    <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="languageDropdown">
                         <li><a class="dropdown-item" href="{{ route('language.switch', 'hr') }}">Hrvatski</a></li>
                         <li><a class="dropdown-item" href="{{ route('language.switch', 'en') }}">English</a></li>
                     </ul>

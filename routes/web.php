@@ -18,13 +18,16 @@ Route::get('/', function () {
     return view('frontend.index.index');
 })->name('frontend.index');
 
+// Language switching route
+Route::get('language/{lang}', [LanguageController::class, 'switchLang'])->name('language.switch');
+
 // Guest routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterController::class, 'register']);
-    
+
     // Password reset routes
     Route::get('/password/reset', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
     Route::post('/password/email', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
@@ -35,15 +38,6 @@ Route::middleware('guest')->group(function () {
 // Admin routes
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::prefix('admin')->group(function () {
-        Route::prefix('countries')->group(function () {
-            Route::get('index', [CountryController::class, 'index']);
-            Route::post('store', [CountryController::class, 'store']);
-        });
-        Route::prefix('couriers')->group(function () {
-            Route::get('index', [CourierController::class, 'index']);
-            Route::post('store', [CourierController::class, 'store']);
-        });
-
         Route::get('overseas/delivery-locations', [OverseasController::class, 'getDeliveryLocations'])->name('overseas-delivery-locations');
         Route::get('dpd/delivery-locations', [DpdController::class, 'getDeliveryLocations'])->name('dpd-delivery-locations');
         Route::get('hp/delivery-locations', [HpController::class, 'getDeliveryLocations'])->name('hp-delivery-locations');
@@ -55,9 +49,4 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [UserProfileController::class, 'index'])->name('profile');
     Route::put('/profile/update', [UserProfileController::class, 'update'])->name('profile.update');
     Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
-
-
 });
-
-// Language switcher
-Route::get('language/{lang}', [LanguageController::class, 'switchLang'])->name('language.switch');

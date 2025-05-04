@@ -28,10 +28,12 @@
 
         @include('layouts.footer')
 
+        @stack('scripts')
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <!-- Bootstrap core JS-->
         <script src="{{ asset('js/bootstrap/bootstrap.bundle.min.js') }}"></script>
         <!-- Core theme JS-->
         <script src="{{ asset('js/scripts.js') }}"></script>
-        @stack('scripts')
     </body>
 </html> 
