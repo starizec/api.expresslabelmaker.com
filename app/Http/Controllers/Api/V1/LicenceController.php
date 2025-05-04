@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Hash;
 
 use App\Services\DomainService;
 use App\Services\Logger\ApiErrorLogger;
-use App\Services\ErrorService;
 
 use App\Notifications\LicenceRenewalNotification;
 use App\Notifications\LicenceBoughtNotification;

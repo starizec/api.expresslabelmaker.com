@@ -5,9 +5,6 @@ namespace App\Services;
 use App\Models\Licence;
 use App\Models\User;
 use App\Models\Domain;
-use App\Classes\UserClass;
-
-use GuzzleHttp\Client;
 
 class UserService
 {
