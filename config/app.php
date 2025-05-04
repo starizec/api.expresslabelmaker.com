@@ -232,4 +232,9 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
     ],
 
+    'available_locales' => [
+        'en' => 'English',
+        'hr' => 'Croatian',
+    ],
+
 ];
