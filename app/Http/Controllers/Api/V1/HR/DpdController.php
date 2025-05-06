@@ -241,7 +241,7 @@ class DpdController extends Controller
 
             UserService::addUsage($user);
 
-            $data[] = [ 
+            $data[] = [
                 'order_number' => $parcel->order_number ?? 'unknown',
                 'parcel_number' => $pl_numbers,
                 'label' => base64_encode($parcelLabelResponse->body())
@@ -285,6 +285,10 @@ class DpdController extends Controller
 
             $allParcelLabelResponseJson = base64_encode($allParcelLabelResponse->body());
         }
+
+        ApiUsageLogger::apiUsage(
+            $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain, 
+            $request);
 
         return response()->json([
             "data" => [
