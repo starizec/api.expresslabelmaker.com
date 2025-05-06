@@ -12,11 +12,14 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\DeliveryLocations\HR\OverseasController;
 use App\Http\Controllers\DeliveryLocations\HR\DpdController;
 use App\Http\Controllers\DeliveryLocations\HR\HpController;
+use App\Http\Controllers\PageController;
 
 // Public routes
 Route::get('/', function () {
     return view('frontend.index.index');
 })->name('frontend.index');
+
+Route::get('/{slug}', [PageController::class, 'show'])->name('page.show');
 
 // Language switching route
 Route::get('language/{lang}', [LanguageController::class, 'switchLang'])->name('language.switch');
