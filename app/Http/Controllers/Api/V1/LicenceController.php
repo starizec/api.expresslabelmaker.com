@@ -164,8 +164,8 @@ class LicenceController extends Controller
         $licence = Licence::where('user_id', $user->id)
             ->where('domain_id', $domain->id)
             ->where('licence_uid', $data->licence)
-            ->whereDate('valid_from', '<=', now())
             ->whereDate('valid_until', '>=', now())
+            ->latest()
             ->first();
 
         if ($licence->user_id != $user->id || $licence->domain_id != $domain->id) {
