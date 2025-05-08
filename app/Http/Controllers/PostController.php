@@ -3,19 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Page;
-class PageController extends Controller
+use App\Models\Post;
+
+class PostController extends Controller
 {
     public function show($slug)
     {
-        $page = Page::whereHas('translations', function($query) use ($slug) {
+        $post = Post::whereHas('translations', function($query) use ($slug) {
             $query->where('slug', $slug);
         })->with('translations')->first();
         
-        if (!$page) {
+        if (!$post) {
             abort(404);
         }
         
-        return view('frontend.pages.index', compact('page'));
+        return view('frontend.posts.index', compact('post'));
     }
 }

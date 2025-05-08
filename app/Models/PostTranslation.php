@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PageTranslation extends Model
+class PostTranslation extends Model
 {
     public $timestamps = false;
     protected $fillable = [
@@ -14,8 +14,8 @@ class PageTranslation extends Model
         'content'
     ];
 
-    public function page()
+    public function post()
     {
-        return $this->belongsTo(Page::class);
+        return $this->belongsTo(Post::class);
     }
 }
