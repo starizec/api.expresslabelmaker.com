@@ -6,13 +6,12 @@ Route::get('language/{lang}', [App\Http\Controllers\LanguageController::class, '
 
 Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}']], function () {
 
-    Route::get('/', function () {
-        return view('pages.index');
-    })->name('pages.index');
+    Route::get('/', [App\Http\Controllers\PageController::class, 'home'])->name('pages.index');
 
     Route::get('/pravno/{slug}', [App\Http\Controllers\PostController::class, 'legalPost'])->name('pages.posts');
     Route::get('/dokumentacija/{slug}', [App\Http\Controllers\PostController::class, 'documentationPost'])->name('pages.documentations');
 
+    // Contact form route
     
 
     Route::middleware('guest')->group(function () {
@@ -41,6 +40,8 @@ Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}']], funct
         Route::post('/logout', [App\Http\Controllers\Auth\LogoutController::class, 'logout'])->name('logout');
     });
 });
+
+Route::post('/contact', [App\Http\Controllers\ContactController::class, 'submit'])->name('contact.submit');
 
 // Redirect root to default language
 Route::get('/', function () {
