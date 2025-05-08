@@ -252,7 +252,7 @@
         document.addEventListener('DOMContentLoaded', updateTimeSaved);
     </script>
 
-    <section class="py-5 bg-light">
+    <section class="py-5 bg-light" id="kontakt">
         <div class="container">
             <h2 class="fw-bold text-center mb-4">Kontaktirajte nas</h2>
             <p class="text-center text-muted mb-5">Imate pitanja? Javite nam se i odgovorit ćemo vam u najkraćem mogućem roku.</p>

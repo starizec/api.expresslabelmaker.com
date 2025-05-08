@@ -16,7 +16,10 @@ class ContactController extends Controller
         ]);
 
         Mail::to('info@expresslabelmaker.com')->send(new ContactFormMail($validated));
+        
+        // Send confirmation email to sender
+        Mail::to($validated['email'])->send(new ContactFormMail($validated, true));
 
-        return back()->with('success', 'Vaša poruka je uspješno poslana. Odgovorit ćemo vam u najkraćem mogućem roku.');
+        return redirect('/#kontakt')->with('success', 'Vaša poruka je uspješno poslana. Odgovorit ćemo vam u najkraćem mogućem roku.');
     }
 } 
