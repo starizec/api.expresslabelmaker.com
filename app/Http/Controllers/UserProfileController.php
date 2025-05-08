@@ -22,7 +22,7 @@ class UserProfileController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return View::make('frontend.profile.index', compact('user', 'licences'));
+        return View::make('pages.profile', compact('user', 'licences'));
     }
 
     /**

@@ -6,5 +6,8 @@ return [
     'nacini_placanja' => 'Načini plaćanja',
     'izjava_o_ogranicenju_odgovornosti' => 'Izjava o ograničenju odgovornosti',
     'pravila_o_kolacicima' => 'Pravila o kolačićima',
-    'impressum' => 'Impressum'
+    'impressum' => 'Impressum',
+    'kontakt' => 'Kontakt',
+    'preuzmi_plugin' => 'Preuzmi Plugin',
+    'dokumentacija' => 'Dokumentacija',
 ];

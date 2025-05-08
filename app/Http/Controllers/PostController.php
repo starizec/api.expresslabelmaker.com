@@ -17,6 +17,6 @@ class PostController extends Controller
             abort(404);
         }
         
-        return view('frontend.posts.index', compact('post'));
+        return view('pages.posts', compact('post'));
     }
 }

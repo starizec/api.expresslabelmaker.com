@@ -20,7 +20,7 @@
                 @else
                     <li class="nav-item"><a class="nav-link" href="{{ route('profile', ['lang' => app()->getLocale()]) }}">{{ __('messages.my_profile') }}</a></li>
                     @if (Auth::user()->is_admin)
-                        <li class="nav-item"><a class="nav-link" href="{{ url(app()->getLocale() . '/admin') }}">{{ __('messages.admin_panel') }}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url('/admin') }}">{{ __('messages.admin_panel') }}</a></li>
                     @endif
                     <li class="nav-item">
                         <form method="POST" action="{{ route('logout', ['lang' => app()->getLocale()]) }}" class="d-inline">

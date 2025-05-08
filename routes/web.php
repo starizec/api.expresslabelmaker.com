@@ -6,8 +6,8 @@ Route::get('language/{lang}', [App\Http\Controllers\LanguageController::class, '
 
 Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}']], function () {
     Route::get('/', function () {
-        return view('frontend.index.index');
-    })->name('frontend.index');
+        return view('pages.index');
+    })->name('pages.index');
 
     /* Route::get('/{slug}', [App\Http\Controllers\PageController::class, 'show'])->name('page.show'); */
 
