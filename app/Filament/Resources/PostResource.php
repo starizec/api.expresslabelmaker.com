@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PostResource\Pages;
+use App\Filament\Resources\PostResource\RelationManagers\TranslationsRelationManager;
 use App\Models\Post;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -22,90 +23,19 @@ class PostResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('post_type_id')
-                    ->relationship('postType', 'name')
-                    ->required(),
                 Forms\Components\FileUpload::make('cover_image')
                     ->image()
                     ->directory('posts')
                     ->nullable(),
+                Forms\Components\Select::make('post_type_id')
+                    ->relationship('postType', 'name')
+                    ->required(),
                 Forms\Components\Select::make('status')
                     ->options([
                         'draft' => 'Draft',
                         'published' => 'Published',
                     ])
                     ->default('draft'),
-                Forms\Components\Tabs::make('Translations')
-                    ->tabs([
-                        Forms\Components\Tabs\Tab::make('Croatian')
-                            ->schema([
-                                Forms\Components\TextInput::make('title_hr')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->afterStateHydrated(function ($component, $state, $record) {
-                                        if ($record) {
-                                            $translation = $record->translations->where('locale', 'hr')->first();
-                                            $component->state($translation?->title ?? '');
-                                        }
-                                    }),
-                                Forms\Components\TextInput::make('slug_hr')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->afterStateHydrated(function ($component, $state, $record) {
-                                        if ($record) {
-                                            $translation = $record->translations->where('locale', 'hr')->first();
-                                            $component->state($translation?->slug ?? '');
-                                        }
-                                    }),
-                                Forms\Components\RichEditor::make('content_hr')
-                                    ->required()
-                                    ->columnSpanFull()
-                                    ->afterStateHydrated(function ($component, $state, $record) {
-                                        if ($record) {
-                                            $translation = $record->translations->where('locale', 'hr')->first();
-                                            $component->state($translation?->content ?? '');
-                                        }
-                                    }),
-                            ]),
-                        Forms\Components\Tabs\Tab::make('English')
-                            ->schema([
-                                Forms\Components\TextInput::make('title_en')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->afterStateHydrated(function ($component, $state, $record) {
-                                        if ($record) {
-                                            $translation = $record->translations->where('locale', 'en')->first();
-                                            $component->state($translation?->title ?? '');
-                                        }
-                                    }),
-                                Forms\Components\TextInput::make('slug_en')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->afterStateHydrated(function ($component, $state, $record) {
-                                        if ($record) {
-                                            $translation = $record->translations->where('locale', 'en')->first();
-                                            $component->state($translation?->slug ?? '');
-                                        }
-                                    }),
-                                Forms\Components\RichEditor::make('content_en')
-                                    ->required()
-                                    ->columnSpanFull()
-                                    ->afterStateHydrated(function ($component, $state, $record) {
-                                        if ($record) {
-                                            $translation = $record->translations->where('locale', 'en')->first();
-                                            $component->state($translation?->content ?? '');
-                                        }
-                                    }),
-                            ]),
-                    ])
-                    ->columnSpanFull()
-                    ->afterStateHydrated(function ($component, $state, $record) {
-                        if ($record) {
-                            // Ensure translations exist
-                            $record->translateOrNew('en');
-                            $record->translateOrNew('hr');
-                        }
-                    }),
             ]);
     }
 
@@ -137,7 +67,7 @@ class PostResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            TranslationsRelationManager::class,
         ];
     }
 
