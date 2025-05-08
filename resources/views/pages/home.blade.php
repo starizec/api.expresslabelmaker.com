@@ -7,7 +7,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <h1 class="display-4" style="font-size: 34px;">ExpressLabelMaker.com</h1>
+                    <h1 class="display-4" style="font-size: 28px; font-weight: 600;">ExpressLabelMaker.com</h1>
                     <p class="lead mb-4">Automatizirana izrada adresnica za WooCommerce trgovine</p>
                     <div class="mb-4">
                         <ul class="list-unstyled">
