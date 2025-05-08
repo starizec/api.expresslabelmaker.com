@@ -23,7 +23,7 @@
                                 administraciju</li>
                         </ul>
                     </div>
-                    <a href="#download" class="btn btn-light btn-lg me-3">Preuzmi plugin</a>
+                    <a href="{{ url(app()->getLocale() . '/preuzmi-plugin') }}" class="btn btn-light btn-lg me-3">Preuzmi plugin</a>
                 </div>
                 <div class="col-md-6 text-center d-none d-md-block">
                     <img src="{{ asset('assets/vectors/undraw_delivery-address_409g_1.svg') }}"

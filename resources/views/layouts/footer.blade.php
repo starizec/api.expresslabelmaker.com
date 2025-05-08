@@ -1,4 +1,4 @@
-<footer class="bg-dark text-white py-5 pt-5">
+<footer class="bg-dark text-white py-5 pt-5 mt-5">
     <div class="container">
         <div class="row">
             <!-- Left Column - Logo -->

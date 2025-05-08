@@ -14,6 +14,9 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="{{ url(app()->getLocale() . '/') }}">{{ __('messages.home') }} <span class="sr-only">(current)</span></a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url(app()->getLocale() . '/preuzmi-plugin') }}">Preuzmi plugin</a>
+                </li>
                 @guest
                     <li class="nav-item"><a class="nav-link" href="{{ route('login', ['lang' => app()->getLocale()]) }}">{{ __('messages.login') }}</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('register', ['lang' => app()->getLocale()]) }}">{{ __('messages.register') }}</a></li>

@@ -10,6 +10,7 @@ Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}']], funct
 
     Route::get('/pravno/{slug}', [App\Http\Controllers\PostController::class, 'legalPost'])->name('pages.posts');
     Route::get('/dokumentacija/{slug}', [App\Http\Controllers\PostController::class, 'documentationPost'])->name('pages.documentations');
+    Route::get('/preuzmi-plugin', [App\Http\Controllers\PageController::class, 'download'])->name('pages.download');
 
     // Contact form route
     
