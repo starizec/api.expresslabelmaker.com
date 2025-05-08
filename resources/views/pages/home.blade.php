@@ -303,7 +303,7 @@
             <h2 class="mb-4">Besplatno isprobajte</h2>
             <p class="lead">Svi korisnici dobivaju <strong>10 besplatnih izrada adresnica</strong>.</p>
             <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                <a href="/download" class="btn btn-light btn-lg px-4">Preuzmi plugin</a>
+                <a href="{{ url(app()->getLocale() . '/preuzmi-plugin') }}" class="btn btn-light btn-lg px-4">Preuzmi plugin</a>
             </div>
         </div>
     </section>
