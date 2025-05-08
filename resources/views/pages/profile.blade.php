@@ -3,7 +3,7 @@
 @section('title', __('messages.profile') . ' - ' . config('app.name'))
 
 @section('content')
-    <div class="container py-5">
+    <div class="container py-5 mb-5">
         <div class="row">
             <!-- Logo centered above the form -->
             <div class="col-12 text-center mb-4">

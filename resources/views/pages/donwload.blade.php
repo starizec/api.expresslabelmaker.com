@@ -38,7 +38,7 @@
 
     <!-- Content from posts -->
     @if (isset($post) && $post->translations->isNotEmpty())
-        <div class="container">
+        <div class="container mb-5">
             <div class="row justify-content-center">
                 <div class="col-md-8">
                     <div class="card mt-4">

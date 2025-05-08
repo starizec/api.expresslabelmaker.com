@@ -3,7 +3,7 @@
 @section('title', $post->title)
 
 @section('content')
-<div class="container">
+<div class="container mb-5">
     <div class="row">
         <div class="col-md-4 mt-4">
             <div class="card">
