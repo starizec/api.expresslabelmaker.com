@@ -6,7 +6,7 @@ Route::get('/', function () {
     return view('frontend.index.index');
 })->name('frontend.index');
 
-Route::get('/{slug}', [App\Http\Controllers\PageController::class, 'show'])->name('page.show');
+/* Route::get('/{slug}', [App\Http\Controllers\PageController::class, 'show'])->name('page.show'); */
 
 Route::get('language/{lang}', [App\Http\Controllers\LanguageController::class, 'switchLang'])->name('language.switch');
 
