@@ -38,7 +38,7 @@
                                 <div class="mb-4 text-center">
                                     <h3>{{ __('messages.sign_in') }}</h3>
                                 </div>
-                                <form action="{{ route('login') }}" method="post">
+                                <form action="{{ route('login', ['lang' => app()->getLocale()]) }}" method="post">
                                     @csrf
                                     <div class="form-group first">
                                         <label for="username">{{ __('messages.email') }}</label>
@@ -67,7 +67,7 @@
                                             <div class="control__indicator"></div>
                                         </label>
                                         <span class="ml-auto">
-                                            <a href="{{ route('password.request') }}"
+                                            <a href="{{ route('password.request', ['lang' => app()->getLocale()]) }}"
                                                 class="forgot-pass">{{ __('messages.forgot_password') }}</a>
                                         </span>
                                     </div>
@@ -79,7 +79,7 @@
                                 <div class="text-center mt-4">
                                     <p class="mb-0">
                                         {{ __('messages.dont_have_account') }}
-                                        <a href="{{ route('register') }}"
+                                        <a href="{{ route('register', ['lang' => app()->getLocale()]) }}"
                                             class="text-decoration-none">{{ __('messages.register_here') }}</a>
                                     </p>
                                 </div>

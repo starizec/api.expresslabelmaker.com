@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container px-5">
-        <a class="navbar-brand" href="{{ url('/') }}">
+        <a class="navbar-brand" href="{{ url(app()->getLocale() . '/') }}">
             <img src="{{ asset('assets/logo.png') }}" alt="Company Logo" height="40" class="d-inline-block">
         </a>
 
@@ -12,18 +12,18 @@
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item active">
-                    <a class="nav-link" href="{{ url('/') }}">{{ __('messages.home') }} <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="{{ url(app()->getLocale() . '/') }}">{{ __('messages.home') }} <span class="sr-only">(current)</span></a>
                 </li>
                 @guest
-                    <li class="nav-item"><a class="nav-link" href="{{ route('login') }}">{{ __('messages.login') }}</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('register') }}">{{ __('messages.register') }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('login', ['lang' => app()->getLocale()]) }}">{{ __('messages.login') }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('register', ['lang' => app()->getLocale()]) }}">{{ __('messages.register') }}</a></li>
                 @else
-                    <li class="nav-item"><a class="nav-link" href="{{ url('/profile') }}">{{ __('messages.my_profile') }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('profile', ['lang' => app()->getLocale()]) }}">{{ __('messages.my_profile') }}</a></li>
                     @if (Auth::user()->is_admin)
-                        <li class="nav-item"><a class="nav-link" href="{{ url('/admin') }}">{{ __('messages.admin_panel') }}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url(app()->getLocale() . '/admin') }}">{{ __('messages.admin_panel') }}</a></li>
                     @endif
                     <li class="nav-item">
-                        <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                        <form method="POST" action="{{ route('logout', ['lang' => app()->getLocale()]) }}" class="d-inline">
                             @csrf
                             <button type="submit" class="nav-link border-0 bg-transparent">
                                 {{ __('messages.logout') }}

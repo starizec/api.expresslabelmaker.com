@@ -18,7 +18,7 @@
                         <h5 class="mb-0">{{ __('messages.personal_and_company_info') }}</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('profile.update') }}" method="POST">
+                        <form action="{{ route('profile.update', ['lang' => app()->getLocale()]) }}" method="POST">
                             @csrf
                             @method('PUT')
 
