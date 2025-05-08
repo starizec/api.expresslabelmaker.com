@@ -5,11 +5,13 @@ use Illuminate\Support\Facades\Route;
 Route::get('language/{lang}', [App\Http\Controllers\LanguageController::class, 'switchLang'])->name('language.switch');
 
 Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}']], function () {
+
     Route::get('/', function () {
         return view('pages.index');
     })->name('pages.index');
 
-    /* Route::get('/{slug}', [App\Http\Controllers\PageController::class, 'show'])->name('page.show'); */
+    Route::get('/pravno/{slug}', [App\Http\Controllers\PostController::class, 'legalPost'])->name('pages.posts');
+    Route::get('/dokumentacija/{slug}', [App\Http\Controllers\PostController::class, 'documentationPost'])->name('pages.documentations');
 
     
 

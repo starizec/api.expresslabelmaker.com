@@ -263,13 +263,4 @@
             </div>
         </div>
     </section>
-
-    <footer class="py-4 bg-dark text-white">
-        <div class="container text-center">
-            <p class="mb-2">Imate pitanja? <a href="/kontakt"
-                    class="text-white text-decoration-underline">Kontaktirajte nas</a></p>
-            <p class="mb-0"><a href="/dokumentacija" class="text-white text-decoration-underline">Pogledajte
-                    dokumentaciju</a></p>
-        </div>
-    </footer>
 @endsection

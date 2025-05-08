@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light">
     <div class="container px-5">
         <a class="navbar-brand" href="{{ url(app()->getLocale() . '/') }}">
             <img src="{{ asset('assets/logo.png') }}" alt="Company Logo" height="40" class="d-inline-block">
