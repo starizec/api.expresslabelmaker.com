@@ -1,10 +1,28 @@
-<footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-    <p class="col-md-4 mb-0 text-body-secondary">© ExpressLabelMaker.com</p> <a href="/"
-        class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none"
-        aria-label="Bootstrap"> <svg class="bi me-2" width="40" height="32" aria-hidden="true">
-            <use xlink:href="#bootstrap"></use>
-        </svg> </a>
-    <ul class="nav col-md-4 justify-content-end">
-        <li class="nav-item"><a href="/uvjeti-koristenja" class="nav-link px-2 text-body-secondary">Uvjeti korištenja</a></li>
-    </ul>
+<footer class="bg-dark text-white py-4">
+    <div class="container">
+        <div class="row">
+            <!-- Left Column - Logo -->
+            <div class="col-md-4 text-center mb-3 mb-md-0">
+                <img src="{{ asset('assets/logo-white.png') }}" alt="ExpressLabelMaker Logo" class="img-fluid" style="max-height: 60px;">
+            </div>
+
+            <!-- Middle Column - Title -->
+            <div class="col-md-4 text-center mb-3 mb-md-0">
+                <h5 class="mb-2">ExpressLabelMaker.com</h5>
+                <p></p>
+            </div>
+
+            <!-- Right Column - Links -->
+            <div class="col-md-4">
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/uvjeti-koristenja" class="text-white text-decoration-none">{{ __('footer.uvjeti_koristenja') }}</a></li>
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/politika-privatnosti" class="text-white text-decoration-none">{{ __('footer.politika_privatnosti') }}</a></li>
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/nacini-placanja" class="text-white text-decoration-none">{{ __('footer.nacini_placanja') }}</a></li>
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/izjava-o-ogranicenju-odgovornosti" class="text-white text-decoration-none">{{ __('footer.izjava_o_ogranicenju_odgovornosti') }}</a></li>
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/pravila-o-kolacicima" class="text-white text-decoration-none">{{ __('footer.pravila_o_kolacicima') }}</a></li>
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/impressum" class="text-white text-decoration-none">{{ __('footer.impressum') }}</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </footer>
