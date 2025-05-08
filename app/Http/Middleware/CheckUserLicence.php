@@ -10,6 +10,7 @@ use App\Services\UserService;
 use App\Services\DomainService;
 use App\Services\Logger\ApiErrorLogger;
 use App\Classes\UserClass;
+use Illuminate\Support\Facades\Validator;
 
 class CheckUserLicence
 {
@@ -24,7 +25,7 @@ class CheckUserLicence
         if ($request->isJson()) {
             $jsonData = json_decode($request->getContent(), true);
 
-            $validator = validator($jsonData['user'], [
+            $validator = Validator::make($jsonData['user'], [
                 'email' => 'required|email',
                 'domain' => 'required|string',
                 'licence' => 'required|string'
