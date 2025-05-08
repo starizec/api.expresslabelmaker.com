@@ -11,7 +11,7 @@
                 <ul class="list-unstyled">
                     <li class="mb-2"><a href="/{{ app()->getLocale() }}/kontakt"
                             class="text-white text-decoration-none">{{ __('footer.kontakt') }}</a></li>
-                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/dokumentacija/isntalacija"
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/dokumentacija/instalacija"
                             class="text-white text-decoration-none">{{ __('footer.dokumentacija') }}</a></li>
                     <li class="mb-2"><a href="/{{ app()->getLocale() }}/preuzmi-plugin"
                             class="text-white text-decoration-none">{{ __('footer.preuzmi_plugin') }}</a></li>

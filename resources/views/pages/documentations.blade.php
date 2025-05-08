@@ -12,9 +12,9 @@
                 </div>
                 <div class="card-body">
                     <ul class="list-unstyled">
-                        @foreach ($allPosts as $post)
+                        @foreach ($allPosts as $sidebarPost)
                             <li class="mb-2">
-                                <a href="{{ route('pages.documentations', ['lang' => app()->getLocale(), 'slug' => $post->slug]) }}">{{ $post->title }}</a>
+                                <a href="{{ route('pages.documentations', ['lang' => app()->getLocale(), 'slug' => $sidebarPost->slug]) }}">{{ $sidebarPost->title }}</a>
                             </li>
                         @endforeach
                     </ul>

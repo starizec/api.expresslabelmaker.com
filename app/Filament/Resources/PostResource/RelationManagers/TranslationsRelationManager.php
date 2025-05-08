@@ -21,10 +21,15 @@ class TranslationsRelationManager extends RelationManager
         return $form
             ->schema([
                 Forms\Components\Select::make('locale')
-                    ->options([
-                        'en' => 'English',
-                        'hr' => 'Croatian',
-                    ])
+                    ->options(function () {
+                        $usedLocales = $this->getOwnerRecord()->translations()->pluck('locale')->toArray();
+                        $allLocales = [
+                            'en' => 'English',
+                            'hr' => 'Croatian',
+                        ];
+                        
+                        return array_diff_key($allLocales, array_flip($usedLocales));
+                    })
                     ->required()
                     ->default('en'),
                 Forms\Components\TextInput::make('title')

@@ -1,6 +1,6 @@
 <?php
 
 return [
-    'all_documentations' => 'All Documentations',
+    'all_documentations' => 'Documentations',
 ];
 

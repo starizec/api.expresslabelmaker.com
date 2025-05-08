@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PostTranslation;
 use Illuminate\Http\Request;
 use App\Models\Post;
+use App\Models\PostType;
 
 class PostController extends Controller
 {
@@ -25,7 +26,7 @@ class PostController extends Controller
     {
         $post = Post::whereHas('translations', function($query) use ($slug) {
             $query->where('slug', $slug);
-        })->with('translations')->first();
+        })->where('status', 'published')->with('translations')->first();
         
         if (!$post) {
             abort(404);
@@ -35,16 +36,14 @@ class PostController extends Controller
     }
 
     public function documentationPost(string $lang, string $slug){
-        // Get all posts of type 'dokumentacija'
         $allPosts = Post::whereHas('translations', function($query) {
-            $query->where('post_type_id', 2);
+            $query->where('post_type_id', PostType::where('name', 'dokumentacija')->first()->id);
         })->with('translations')->get();
 
-        // Get single post by slug
         $post = Post::whereHas('translations', function($query) use ($slug) {
             $query->where('slug', $slug);
-        })->with('translations')->first();
-        
+        })->where('status', 'published')->with('translations')->first();
+
         if (!$post) {
             abort(404);
         }
