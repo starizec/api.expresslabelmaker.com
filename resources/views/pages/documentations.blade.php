@@ -5,22 +5,26 @@
 @section('content')
 <div class="container">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-4 mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h4">{{ __('documentations.all_documentations') }}</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        @foreach ($allPosts as $post)
+                            <li class="mb-2">
+                                <a href="{{ route('pages.documentations', ['lang' => app()->getLocale(), 'slug' => $post->slug]) }}">{{ $post->title }}</a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
             <h1 class="post-title">{{ $post->title }}</h1>
             <p class="post-content">{!! $post->content !!}</p>
-        </div>
-    </div>
-</div>
-
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <h2>Svi članci</h2>
-            <ul>
-                @foreach ($allPosts as $post)
-                    <li><a href="{{ route('pages.posts', ['lang' => app()->getLocale(), 'slug' => $post->slug]) }}">{{ $post->title }}</a></li>
-                @endforeach
-            </ul>
         </div>
     </div>
 </div>
