@@ -36,8 +36,8 @@ class UserProfileController extends Controller
         $user = Auth::user();
         
         $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'first_name' => 'nullable|string|max:255',
+            'last_name' => 'nullable|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'company_name' => 'nullable|string|max:255',
             'company_address' => 'nullable|string|max:255',
