@@ -3,7 +3,7 @@
 @section('title', $licence->domain->name)
 
 @section('content')
-    <div class="container">
+    <div class="container mt-5 mb-5">
         <div class="row">
             <div class="col-md-6">
                 <div class="card mb-4">
@@ -14,6 +14,8 @@
                         <form action="{{ route('profile.update', ['lang' => app()->getLocale()]) }}" method="POST">
                             @csrf
                             @method('PUT')
+                            <input type="hidden" name="licence_id" value="{{ $licence->id }}">
+
                             <!-- Personal Information -->
                             <div class="row mb-4">
                                 <div class="col-md-12">
@@ -125,9 +127,48 @@
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>
+
+                                    
                                 </div>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">{{ __('messages.licence_details') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2">{{ __('messages.licence_uid') }}</h6>
+                            <p class="mb-0">{{ $licence->licence_uid }}</p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2">{{ __('messages.domain_name') }}</h6>
+                            <p class="mb-0">{{ $licence->domain->name }}</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2">{{ __('messages.valid_until') }}</h6>
+                            <p class="mb-0">{{ $valid_until }}</p>
+                        </div>
+
+                        <div class="mb-4">
+                            <h6 class="text-muted mb-2">{{ __('messages.payment_cost') }}</h6>
+                            <p class="mb-0">{{ number_format($licence->price, 2) }} €</p>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="button" class="btn btn-primary btn-block" id="payment-button">
+                                {{ __('messages.proceed_to_payment') }}
+                            </button>
+                            <button type="button" class="btn btn-primary btn-block" id="payment-button">
+                                {{ __('messages.ponuda') }}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

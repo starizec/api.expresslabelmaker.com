@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\Licence;
+use Carbon\Carbon;
 
 class PageController extends Controller
 {
@@ -25,7 +26,12 @@ class PageController extends Controller
     public function payment(string $lang, string $licence_uid)
     {
         $licence = Licence::where('licence_uid', $licence_uid)->with('domain')->with('user')->latest()->first();
+        $valid_until = $licence->valid_until;
 
-        return view('pages.payment', compact('licence'));
+        if($licence->type != config('licence-types.trial')) {
+            $valid_until = Carbon::parse($licence->valid_until)->addYear()->addDay()->toDateString();
+        }
+
+        return view('pages.payment', compact('licence', 'valid_until'));
     }
 }
