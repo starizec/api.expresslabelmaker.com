@@ -44,7 +44,7 @@
                                 </div>
                             @endif
 
-                            <form action="{{ route('register') }}" method="post">
+                            <form action="{{ route('register', ['lang' => app()->getLocale()]) }}" method="post">
                                 @csrf
 
                                 <div class="mb-3">
@@ -82,7 +82,7 @@
                             <div class="text-center mt-4">
                                 <p class="mb-0">
                                     {{ __('messages.already_have_account') }}
-                                    <a href="{{ route('login') }}"
+                                    <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
                                         class="text-decoration-none">{{ __('messages.sign_in') }}</a>
                                 </p>
                             </div>

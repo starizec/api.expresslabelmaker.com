@@ -44,7 +44,7 @@
                                 </div>
                             @endif
 
-                            <form action="{{ route('password.email') }}" method="post">
+                            <form action="{{ route('password.email', ['lang' => app()->getLocale()]) }}" method="post">
                                 @csrf
 
                                 <div class="mb-3">
@@ -65,7 +65,7 @@
 
                             <div class="text-center mt-4">
                                 <p class="mb-0">
-                                    <a href="{{ route('login') }}"
+                                    <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
                                         class="text-decoration-none"><i class="bi bi-arrow-left"></i> {{ __('messages.back_to_login') }}</a>
                                 </p>
                             </div>

@@ -80,7 +80,7 @@ class ResetPasswordController extends Controller
         // the application's home authenticated view. If there is an error we can
         // redirect them back to where they came from with their error message.
         if ($status === Password::PASSWORD_RESET) {
-            return redirect()->route('login')->with('status', __('messages.password_reset_success'));
+            return redirect()->route('login', ['lang' => app()->getLocale()])->with('status', __('messages.password_reset_success'));
         }
 
         return back()->withErrors(['email' => [trans($status)]]);

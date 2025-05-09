@@ -63,7 +63,7 @@ class UserProfileController extends Controller
         
         $user->save();
         
-        return redirect()->route('profile')
+        return redirect()->route('profile', ['lang' => app()->getLocale()])
             ->with('success', __('messages.profile_updated'));
     }
 }

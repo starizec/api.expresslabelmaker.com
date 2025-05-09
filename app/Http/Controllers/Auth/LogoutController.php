@@ -22,6 +22,6 @@ class LogoutController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return Redirect::to('/')->with('success', 'You have been successfully logged out');
+        return Redirect::to('/' . app()->getLocale())->with('success', 'You have been successfully logged out');
     }
 } 

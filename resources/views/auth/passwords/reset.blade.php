@@ -38,7 +38,7 @@
                                 <h3>{{ __('messages.reset_password') }}</h3>
                             </div>
 
-                            <form action="{{ route('password.update') }}" method="post">
+                            <form action="{{ route('password.update', ['lang' => app()->getLocale()]) }}" method="post">
                                 @csrf
 
                                 <input type="hidden" name="token" value="{{ $token }}">
@@ -77,7 +77,7 @@
 
                             <div class="text-center mt-4">
                                 <p class="mb-0">
-                                    <a href="{{ route('login') }}"
+                                    <a href="{{ route('login', ['lang' => app()->getLocale()]) }}"
                                         class="text-decoration-none"><i class="bi bi-arrow-left"></i> {{ __('messages.back_to_login') }}</a>
                                 </p>
                             </div>

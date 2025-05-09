@@ -41,7 +41,14 @@ class ForgotPasswordController extends Controller
         $request->validate(['email' => 'required|email']);
 
         $status = Password::sendResetLink(
-            $request->only('email')
+            $request->only('email'),
+            function ($user, $token) {
+                return url(route('password.reset', [
+                    'token' => $token,
+                    'email' => $user->getEmailForPasswordReset(),
+                    'lang' => app()->getLocale()
+                ], false));
+            }
         );
 
         if ($status === Password::RESET_LINK_SENT) {

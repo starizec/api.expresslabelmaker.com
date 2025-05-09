@@ -34,6 +34,6 @@ class RegisterController extends Controller
 
         Auth::login($user);
 
-        return redirect('/profile')->with('success', __('messages.registration_successful'));
+        return redirect('/' . app()->getLocale() . '/profile')->with('success', __('messages.registration_successful'));
     }
 } 
