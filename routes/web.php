@@ -7,13 +7,10 @@ Route::get('language/{lang}', [App\Http\Controllers\LanguageController::class, '
 Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}']], function () {
 
     Route::get('/', [App\Http\Controllers\PageController::class, 'home'])->name('pages.index');
-
     Route::get('/pravno/{slug}', [App\Http\Controllers\PostController::class, 'legalPost'])->name('pages.posts');
     Route::get('/dokumentacija/{slug}', [App\Http\Controllers\PostController::class, 'documentationPost'])->name('pages.documentations');
     Route::get('/preuzmi-plugin', [App\Http\Controllers\PageController::class, 'download'])->name('pages.download');
-
-    // Contact form route
-    
+    Route::get('/payment/{licence_uid}', [App\Http\Controllers\PageController::class, 'payment'])->name('pages.payment');
 
     Route::middleware('guest')->group(function () {
         Route::get('/login', [App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
@@ -43,8 +40,3 @@ Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}']], funct
 });
 
 Route::post('/contact', [App\Http\Controllers\ContactController::class, 'submit'])->name('contact.submit');
-
-// Redirect root to default language
-Route::get('/', function () {
-    return redirect('/' . app()->getLocale());
-});

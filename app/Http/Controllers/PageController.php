@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Post;
+use App\Models\Licence;
 
 class PageController extends Controller
 {
@@ -14,10 +15,17 @@ class PageController extends Controller
 
     public function download()
     {
-        $post = Post::whereHas('translations', function($query) {
+        $post = Post::whereHas('translations', function ($query) {
             $query->where('slug', 'preuzmi-plugin');
         })->with('translations')->first();
 
         return view('pages.donwload', compact('post'));
+    }
+
+    public function payment(string $lang, string $licence_uid)
+    {
+        $licence = Licence::where('licence_uid', $licence_uid)->with('domain')->with('user')->latest()->first();
+
+        return view('pages.payment', compact('licence'));
     }
 }
