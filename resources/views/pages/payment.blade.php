@@ -165,7 +165,7 @@
                             <button type="button" class="btn btn-primary btn-block" id="payment-button">
                                 {{ __('messages.proceed_to_payment') }}
                             </button>
-                            <button type="button" class="btn btn-primary btn-block" id="payment-button">
+                            <button type="button" class="btn btn-secondary btn-block" id="offer-button">
                                 {{ __('messages.ponuda') }}
                             </button>
                         </div>
@@ -174,4 +174,45 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        document.getElementById('payment-button').addEventListener('click', async function() {
+            try {
+                const response = await fetch('{{ route("payment.create-session", ["lang" => app()->getLocale(), "licence_uid" => $licence->licence_uid]) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                
+                const session = await response.json();
+                
+                if (!session.id) {
+                    throw new Error('No session ID received from server');
+                }
+                
+                const stripe = Stripe('{{ config("services.stripe.key") }}');
+                const result = await stripe.redirectToCheckout({
+                    sessionId: session.id
+                });
+
+                if (result.error) {
+                    alert(result.error.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while processing your payment: ' + error.message);
+            }
+        });
+    </script>
+    @endpush
 @endsection

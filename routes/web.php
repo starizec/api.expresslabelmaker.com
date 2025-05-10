@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 Route::get('language/{lang}', [App\Http\Controllers\LanguageController::class, 'switchLang'])->name('language.switch');
 
@@ -11,6 +12,7 @@ Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}']], funct
     Route::get('/dokumentacija/{slug}', [App\Http\Controllers\PostController::class, 'documentationPost'])->name('pages.documentations');
     Route::get('/preuzmi-plugin', [App\Http\Controllers\PageController::class, 'download'])->name('pages.download');
     Route::get('/payment/{licence_uid}', [App\Http\Controllers\PageController::class, 'payment'])->name('pages.payment');
+    Route::post('/stripe-session/{licence_uid}', [App\Http\Controllers\PaymentController::class, 'createSession'])->name('payment.create-session');
 
     Route::middleware('guest')->group(function () {
         Route::get('/login', [App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
