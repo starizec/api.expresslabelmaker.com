@@ -35,17 +35,13 @@
 </head>
 
 <body class="d-flex flex-column h-100">
-    @include('layouts.navigation')
     <main class="flex-shrink-0">
         @yield('content')
     </main>
 
-    @include('layouts.footer')
-
     @stack('scripts')
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="{{ asset('js/bootstrap/bootstrap.bundle.min.js') }}"></script>
 </body>
 
