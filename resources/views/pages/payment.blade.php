@@ -1,4 +1,4 @@
-@extends('layouts.app-no-navigation')
+@extends('layouts.app')
 
 @section('title', $licence->domain->name)
 
@@ -95,7 +95,7 @@
                                                 <option value="">{{ __('messages.select_country') }}</option>
                                                 @php
                                                     $countries = [
-                                                        'HR' => 'Hrvatska'
+                                                        'HR' => 'Hrvatska',
                                                     ];
                                                 @endphp
                                                 @foreach ($countries as $code => $name)
@@ -127,10 +127,10 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    
+
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5 class="mb-0">{{ __('payment.ponuda') }}</h5>
+                            <h5 class="mb-0">{{ __('payment.order_review') }}</h5>
                         </div>
                         <div class="card-body">
                             <div class="mb-4">
@@ -145,7 +145,7 @@
 
                             <div class="mb-4">
                                 <h6 class="mb-2">{{ __('payment.valid_until') }}</h6>
-                                <p class="font-weight-bold">{{ $valid_until }}</p>
+                                <p class="font-weight-bold">{{ \Carbon\Carbon::parse($valid_until)->format('d.m.Y') }}</p>
                             </div>
 
                             <div class="mb-4">
@@ -153,33 +153,22 @@
                                 <p class="font-weight-bold">{{ number_format($licence->price, 2) }} €</p>
                             </div>
 
-                            <div class="d-grid">
+                            <div class="d-grid mb-4">
                                 <button type="button" class="btn btn-lg btn-success btn-block shadow"
-                                    id="payment-button">
-                                    <i class="fas fa-credit-card me-2"></i>{{ __('payment.proceed_to_payment') }}
+                                    id="payment-button"
+                                    style="
+                                    box-shadow: 1px 1px 21px -1px rgba(0,0,0,0.39);
+                                    -webkit-box-shadow: 1px 1px 21px -1px rgba(0,0,0,0.39);
+                                    -moz-box-shadow: 1px 1px 21px -1px rgba(0,0,0,0.39);
+                                    ">
+                                    <i class="bi bi-credit-card-fill"></i> {{ __('payment.proceed_to_payment') }}
                                 </button>
+                            </div>
+                            <div>
+                                <img src="{{ asset('assets/images/stripe-badge-transparent.png') }}" class="img-fluid">
                             </div>
                         </div>
                     </div>
-                    <div class="mb-4">
-                        <img src="{{ asset('assets/logo-white.png') }}" class="img-fluid" style="max-width: 200px;">
-                    </div>
-                    <ul class="list-unstyled">
-                        <li><a href="/{{ app()->getLocale() }}/pravno/uvjeti-koristenja"
-                                class="text-white text-decoration-none">{{ __('footer.uvjeti_koristenja') }}</a></li>
-                        <li><a href="/{{ app()->getLocale() }}/pravno/politika-privatnosti"
-                                class="text-white text-decoration-none">{{ __('footer.politika_privatnosti') }}</a></li>
-                        <li><a href="/{{ app()->getLocale() }}/pravno/nacini-placanja"
-                                class="text-white text-decoration-none">{{ __('footer.nacini_placanja') }}</a></li>
-                        <li><a href="/{{ app()->getLocale() }}/pravno/izjava-o-ogranicenju-odgovornosti"
-                                class="text-white text-decoration-none">{{ __('footer.izjava_o_ogranicenju_odgovornosti') }}</a>
-                        </li>
-                        <li><a href="/{{ app()->getLocale() }}/pravno/pravila-o-kolacicima"
-                                class="text-white text-decoration-none">{{ __('footer.pravila_o_kolacicima') }}</a></li>
-                        <li><a href="/{{ app()->getLocale() }}/pravno/impressum"
-                                class="text-white text-decoration-none">{{ __('footer.impressum') }}</a></li>
-                    </ul>
-                    
                 </div>
             </div>
         </div>

@@ -7,9 +7,9 @@ Route::get('language/{lang}', [App\Http\Controllers\LanguageController::class, '
 Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}']], function () {
 
     Route::get('/', [App\Http\Controllers\PageController::class, 'home'])->name('pages.index');
-    Route::get('/pravno/{slug}', [App\Http\Controllers\PostController::class, 'legalPost'])->name('pages.posts');
-    Route::get('/dokumentacija/{slug}', [App\Http\Controllers\PostController::class, 'documentationPost'])->name('pages.documentations');
-    Route::get('/preuzmi-plugin', [App\Http\Controllers\PageController::class, 'download'])->name('pages.download');
+    Route::get('/legal/{slug}', [App\Http\Controllers\PostController::class, 'legalPost'])->name('pages.posts');
+    Route::get('/documentation/{slug}', [App\Http\Controllers\PostController::class, 'documentationPost'])->name('pages.documentations');
+    Route::get('/download', [App\Http\Controllers\PageController::class, 'download'])->name('pages.download');
     Route::get('/payment/{licence_uid}', [App\Http\Controllers\PageController::class, 'payment'])->name('pages.payment');
     Route::post('/stripe-session/{licence_uid}', [App\Http\Controllers\PaymentController::class, 'createSession'])->name('payment.create-session');
 

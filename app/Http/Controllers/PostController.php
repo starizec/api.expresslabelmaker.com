@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PostTranslation;
-use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\PostType;
 
@@ -24,10 +22,11 @@ class PostController extends Controller
 
     public function legalPost(string $lang, string $slug)
     {
+        
         $post = Post::whereHas('translations', function($query) use ($slug) {
             $query->where('slug', $slug);
         })->where('status', 'published')->with('translations')->first();
-        
+
         if (!$post) {
             abort(404);
         }

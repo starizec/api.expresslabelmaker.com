@@ -8,6 +8,6 @@ return [
     'ponuda' => 'Offer',
     'domain_name' => 'Domain name',
     'personal_and_company_info' => 'Personal and company info',
-    
+    'order_review' => 'Order review',
 ];
 

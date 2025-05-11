@@ -7,6 +7,7 @@ return [
     'proceed_to_payment' => 'Nastavi na plaćanje',
     'ponuda' => 'Ponuda',
     'domain_name' => 'Naziv domene',
-    'personal_and_company_info' => 'Podaci o platitelju',
+    'personal_and_company_info' => 'Podaci o kupcu',
+    'order_review' => 'Pregled narudžbe',
 ];
 

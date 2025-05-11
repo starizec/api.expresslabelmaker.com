@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-lg navbar-light">
-    <div class="container px-5">
+    <div class="container">
         <a class="navbar-brand" href="{{ url(app()->getLocale() . '/') }}">
             <img src="{{ asset('assets/logo.png') }}" alt="Company Logo" height="40" class="d-inline-block">
         </a>
@@ -15,7 +15,7 @@
                     <a class="nav-link" href="{{ url(app()->getLocale() . '/') }}">{{ __('messages.home') }} <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url(app()->getLocale() . '/preuzmi-plugin') }}">Preuzmi plugin</a>
+                    <a class="nav-link" href="{{ url(app()->getLocale() . '/download') }}">Preuzmi plugin</a>
                 </li>
                 @guest
                     <li class="nav-item"><a class="nav-link" href="{{ route('login', ['lang' => app()->getLocale()]) }}">{{ __('messages.login') }}</a></li>

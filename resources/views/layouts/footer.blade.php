@@ -11,27 +11,27 @@
                 <ul class="list-unstyled">
                     <li class="mb-2"><a href="/{{ app()->getLocale() }}/#kontakt"
                             class="text-white text-decoration-none">{{ __('footer.kontakt') }}</a></li>
-                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/dokumentacija/instalacija"
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/documentation/installation"
                             class="text-white text-decoration-none">{{ __('footer.dokumentacija') }}</a></li>
-                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/preuzmi-plugin"
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/download"
                             class="text-white text-decoration-none">{{ __('footer.preuzmi_plugin') }}</a></li>
                 </ul>
             </div>
 
             <div class="col-md-2">
                 <ul class="list-unstyled">
-                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/pravno/uvjeti-koristenja"
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/legal/terms-of-use"
                             class="text-white text-decoration-none">{{ __('footer.uvjeti_koristenja') }}</a></li>
-                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/pravno/politika-privatnosti"
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/legal/privacy-policy"
                             class="text-white text-decoration-none">{{ __('footer.politika_privatnosti') }}</a></li>
-                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/pravno/nacini-placanja"
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/legal/payment-methods"
                             class="text-white text-decoration-none">{{ __('footer.nacini_placanja') }}</a></li>
-                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/pravno/izjava-o-ogranicenju-odgovornosti"
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/legal/disclaimer"
                             class="text-white text-decoration-none">{{ __('footer.izjava_o_ogranicenju_odgovornosti') }}</a>
                     </li>
-                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/pravno/pravila-o-kolacicima"
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/legal/cookies"
                             class="text-white text-decoration-none">{{ __('footer.pravila_o_kolacicima') }}</a></li>
-                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/pravno/impressum"
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/legal/impressum"
                             class="text-white text-decoration-none">{{ __('footer.impressum') }}</a></li>
                 </ul>
             </div>
