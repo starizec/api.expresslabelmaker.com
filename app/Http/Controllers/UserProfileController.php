@@ -18,10 +18,12 @@ class UserProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $licences = Licence::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
 
+        $licences = Licence::with('domain')
+            ->where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('domain.name');
         return View::make('pages.profile', compact('user', 'licences'));
     }
 

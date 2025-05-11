@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@php
+use App\Services\DomainService;
+@endphp
+
 @section('title', __('messages.profile') . ' - ' . config('app.name'))
 
 @section('content')
@@ -150,11 +154,16 @@
                                 <p class="mt-2">{{ __('messages.no_licenses') }}</p>
                             </div>
                         @else
-                            <div class="table-responsive">
+                        <div class="table-responsive">
+                            @foreach ($licences as $domain => $groupedLicences)
+                                <h5 class="mt-4">
+                                    <span class="badge badge-pill badge-primary mr-2">{{ $domain }}</span>  
+                                    <a href="/{{ app()->getLocale() }}/payment/{{ DomainService::getLicence($domain) }}" class="badge badge-pill badge-success"><i class="bi bi-plus-lg"></i> {{ __('app.renew_license') }}</a> 
+                                </h5>
+                        
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
-                                            <th>{{ __('messages.domain') }}</th>
                                             <th>{{ __('messages.license_key') }}</th>
                                             <th>{{ __('messages.status') }}</th>
                                             <th>{{ __('messages.usage') }}</th>
@@ -163,16 +172,9 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($licences as $licence)
+                                        @foreach ($groupedLicences as $licence)
                                             <tr>
-                                                <td>
-                                                    {{ $licence->domain->name }}
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="text-monospace">{{ $licence->licence_uid }}</span>
-                                                    </div>
-                                                </td>
+                                                <td><span class="text-monospace">{{ $licence->licence_uid }}</span></td>
                                                 <td>
                                                     @php
                                                         $today = \Carbon\Carbon::now();
@@ -182,7 +184,7 @@
                                                         $validUntilDate = is_string($licence->valid_until)
                                                             ? \Carbon\Carbon::parse($licence->valid_until)
                                                             : $licence->valid_until;
-
+                        
                                                         if ($today->between($validFromDate, $validUntilDate)) {
                                                             $status = 'active';
                                                             $badgeClass = 'bg-success';
@@ -194,33 +196,18 @@
                                                             $badgeClass = 'bg-warning';
                                                         }
                                                     @endphp
-                                                    <span
-                                                        class="badge {{ $badgeClass }}">{{ __('messages.' . $status) }}</span>
+                                                    <span class="badge {{ $badgeClass }}">{{ __('messages.' . $status) }}</span>
                                                 </td>
-                                                <td>
-                                                    {{ $licence->usage }} / {{ $licence->usage_limit ?? '∞' }}
-                                                </td>
-                                                <td>
-                                                    @php
-                                                        $validFromDate = is_string($licence->valid_from)
-                                                            ? \Carbon\Carbon::parse($licence->valid_from)
-                                                            : $licence->valid_from;
-                                                    @endphp
-                                                    {{ $validFromDate->format('d.m.Y') }}
-                                                </td>
-                                                <td>
-                                                    @php
-                                                        $validUntilDate = is_string($licence->valid_until)
-                                                            ? \Carbon\Carbon::parse($licence->valid_until)
-                                                            : $licence->valid_until;
-                                                    @endphp
-                                                    {{ $validUntilDate->format('d.m.Y') }}
-                                                </td>
+                                                <td>{{ $licence->usage }} / {{ $licence->usage_limit ?? '∞' }}</td>
+                                                <td>{{ $validFromDate->format('d.m.Y') }}</td>
+                                                <td>{{ $validUntilDate->format('d.m.Y') }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
                                 </table>
-                            </div>
+                            @endforeach
+                        </div>
+                        
                         @endif
                     </div>
                 </div>
