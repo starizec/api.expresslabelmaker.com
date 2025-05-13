@@ -15,8 +15,9 @@ class PageController extends Controller
         return view('pages.home');
     }
 
-    public function download()
+    public function download(string $lang)
     {
+        app()->setLocale($lang);
         $post = Post::whereHas('translations', function ($query) {
             $query->where('slug', 'preuzmi-plugin');
         })->with('translations')->first();
