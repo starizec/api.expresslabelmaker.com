@@ -9,16 +9,29 @@ class LanguageController extends Controller
 {
     public function switchLang($lang)
     {
-        Log::info('Switching language to: ' . $lang);
         session(['locale' => $lang]);
-        Log::info('Session locale set to: ' . session('locale'));
         
-        // Get the current URL path without the language prefix
+        // If redirect parameter is provided, use it
+        if (request()->has('redirect')) {
+            $redirectPath = request()->get('redirect');
+            // Remove any existing language prefix from the redirect path
+            $pathWithoutLang = preg_replace('/^[a-zA-Z]{2}\//', '', $redirectPath);
+            return redirect('/' . $lang . '/' . $pathWithoutLang);
+        }
+        
+        // Get the current URL path
         $currentPath = request()->path();
+        
+        // Remove the current language prefix if it exists
         $pathWithoutLang = preg_replace('/^[a-zA-Z]{2}\//', '', $currentPath);
         
         // If we're on the language switch route itself, redirect to home
         if ($pathWithoutLang === 'language/' . $lang) {
+            return redirect('/' . $lang);
+        }
+        
+        // If the path is empty after removing language prefix, it means we're on home
+        if (empty($pathWithoutLang)) {
             return redirect('/' . $lang);
         }
         
