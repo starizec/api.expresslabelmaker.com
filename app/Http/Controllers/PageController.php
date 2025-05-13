@@ -18,11 +18,14 @@ class PageController extends Controller
     public function download(string $lang)
     {
         app()->setLocale($lang);
-        $post = Post::whereHas('translations', function ($query) {
-            $query->where('slug', 'preuzmi-plugin');
-        })->with('translations')->first();
+        $post = Post::whereHas('translations', function ($query) use ($lang) {
+            $query->where('slug', 'preuzmi-plugin')
+                  ->where('locale', $lang);
+        })->with(['translations' => function($query) use ($lang) {
+            $query->where('locale', $lang);
+        }])->first();
 
-        return view('pages.donwload', compact('post'));
+        return view('pages.download', compact('post'));
     }
 
     public function payment(string $lang, string $licence_uid)

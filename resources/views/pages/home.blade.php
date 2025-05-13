@@ -11,15 +11,15 @@
                     <p class="lead mb-4">Automatizirana izrada adresnica za WooCommerce trgovine</p>
                     <div class="mb-4">
                         <ul class="list-unstyled">
-                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Plug & play rješenje – spremno za
+                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i> Plug & play rješenje – spremno za
                                 korištenje odmah</li>
-                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Sigurna i stabilna integracija
+                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i> Sigurna i stabilna integracija
                             </li>
-                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Povezivanje s kuririma u par
+                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i> Povezivanje s kuririma u par
                                 klikova</li>
-                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Tehnička podrška i redovita
+                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i> Tehnička podrška i redovita
                                 ažuriranja</li>
-                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i>Više vremena za prodaju, manje za
+                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i> Više vremena za prodaju, manje za
                                 administraciju</li>
                         </ul>
                     </div>
