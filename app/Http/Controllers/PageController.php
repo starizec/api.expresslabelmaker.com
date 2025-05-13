@@ -17,10 +17,8 @@ class PageController extends Controller
 
     public function download(string $lang)
     {
-        app()->setLocale($lang);
         $post = Post::whereHas('translations', function ($query) use ($lang) {
-            $query->where('slug', 'preuzmi-plugin')
-                  ->where('locale', $lang);
+            $query->where('slug', 'preuzmi-plugin');
         })->with(['translations' => function($query) use ($lang) {
             $query->where('locale', $lang);
         }])->first();
