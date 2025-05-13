@@ -9,8 +9,9 @@ use Carbon\Carbon;
 
 class PageController extends Controller
 {
-    public function home()
+    public function home(string $lang)
     {
+        app()->setLocale($lang);
         return view('pages.home');
     }
 

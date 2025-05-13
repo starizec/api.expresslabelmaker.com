@@ -26,12 +26,12 @@
                             class="text-white text-decoration-none">{{ __('footer.politika_privatnosti') }}</a></li>
                     <li class="mb-2"><a href="/{{ app()->getLocale() }}/legal/payment-methods"
                             class="text-white text-decoration-none">{{ __('footer.nacini_placanja') }}</a></li>
-                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/legal/disclaimer"
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/legal/disclaimer-of-liability"
                             class="text-white text-decoration-none">{{ __('footer.izjava_o_ogranicenju_odgovornosti') }}</a>
                     </li>
-                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/legal/cookies"
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/legal/cookie-policy"
                             class="text-white text-decoration-none">{{ __('footer.pravila_o_kolacicima') }}</a></li>
-                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/legal/impressum"
+                    <li class="mb-2"><a href="/{{ app()->getLocale() }}/legal/legal-notice"
                             class="text-white text-decoration-none">{{ __('footer.impressum') }}</a></li>
                 </ul>
             </div>

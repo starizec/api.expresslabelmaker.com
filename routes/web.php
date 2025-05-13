@@ -4,7 +4,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('language/{lang}', [App\Http\Controllers\LanguageController::class, 'switchLang'])->name('language.switch');
 
-Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}']], function () {
+// Handle root URL directly
+Route::get('/', [App\Http\Controllers\PageController::class, 'home'])->defaults('lang', 'hr');
+
+Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}'], 'defaults' => ['lang' => 'hr']], function () {
 
     Route::get('/', [App\Http\Controllers\PageController::class, 'home'])->name('pages.index');
     Route::get('/legal/{slug}', [App\Http\Controllers\PostController::class, 'legalPost'])->name('pages.posts');
