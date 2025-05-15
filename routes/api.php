@@ -33,6 +33,7 @@ Route::middleware(['checkUserProperty', 'checkUserLicence'])->prefix('api/v1')->
                 Route::post('labels', [App\Http\Controllers\Api\V1\HR\HpController::class, 'createLabels']);
                 Route::post('collection-request', [App\Http\Controllers\Api\V1\HR\HpController::class, 'collectionRequest']);
             });
+            Route::post('delivery-locations', [App\Http\Controllers\Api\V1\HR\HpController::class, 'getDeliveryLocations']);
         });
     });
 
