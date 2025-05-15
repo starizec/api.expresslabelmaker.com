@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use App\Services\Logger\ApiErrorLogger;
-use App\Services\AdressService;
 use App\Models\Courier;
 use App\Models\DeliveryLocationHeader;
 use App\Models\DeliveryLocation;
@@ -37,11 +36,13 @@ class HpController extends Controller
     ];
 
     protected $services = [
-        24 => "Paletizirana pošiljka",
         26 => "Paket 24 D+1",
         29 => "Paket 24 D+2",
         32 => "Paket 24 D+3",
         38 => "Paket 24 D+4",
+        39 => "EasyReturn D+3 (1st option)",
+        40 => "EasyReturn D+3 (2nd option)",
+        46 => "Pallet shipment D+5",
     ];
 
     protected $payedBy = [
@@ -53,6 +54,13 @@ class HpController extends Controller
         "ADR" => 1,
         "PU" => 2,
         "PAK" => 3,
+    ];
+
+    protected $parcelSize = [
+        "X" => 1,
+        "S" => 2,
+        "M" => 3,
+        "L" => 4,
     ];
 
     public function __construct()
@@ -87,13 +95,13 @@ class HpController extends Controller
 
             return response()->json([
                 'errors' =>
-                [
                     [
-                        'order_number' => $parcel->order_number ?? 'unknown',
-                        'error_message' => $error_message,
-                        'error_code' => '703'
+                        [
+                            'order_number' => $parcel->order_number ?? 'unknown',
+                            'error_message' => $error_message,
+                            'error_code' => '703'
+                        ]
                     ]
-                ]
             ], 422);
         }
 
@@ -106,7 +114,8 @@ class HpController extends Controller
             ->post(
                 config('urls.hr.hp') . "/shipment/create_shipment_orders",
                 [
-                    'parcels' => [$this->prepareParcelPayload($parcel)]
+                    "parcels" => [$this->prepareParcelPayload($parcel)],
+                    "return_address_label" => true
                 ]
             );
 
@@ -143,49 +152,11 @@ class HpController extends Controller
 
         foreach ($parcelResponseJson->ShipmentOrdersList as $shipmentOrder) {
             foreach ($shipmentOrder->Packages as $package) {
-                $pl_numbers[]["barcode"] = $package->barcode;
+                $pl_numbers[] = $package->barcode;
             }
         }
 
-        $parcelLabelResponse = Http::withoutVerifying()
-            ->withHeaders([
-                'Authorization' => 'Bearer ' . $this->token,
-                'Accept' => 'application/json'
-            ])
-            ->get(
-                config('urls.hr.hp') . "/shipment/get_shipping_labels",
-                [
-                    'client_reference_number' => $parcel->order_number,
-                    'barcodes' => $pl_numbers,
-                    'A4' => true
-                ]
-            );
-
-        $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
-
-        if (!$parcelLabelResponse->successful() || $parcelLabelResponseJson->ErrorCode != null) {
-            $error_message = $parcelLabelResponse->successful()
-                ? $parcelLabelResponseJson->ErrorCode . " - " . $parcelLabelResponseJson->ErrorMessage
-                : $parcelLabelResponse->status() . " - Overseas Server error";
-
-
-            ApiErrorLogger::apiError(
-                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
-                $request,
-                $error_message,
-                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
-            );
-
-            return response()->json([
-                "errors" => [
-                    [
-                        'order_number' => $parcel->order_number ?? 'unknown',
-                        'error_message' => 'HP poruka: ' . $error_message,
-                        'error_code' => '603'
-                    ]
-                ]
-            ], $parcelLabelResponse->status());
-        }
+        $pl_numbers = implode(",", $pl_numbers);
 
         UserService::addUsage($this->user);
 
@@ -193,8 +164,9 @@ class HpController extends Controller
 
         return response()->json([
             "data" => [
+                "order_number" => $parcel->order_number,
                 "parcels" => $pl_numbers,
-                "label" => $parcelLabelResponseJson->PackageLabel
+                "label" => $parcelResponseJson->ShipmentsLabel
             ]
         ], 201);
     }
@@ -252,69 +224,80 @@ class HpController extends Controller
 
     protected function prepareParcelPayload($parcel)
     {
-        $additionalServices = [["additional_service_id" => 30]];
+        if (!isset($parcel->location_id) || $parcel->location_id == "" || $parcel->location_id == null) {
+            $deliveryTypeId = $this->deliveryTypes["ADR"];
 
-        if ($parcel->cod_amount) {
+        } elseif (isset($parcel->location_id) && $parcel->location_type == "PU") {
+            $deliveryTypeId = $this->deliveryTypes["PU"];
+
+        } elseif (isset($parcel->location_id) && $parcel->location_type == "PAK") {
+            $deliveryTypeId = $this->deliveryTypes["PAK"];
+        }
+
+        $additionalServices = [];
+
+        if (isset($parcel->cod_amount) && (float)$parcel->cod_amount > 0) {
             $additionalServices[] = ["additional_service_id" => 9];
         }
 
-        $adressService = new AdressService();
-        $senderAdress = $adressService->splitAddress($parcel->sender_adress);
-        $recipientAdress = $adressService->splitAddress($parcel->recipient_adress);
+        $additionalServicesIds = explode(',', $parcel->additional_services);
 
-        return [
-            "client_reference_number" => (string) $parcel->order_number,
-            "service" => (string) 26,
-            "payed_by" => 1,
-            "delivery_type" => (int) $this->deliveryTypes[$parcel->delivery_type],
-            "payment_value" => (float) $parcel->cod_amount ?? null,
-            "value" => (float) $parcel->cod_amount ?? null,
-            "parcel_size" => (string) $parcel->cod_amount ? "M" : null,
+        foreach ($additionalServicesIds as $additionalServiceId) {
+            $additionalServices[] = ["additional_service_id" => (int)trim($additionalServiceId)];
+        }
 
-            "reference_field_B" => (string) $parcel->order_number,
-            "reference_field_C" => (string) $parcel->parcel_ref_1 ?? null,
-            "reference_field_D" => (string) $parcel->parcel_ref_2 ?? null,
+        return
+            [
+                "client_reference_number" => (string) $parcel->order_number,
+                "service" => (string) $parcel->delivery_sevice,
+                "payed_by" => 1,
+                "delivery_type" => (int) $deliveryTypeId,
+                "payment_value" => (float) isset($parcel->cod_amount) ? $parcel->cod_amount : null,
+                "value" => (float) $parcel->parcel_value,
+                "parcel_size" => (string) isset($parcel->parcel_size) ? $parcel->parcel_size : null,
 
-            "sender" => [
-                "sender_name" => (string) $parcel->sender_name,
-                "sender_phone" => (string) $parcel->sender_phone,
-                "sender_email" => (string) $parcel->sender_email ?? null,
-                "sender_street" => (string) $senderAdress['street'],
-                "sender_hnum" => (string) $senderAdress['house_number'],
-                "sender_hnum_suffix" => (string) $senderAdress['house_number_suffix'],
-                "sender_zip" => (string) $parcel->sender_postal_code,
-                "sender_city" => (string) $parcel->sender_city,
-                "sender_pickup_center" => null,
-            ],
+                "reference_field_B" => (string) $parcel->parcel_remark,
 
-            "recipient" => [
-                "recipient_name" => (string) $parcel->recipient_name,
-                "recipient_phone" => (string) $parcel->recipient_phone,
-                "recipient_email" => (string) $parcel->recipient_email ?? null,
-                "recipient_street" => (string) $recipientAdress['street'],
-                "recipient_hnum" => (string) $recipientAdress['house_number'],
-                "recipient_hnum_suffix" => (string) $recipientAdress['house_number_suffix'],
-                "recipient_zip" => (string) $parcel->recipient_postal_code,
-                "recipient_city" => (string) $parcel->recipient_city,
-                "recipient_pickup_center" => (string) $parcel->location_id ?? null,
-            ],
-            "additional_services" => $additionalServices,
-            "packages" => [
-                [
-                    "barcode" => "",
-                    "barcode_type" => 1,
-                    "barcode_client" => (string) $parcel->order_number,
-                    "weight" => (float) $parcel->parcel_weight
+                "sender" => [
+                    "sender_name" => (string) $parcel->sender_name,
+                    "sender_phone" => (string) $parcel->sender_phone,
+                    "sender_email" => (string) isset($parcel->sender_email) ? $parcel->sender_email : null,
+                    "sender_street" => (string) $parcel->sender_adress,
+                    "sender_hnum" => (string) ".",
+                    "sender_hnum_suffix" => (string) ".",
+                    "sender_zip" => (string) $parcel->sender_postal_code,
+                    "sender_city" => (string) $parcel->sender_city,
+                    "sender_pickup_center" => null,
+                ],
+
+                "recipient" => [
+                    "recipient_name" => (string) $parcel->recipient_name,
+                    "recipient_phone" => (string) $parcel->recipient_phone,
+                    "recipient_email" => (string) isset($parcel->recipient_email) ? $parcel->recipient_email : null,
+                    "recipient_street" => (string) $parcel->recipient_adress,
+                    "recipient_hnum" => (string) ".",
+                    "recipient_hnum_suffix" => (string) ".",
+                    "recipient_zip" => (string) $parcel->recipient_postal_code,
+                    "recipient_city" => (string) $parcel->recipient_city,
+                    "recipient_pickup_center" => (string) isset($parcel->location_id) ? $parcel->location_id : null,
+                ],
+                "additional_services" => $additionalServices,
+                "packages" => [
+                    [
+                        "barcode" => "",
+                        "barcode_type" => 1,
+                        "barcode_client" => (string) $parcel->order_number,
+                        "weight" => (float) $parcel->parcel_weight
+                    ]
                 ]
             ]
-        ];
+        ;
     }
 
     protected function validateParcel($parcel)
     {
         $rules = [
             'order_number' => 'required|string|max:255',
-            'delivery_type' => 'required|string|in:ADR,PU,PAK',
             'cod_amount' => 'nullable|numeric|min:0',
             'parcel_ref_1' => 'nullable|string|max:255',
             'parcel_ref_2' => 'nullable|string|max:255',
