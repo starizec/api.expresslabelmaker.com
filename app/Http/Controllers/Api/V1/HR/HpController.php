@@ -171,6 +171,98 @@ class HpController extends Controller
         ], 201);
     }
 
+    public function createLabels(Request $request)
+    {
+        $requestBody = $request->getContent();
+        $jsonData = json_decode($requestBody);
+
+        $this->user = $jsonData->user;
+        $parcels = $jsonData->parcels;
+
+        $data = [];
+        $errors = [];
+        $allparcels = [];
+
+        foreach ($parcels as $parcel) {
+            try {
+                $this->validateParcel($parcel);
+            } catch (ValidationException $e) {
+                $error_message = implode(' | ', collect($e->errors())->flatten()->all());
+
+                ApiErrorLogger::apiError(
+                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
+                    $request,
+                    $error_message,
+                    __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+                );
+
+                $errors[] = [
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => $error_message,
+                    'error_code' => '701'
+                ];
+
+                continue;
+            }
+
+            $allparcels[] = $this->prepareParcelPayload($parcel);
+        }
+
+        $this->token = $this->getToken()['accessToken'];
+
+        $parcelResponse = Http::withoutVerifying()
+            ->withHeaders([
+                'Authorization' => 'Bearer ' . $this->token
+            ])
+            ->post(
+                config('urls.hr.hp') . "/shipment/create_shipment_orders",
+                [
+                    "parcels" => $allparcels,
+                    "return_address_label" => true
+                ]
+            );
+
+        $parcelResponseJson = json_decode($parcelResponse->body());
+
+        foreach ($parcelResponseJson->ShipmentOrdersList as $shipmentOrder) {
+            UserService::addUsage($this->user);
+
+            if ($shipmentOrder->ErrorCode == null) {
+                foreach ($shipmentOrder->Packages as $package) {
+                    if ($shipmentOrder->ErrorCode == null) {
+                        $data[] = [
+                            "order_number" => $shipmentOrder->ClientReferenceNumber,
+                            "parcel_number" => $package->barcode,
+                            "label" => $parcelResponseJson->ShipmentsLabel
+                        ];
+                    }
+                }
+            } else {
+                ApiErrorLogger::apiError(
+                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . 'HP poruka: ' . $shipmentOrder->ErrorCode . ' - ' . $shipmentOrder->ErrorMessage,
+                    $request,
+                    'HP poruka: ' . $shipmentOrder->ErrorCode . ' - ' . $shipmentOrder->ErrorMessage,
+                    __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+                );
+
+                $errors[] = [
+                    'order_number' => $shipmentOrder->ClientReferenceNumber,
+                    'error_message' => 'HP poruka: ' . $shipmentOrder->ErrorCode . ' - ' . $shipmentOrder->ErrorMessage,
+                    'error_code' => '603'
+                ];
+            }
+
+        }
+
+        return response()->json([
+            "data" => [
+                "parcels" => $data,
+                "label" => $parcelResponseJson->ShipmentsLabel
+            ],
+            "errors" => $errors
+        ], 201);
+    }
+
     public function getDeliveryLocations()
     {
         $header = DeliveryLocationHeader::where('courier_id', $this->courier->id)->latest()->first();
@@ -236,14 +328,14 @@ class HpController extends Controller
 
         $additionalServices = [];
 
-        if (isset($parcel->cod_amount) && (float)$parcel->cod_amount > 0) {
+        if (isset($parcel->cod_amount) && (float) $parcel->cod_amount > 0) {
             $additionalServices[] = ["additional_service_id" => 9];
         }
 
         $additionalServicesIds = explode(',', $parcel->additional_services);
 
         foreach ($additionalServicesIds as $additionalServiceId) {
-            $additionalServices[] = ["additional_service_id" => (int)trim($additionalServiceId)];
+            $additionalServices[] = ["additional_service_id" => (int) trim($additionalServiceId)];
         }
 
         return
