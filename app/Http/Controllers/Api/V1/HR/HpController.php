@@ -362,6 +362,60 @@ class HpController extends Controller
         ], 201);
     }
 
+    public function getParcelStatus(Request $request)
+    {
+        $requestBody = $request->getContent();
+        $jsonData = json_decode($requestBody);
+
+        $this->user = $jsonData->user;
+        $parcels = $jsonData->parcels;
+
+        $track_numbers = [];
+        $status_response = [];
+
+        foreach ($parcels as $parcel) {
+            $track_numbers[] = ["barcode" => $parcel->parcel_number];
+        }
+
+        $this->token = $this->getToken()['accessToken'];
+
+        $statusResponse = Http::withoutVerifying()
+            ->withHeaders([
+                'Authorization' => 'Bearer ' . $this->token
+            ])
+            ->post(
+                config('urls.hr.hp') . "/shipment/fetch_shipment_status",
+                [
+                    "barcodes" => $track_numbers
+                ]
+            );
+
+        $statusResponseJson = json_decode($statusResponse->body());
+
+        foreach ($statusResponseJson as $status) {
+            foreach ($status->PackageScansList as $scan) {
+                foreach($parcels as $parcel) {
+                    if($parcel->parcel_number == $status->Barcode) {
+                        $status_response[] = [
+                            "order_number" => $parcel->order_number,
+                            "parcel_number" => $status->Barcode,
+                            "status_message" => $scan->ScanDescription,
+                            "status_code" => $scan->Scan,
+                            "status_date" => $scan->ScanTime,
+                            "color" => "#fff"
+                        ];
+                    }
+                }
+            }
+        }
+
+        return response()->json([
+            "data" => [
+                "statuses" => $status_response
+            ]
+        ], 201);
+    }
+
     public function getDeliveryLocations()
     {
         $header = DeliveryLocationHeader::where('courier_id', $this->courier->id)->latest()->first();
@@ -399,9 +453,6 @@ class HpController extends Controller
             ]
         ], 201);
     }
-
-
-
 
     protected function getToken()
     {
