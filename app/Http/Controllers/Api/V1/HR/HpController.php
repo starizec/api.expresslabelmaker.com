@@ -263,6 +263,105 @@ class HpController extends Controller
         ], 201);
     }
 
+    public function collectionRequest(Request $request)
+    {
+        $requestBody = $request->getContent();
+        $jsonData = json_decode($requestBody);
+
+        $this->user = $jsonData->user;
+        $parcel = $jsonData->parcel;
+        $errors = [];
+
+        try {
+            $this->validateParcel($parcel);
+        } catch (ValidationException $e) {
+            $error_message = implode(' | ', collect($e->errors())->flatten()->all());
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
+            return response()->json([
+                'errors' =>
+                    [
+                        [
+                            'order_number' => $parcel->order_number ?? 'unknown',
+                            'error_message' => $error_message,
+                            'error_code' => '703'
+                        ]
+                    ]
+            ], 422);
+        }
+
+        $this->token = $this->getToken()['accessToken'];
+
+        $parcelResponse = Http::withoutVerifying()
+            ->withHeaders([
+                'Authorization' => 'Bearer ' . $this->token
+            ])
+            ->post(
+                config('urls.hr.hp') . "/shipment/create_shipment_orders",
+                [
+                    "parcels" => [$this->prepareParcelPayload($parcel, true)],
+                    "return_address_label" => true
+                ]
+            );
+
+        $parcelResponseJson = json_decode($parcelResponse->body());
+
+        foreach ($parcelResponseJson->ShipmentOrdersList as $shipmentOrder) {
+            if ($shipmentOrder->ErrorCode != null) {
+                $errors[] = $shipmentOrder->ErrorCode . " - " . $shipmentOrder->ErrorMessage;
+            }
+        }
+
+        if (($parcelResponse->successful() && count($errors) > 0) || !$parcelResponse->successful()) {
+            $error_message = $parcelResponse->successful()
+                ? implode(' | ', collect($errors)->flatten()->all())
+                : $parcelResponse->status() . " - HP Server error";
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
+            return response()->json([
+                "errors" => [
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'HP poruka: ' . $error_message,
+                    'error_code' => '603'
+                ]
+            ], $parcelResponse->status());
+        }
+
+        $pl_numbers = [];
+
+        foreach ($parcelResponseJson->ShipmentOrdersList as $shipmentOrder) {
+            foreach ($shipmentOrder->Packages as $package) {
+                $pl_numbers[] = $package->barcode;
+            }
+        }
+
+        $pl_numbers = implode(",", $pl_numbers);
+
+        UserService::addUsage($this->user);
+
+        ApiUsageLogger::apiUsage($this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain, $request);
+
+        return response()->json([
+            "data" => [
+                "order_number" => $parcel->order_number,
+                "parcels" => $pl_numbers,
+                "label" => $parcelResponseJson->ShipmentsLabel
+            ]
+        ], 201);
+    }
+
     public function getDeliveryLocations()
     {
         $header = DeliveryLocationHeader::where('courier_id', $this->courier->id)->latest()->first();
@@ -301,6 +400,9 @@ class HpController extends Controller
         ], 201);
     }
 
+
+
+
     protected function getToken()
     {
         $response = Http::withoutVerifying()->post(
@@ -314,8 +416,10 @@ class HpController extends Controller
         return $response->json();
     }
 
-    protected function prepareParcelPayload($parcel)
+    protected function prepareParcelPayload($parcel, $isCollection = false)
     {
+        $parcel->payed_by = 1;
+
         if (!isset($parcel->location_id) || $parcel->location_id == "" || $parcel->location_id == null) {
             $deliveryTypeId = $this->deliveryTypes["ADR"];
 
@@ -338,15 +442,23 @@ class HpController extends Controller
             $additionalServices[] = ["additional_service_id" => (int) trim($additionalServiceId)];
         }
 
+        if ($isCollection) {
+            $additionalServices = [];
+            $parcel->payed_by = 2;
+            $pickup_type = 1;
+        }
+
         return
             [
                 "client_reference_number" => (string) $parcel->order_number,
                 "service" => (string) $parcel->delivery_sevice,
-                "payed_by" => 1,
+                "payed_by" => (int) $parcel->payed_by,
                 "delivery_type" => (int) $deliveryTypeId,
                 "payment_value" => (float) isset($parcel->cod_amount) ? $parcel->cod_amount : null,
                 "value" => (float) $parcel->parcel_value,
                 "parcel_size" => (string) isset($parcel->parcel_size) ? $parcel->parcel_size : null,
+
+                "pickup_type" => (int) isset($pickup_type) ? $pickup_type : null,
 
                 "reference_field_B" => (string) $parcel->parcel_remark,
 
