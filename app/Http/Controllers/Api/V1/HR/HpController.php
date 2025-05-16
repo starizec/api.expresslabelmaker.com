@@ -394,8 +394,8 @@ class HpController extends Controller
 
         foreach ($statusResponseJson as $status) {
             foreach ($status->PackageScansList as $scan) {
-                foreach($parcels as $parcel) {
-                    if($parcel->parcel_number == $status->Barcode) {
+                foreach ($parcels as $parcel) {
+                    if ($parcel->parcel_number == $status->Barcode) {
                         $status_response[] = [
                             "order_number" => $parcel->order_number,
                             "parcel_number" => $status->Barcode,
@@ -499,6 +499,18 @@ class HpController extends Controller
             $pickup_type = 1;
         }
 
+        $packages = [];
+        
+        for ($i = 0; $i < $parcel->parcel_count; $i++) {
+            $packages[] = [
+                "barcode" => "",
+                "barcode_type" => 1,
+                "barcode_client" => (string) $parcel->order_number . "-" . ($i + 1),
+                "weight" => (float) $parcel->parcel_weight / $parcel->parcel_count
+            ];
+        }
+
+
         return
             [
                 "client_reference_number" => (string) $parcel->order_number,
@@ -537,14 +549,7 @@ class HpController extends Controller
                     "recipient_pickup_center" => (string) isset($parcel->location_id) ? $parcel->location_id : null,
                 ],
                 "additional_services" => $additionalServices,
-                "packages" => [
-                    [
-                        "barcode" => "",
-                        "barcode_type" => 1,
-                        "barcode_client" => (string) $parcel->order_number,
-                        "weight" => (float) $parcel->parcel_weight
-                    ]
-                ]
+                "packages" => $packages
             ]
         ;
     }
