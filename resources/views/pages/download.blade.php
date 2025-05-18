@@ -5,9 +5,13 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6 text-center">
-                    <a href="#download" class="btn btn-light btn-lg me-3 ">Preuzmi plugin</a>
-                    <div class="mt-2 text-white">Version: 1.25127.2</div>
-                    
+                    <a href="{{ asset('storage/' . $plugin_downloads->plugin_download_link) }}"
+                        class="btn btn-light btn-lg me-3" download>
+                        Preuzmi plugin
+                    </a>
+
+                    <div class="mt-2 text-white">Version: {{ $plugin_downloads->version }}</div>
+
                 </div>
 
                 <div class="col-md-6 d-none d-md-block">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\Licence;
+use App\Models\PluginDownload;
 use Carbon\Carbon;
 
 class PageController extends Controller
@@ -23,7 +24,9 @@ class PageController extends Controller
             $query->where('locale', $lang);
         }])->first();
 
-        return view('pages.download', compact('post'));
+        $plugin_downloads = PluginDownload::latest()->first();
+
+        return view('pages.download', compact('post', 'plugin_downloads'));
     }
 
     public function payment(string $lang, string $licence_uid)
