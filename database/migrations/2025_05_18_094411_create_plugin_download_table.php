@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('plugin_download', function (Blueprint $table) {
             $table->id();
             $table->string('version')->unique();
-            $table->string('download_link');
+            $table->string('plugin_download_link');
             $table->timestamps();
         });
     }

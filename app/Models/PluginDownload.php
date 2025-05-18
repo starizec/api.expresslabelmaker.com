@@ -10,6 +10,6 @@ class PluginDownload extends Model
 
     protected $fillable = [
         'version',
-        'download_link'
+        'plugin_download_link'
     ];
 }

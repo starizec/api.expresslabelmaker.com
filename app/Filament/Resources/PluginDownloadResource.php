@@ -13,7 +13,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
-
+use Illuminate\Support\Facades\Storage;
 class PluginDownloadResource extends Resource
 {
     protected static ?string $model = PluginDownload::class;
@@ -27,19 +27,9 @@ class PluginDownloadResource extends Resource
                 Forms\Components\TextInput::make('version')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\FileUpload::make('download_link')
+                Forms\Components\FileUpload::make('plugin_download_link')
                     ->required()
                     ->directory('plugin-downloads')
-                    ->preserveFilenames()
-                    ->storeFileNamesIn('original_filename')
-                    ->afterStateUpdated(function ($state, Forms\Set $set, $get) {
-                        $version = $get('version');
-                        if ($version && $state) {
-                            $extension = pathinfo($state, PATHINFO_EXTENSION);
-                            $newFilename = str_replace('.', '_', $version) . '.' . $extension;
-                            $set('download_link', $newFilename);
-                        }
-                    })->multiple(false),
             ]);
     }
 
@@ -50,7 +40,7 @@ class PluginDownloadResource extends Resource
                 Tables\Columns\TextColumn::make('version')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('download_link')
+                Tables\Columns\TextColumn::make('plugin_download_link')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
