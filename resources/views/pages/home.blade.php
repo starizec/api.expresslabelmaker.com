@@ -25,7 +25,7 @@
                                 administraciju</li>
                         </ul>
                     </div>
-                    <a href="{{ url(app()->getLocale() . '/preuzmi-plugin') }}" class="btn btn-light btn-lg me-3">Preuzmi
+                    <a href="{{ url(app()->getLocale() . '/download') }}" class="btn btn-light btn-lg me-3">Preuzmi
                         plugin</a>
                 </div>
                 <div class="col-md-6 text-center d-none d-md-block">
@@ -288,15 +288,19 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <div class="mb-3 d-flex justify-content-between align-items-center">
-                                    <div>
-                                        {!! NoCaptcha::renderJs() !!}
-                                        {!! NoCaptcha::display() !!}
-                                        @error('g-recaptcha-response')
-                                            <div class="text-danger mt-1">{{ $message }}</div>
-                                        @enderror
+                                <div class="mb-3">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3 mb-md-0">
+                                            {!! NoCaptcha::renderJs() !!}
+                                            {!! NoCaptcha::display() !!}
+                                            @error('g-recaptcha-response')
+                                                <div class="text-danger mt-1">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <button type="submit" class="btn btn-primary btn-lg w-100">Pošalji poruku</button>
+                                        </div>
                                     </div>
-                                    <button type="submit" class="btn btn-primary btn-lg px-4">Pošalji poruku</button>
                                 </div>
                             </form>
                         </div>
