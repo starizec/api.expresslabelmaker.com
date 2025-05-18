@@ -11,7 +11,8 @@
                     <p class="lead mb-4">Automatizirana izrada adresnica za WooCommerce trgovine</p>
                     <div class="mb-4">
                         <ul class="list-unstyled">
-                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i> Plug & play rješenje – spremno za
+                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i> Plug & play rješenje – spremno
+                                za
                                 korištenje odmah</li>
                             <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i> Sigurna i stabilna integracija
                             </li>
@@ -19,11 +20,13 @@
                                 klikova</li>
                             <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i> Tehnička podrška i redovita
                                 ažuriranja</li>
-                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i> Više vremena za prodaju, manje za
+                            <li class="mb-2"><i class="bi bi-check2 text-white me-2"></i> Više vremena za prodaju, manje
+                                za
                                 administraciju</li>
                         </ul>
                     </div>
-                    <a href="{{ url(app()->getLocale() . '/preuzmi-plugin') }}" class="btn btn-light btn-lg me-3">Preuzmi plugin</a>
+                    <a href="{{ url(app()->getLocale() . '/preuzmi-plugin') }}" class="btn btn-light btn-lg me-3">Preuzmi
+                        plugin</a>
                 </div>
                 <div class="col-md-6 text-center d-none d-md-block">
                     <img src="{{ asset('assets/vectors/undraw_delivery-address_409g_1.svg') }}"
@@ -255,11 +258,12 @@
     <section class="py-5 bg-light" id="kontakt">
         <div class="container">
             <h2 class="fw-bold text-center mb-4">Kontaktirajte nas</h2>
-            <p class="text-center text-muted mb-5">Imate pitanja? Javite nam se i odgovorit ćemo vam u najkraćem mogućem roku.</p>
+            <p class="text-center text-muted mb-5">Imate pitanja? Javite nam se i odgovorit ćemo vam u najkraćem mogućem
+                roku.</p>
 
             <div class="row justify-content-center">
                 <div class="col-md-8">
-                    @if(session('success'))
+                    @if (session('success'))
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             {{ session('success') }}
                         </div>
@@ -270,23 +274,28 @@
                                 @csrf
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Email adresa</label>
-                                    <input type="email" class="form-control @error('email') is-invalid @enderror" 
-                                           id="email" name="email" required 
-                                           placeholder="Email">
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                        id="email" name="email" required placeholder="Email">
                                     @error('email')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="mb-3">
                                     <label for="message" class="form-label">Poruka</label>
-                                    <textarea class="form-control @error('message') is-invalid @enderror" 
-                                              id="message" name="contactMessage" rows="4" required 
-                                              placeholder="Upit..."></textarea>
+                                    <textarea class="form-control @error('message') is-invalid @enderror" id="message" name="contactMessage"
+                                        rows="4" required placeholder="Upit..."></textarea>
                                     @error('message')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <div class="text-center">
+                                <div class="mb-3 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        {!! NoCaptcha::renderJs() !!}
+                                        {!! NoCaptcha::display() !!}
+                                        @error('g-recaptcha-response')
+                                            <div class="text-danger mt-1">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                     <button type="submit" class="btn btn-primary btn-lg px-4">Pošalji poruku</button>
                                 </div>
                             </form>
@@ -303,10 +312,11 @@
             <h2 class="mb-4">Besplatno isprobajte</h2>
             <p class="lead">Svi korisnici dobivaju <strong>10 besplatnih izrada adresnica</strong>.</p>
             <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                <a href="{{ url(app()->getLocale() . '/preuzmi-plugin') }}" class="btn btn-light btn-lg px-4">Preuzmi plugin</a>
+                <a href="{{ url(app()->getLocale() . '/preuzmi-plugin') }}" class="btn btn-light btn-lg px-4">Preuzmi
+                    plugin</a>
             </div>
         </div>
     </section>
 
-    
+
 @endsection

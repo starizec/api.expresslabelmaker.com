@@ -13,6 +13,7 @@ class ContactController extends Controller
         $validated = $request->validate([
             'email' => 'required|email',
             'contactMessage' => 'required|min:10',
+            'g-recaptcha-response' => 'required|captcha',
         ]);
 
         Mail::to('info@expresslabelmaker.com')->send(new ContactFormMail($validated));
