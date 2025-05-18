@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+
 class PluginDownloadResource extends Resource
 {
     protected static ?string $model = PluginDownload::class;
@@ -29,7 +31,20 @@ class PluginDownloadResource extends Resource
                     ->maxLength(255),
                 Forms\Components\FileUpload::make('plugin_download_link')
                     ->required()
-                    ->directory('plugin-downloads')
+                    ->acceptedFileTypes([
+                        'application/zip',
+                        'application/x-zip',
+                        'application/x-zip-compressed',
+                        'application/octet-stream',
+                        'application/x-compressed',
+                        'multipart/x-zip'
+                    ])->directory('plugin-downloads')
+                    ->getUploadedFileNameForStorageUsing(
+                        function (TemporaryUploadedFile $file, Forms\Get $get): string {
+                            $extension = pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                            return 'express-label-maker-' . $get('version') . '.' . $extension;
+                        }
+                    )
             ]);
     }
 
