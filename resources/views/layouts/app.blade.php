@@ -20,8 +20,7 @@
     <meta name="author" content="" />
     <title>@yield('title', 'ExpressLabelMaker.com')</title>
 
-    <link rel="icon" type="image/x-icon" href="{{ asset('assets/favicon.ico') }}" />
-    
+    <link rel="icon" type="image/png" href="{{ asset('assets/favicon.png') }}" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
