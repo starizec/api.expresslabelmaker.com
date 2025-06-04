@@ -514,7 +514,7 @@ class HpController extends Controller
         return
             [
                 "client_reference_number" => (string) $parcel->order_number,
-                "service" => (string) $parcel->delivery_sevice,
+                "service" => (string) $parcel->delivery_service,
                 "payed_by" => (int) $parcel->payed_by,
                 "delivery_type" => (int) $deliveryTypeId,
                 "payment_value" => (float) isset($parcel->cod_amount) ? $parcel->cod_amount : null,
@@ -546,7 +546,7 @@ class HpController extends Controller
                     "recipient_hnum_suffix" => (string) ".",
                     "recipient_zip" => (string) $parcel->recipient_postal_code,
                     "recipient_city" => (string) $parcel->recipient_city,
-                    "recipient_pickup_center" => (string) isset($parcel->location_id) ? $parcel->location_id : null,
+                    "recipient_delivery_center" => (string) isset($parcel->location_id) ? $parcel->location_id : null,
                 ],
                 "additional_services" => $additionalServices,
                 "packages" => $packages
