@@ -464,7 +464,13 @@ class HpController extends Controller
             ]
         );
 
-        return $response->json();
+        $tokenData = $response->json();
+
+        if (!isset($tokenData['accessToken']) || empty($tokenData['accessToken'])) {
+            throw new \Exception('Failed to obtain access token from HP API');
+        }
+
+        return $tokenData;
     }
 
     protected function prepareParcelPayload($parcel, $isCollection = false)
