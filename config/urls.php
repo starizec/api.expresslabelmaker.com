@@ -8,8 +8,8 @@ return (function () {
             'hr' => [
                 'dpd' => 'https://easyship.hr/api',
                 'overseas' => 'https://api.overseas.hr',
-                'hp-auth' => 'https://dxwebapit.posta.hr:9000/api',
-                'hp' => 'https://dxwebapit.posta.hr:9020/api'
+                'hp-auth' => 'https://dxwebapi.posta.hr:9000/api',
+                'hp' => 'https://dxwebapi.posta.hr:9020/api'
             ],
             'si' => [
                 'dpd' => 'https://easyship.si/api'
