@@ -468,6 +468,10 @@ class HpController extends Controller
 
         if (!isset($tokenData['accessToken']) || empty($tokenData['accessToken'])) {
             throw new \Exception('Failed to obtain access token from HP API');
+
+            Log::info('HP API Token obtained', [
+                'Failed to obtain access token from HP API'
+            ]);
         }
 
         \Log::info('HP API Token obtained', [
