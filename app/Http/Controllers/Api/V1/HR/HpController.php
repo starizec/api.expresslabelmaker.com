@@ -470,6 +470,11 @@ class HpController extends Controller
             throw new \Exception('Failed to obtain access token from HP API');
         }
 
+        \Log::info('HP API Token obtained', [
+            'user' => $this->user->username,
+            'token' => $tokenData['accessToken']
+        ]);
+
         return $tokenData;
     }
 
