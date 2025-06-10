@@ -73,7 +73,8 @@ class HpController extends Controller
     }
 
     public function createLabel(Request $request)
-    {
+    {   
+        Log::info('createLabel');
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
 
