@@ -13,7 +13,7 @@ use App\Models\DeliveryLocationHeader;
 use App\Models\DeliveryLocation;
 use App\Services\UserService;
 use App\Services\Logger\ApiUsageLogger;
-
+use Illuminate\Support\Facades\Log;
 class HpController extends Controller
 {
     protected $courier;
@@ -104,7 +104,7 @@ class HpController extends Controller
                     ]
             ], 422);
         }
-
+        Log::info('Getting token');
         $this->token = $this->getToken()['accessToken'];
 
         $parcelResponse = Http::withoutVerifying()
