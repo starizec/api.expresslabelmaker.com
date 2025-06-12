@@ -74,7 +74,6 @@ class HpController extends Controller
 
     public function createLabel(Request $request)
     {   
-        Log::info('createLabel');
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
 
@@ -105,7 +104,7 @@ class HpController extends Controller
                     ]
             ], 422);
         }
-        Log::info('Getting token');
+
         $this->token = $this->getToken()['accessToken'];
 
         $parcelResponse = Http::withoutVerifying()
@@ -468,17 +467,12 @@ class HpController extends Controller
         $tokenData = $response->json();
 
         if (!isset($tokenData['accessToken']) || empty($tokenData['accessToken'])) {
-            throw new \Exception('Failed to obtain access token from HP API');
-
             Log::info('HP API Token obtained', [
                 'Failed to obtain access token from HP API'
             ]);
+            
+            throw new \Exception('Failed to obtain access token from HP API');
         }
-
-        \Log::info('HP API Token obtained', [
-            'user' => $this->user->username,
-            'token' => $tokenData['accessToken']
-        ]);
 
         return $tokenData;
     }

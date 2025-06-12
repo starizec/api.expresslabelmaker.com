@@ -38,6 +38,18 @@ Route::middleware(['checkUserProperty', 'checkUserLicence'])->prefix('api/v1')->
             });
             Route::post('delivery-locations', [App\Http\Controllers\Api\V1\HR\HpController::class, 'getDeliveryLocations']);
         });
+
+        Route::middleware(['checkHrGlsUserProperty'])->prefix('gls')->group(function () {
+            Route::prefix('create')->group(function () {
+                Route::post('label', [App\Http\Controllers\Api\V1\HR\GlsController::class, 'createLabel']);
+                Route::post('labels', [App\Http\Controllers\Api\V1\HR\GlsController::class, 'createLabels']);
+                Route::post('collection-request', [App\Http\Controllers\Api\V1\HR\GlsController::class, 'collectionRequest']);
+            });
+            Route::prefix('get')->group(function () {
+                Route::post('parcel-status', [App\Http\Controllers\Api\V1\HR\GlsController::class, 'getParcelStatus']);
+            });
+            Route::post('delivery-locations', [App\Http\Controllers\Api\V1\HR\GlsController::class, 'getDeliveryLocations']);
+        });
     });
 
     Route::prefix('si')->group(function () {
