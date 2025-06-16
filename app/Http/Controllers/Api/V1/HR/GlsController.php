@@ -128,7 +128,100 @@ class GlsController extends Controller
 
     public function createLabels(Request $request)
     {
+        $requestBody = $request->getContent();
+        $jsonData = json_decode($requestBody);
 
+        $this->user = $jsonData->user;
+        $parcels = $jsonData->parcels;
+
+        $data = [];
+        $errors = [];
+        $allparcels = [];
+
+        foreach ($parcels as $parcel) {
+            try {
+                $this->validateParcel($parcel);
+            } catch (ValidationException $e) {
+                $error_message = implode(' | ', collect($e->errors())->flatten()->all());
+
+                ApiErrorLogger::apiError(
+                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
+                    $request,
+                    $error_message,
+                    __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+                );
+
+                $errors[] = [
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => $error_message,
+                    'error_code' => '702'
+                ];
+
+                continue;
+            }
+
+            $allparcels[] = $this->prepareParcelPayload($parcel);
+        }
+
+        $parcelResponse = Http::withoutVerifying()
+            ->post(
+                config('urls.hr.gls') . "/ParcelService.svc/json/PrintLabels",
+                [
+                    "Username" => $this->user->username,
+                    "Password" => $this->passwordHash($this->user->password),
+                    "WebshopEngine" => "Woocommerce",
+                    "PrintPosition" => 1,
+                    "ShowPrintDialog" => 0,
+                    "TypeOfPrinter" => "A4_4x1",
+                    "ParcelList" => $allparcels,
+                ]
+            );
+
+        $parcelResponseJson = json_decode($parcelResponse->body());
+
+        $combinedErrors = [];
+
+        foreach ($parcelResponseJson->PrintLabelsErrorList as $errorInfo) {
+            $errorOrderNumber = $errorInfo->ClientReferenceList[0];
+
+            if (!isset($combinedErrors[$errorOrderNumber])) {
+                $combinedErrors[$errorOrderNumber] = [
+                    'order_number' => $errorOrderNumber,
+                    'error_message' => 'GLS poruka: ' . $errorInfo->ErrorCode . ' - ' . $errorInfo->ErrorDescription,
+                    'error_code' => '602'
+                ];
+            } else {
+                $combinedErrors[$errorOrderNumber]['error_message'] .= '; ' . $errorInfo->ErrorDescription;
+            }
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . 'GLS poruka: ' . $errorInfo->ErrorCode . ' - ' . $errorInfo->ErrorDescription,
+                $request,
+                'GLS poruka: ' . $errorInfo->ErrorCode . ' - ' . $errorInfo->ErrorDescription,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+        }
+
+        $errors = array_values($combinedErrors);
+
+        foreach ($parcelResponseJson->PrintLabelsInfoList as $parcelInfo) {
+            $data[] = [
+                "order_number" => $parcelInfo->ClientReference,
+                "parcel_number" => $parcelInfo->ParcelNumber,
+                "label" => $this->labelToBase64($parcelResponseJson->Labels)
+            ];
+            UserService::addUsage($this->user);
+        }
+
+        ApiUsageLogger::apiUsage($this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain, $request);
+
+        return response()->json([
+            "data" => [
+                "parcels" => $data,
+                "label" => $this->labelToBase64($parcelResponseJson->Labels)
+            ],
+            "errors" => $errors
+        ], 201);
     }
 
     public function collectionRequest(Request $request)
@@ -156,7 +249,7 @@ class GlsController extends Controller
             ];
         }
 
-        if($parcel->location_id) {
+        if (isset($parcel->location_id) && $parcel->location_id != "") {
             $service_list[] = [
                 "Code" => "PSD",
                 "PSDParameter" => [
@@ -198,7 +291,7 @@ class GlsController extends Controller
         return [
             "ClientNumber" => $this->user->client_number,
             "ClientReference" => $parcel->order_number,
-            "Count" => $parcel->parcel_count,
+            "Count" => $parcel->parcel_count ?? 1,
             "CODAmount" => $parcel->cod_amount ?? null,
             "CODReference" => $parcel->order_number ?? null,
             "CODCurrency" => $parcel->cod_currency ?? null,
@@ -219,7 +312,7 @@ class GlsController extends Controller
                 "HouseNumber" => $parcel->recipient_adress,
                 "City" => $parcel->recipient_city,
                 "ZipCode" => $parcel->recipient_postal_code,
-                "CountryIsoCode" => $parcel->recipient_country ,
+                "CountryIsoCode" => $parcel->recipient_country,
                 "ContactName" => $parcel->recipient_name,
                 "ContactPhone" => $parcel->recipient_phone,
                 "ContactEmail" => $parcel->recipient_email
