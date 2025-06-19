@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\HR;
 
 use App\Http\Controllers\Controller;
+use App\Services\AdressService;
 use Illuminate\Http\Request;
 use App\Models\Courier;
 use Illuminate\Support\Facades\Validator;
@@ -11,16 +12,58 @@ use App\Services\Logger\ApiErrorLogger;
 use Illuminate\Support\Facades\Http;
 use App\Services\UserService;
 use App\Services\Logger\ApiUsageLogger;
+use DateInterval;
 
 class GlsController extends Controller
 {
     protected $courier;
     protected $user;
 
-    protected $service_list = [
-        "COD" => "Cash on delivery",
-
+    protected $successfulStatusCodes = [
+        '5',
+        '8',
+        '54',
+        '55',
+        '58',
+        '59'
     ];
+
+    protected $unsuccessfulStatusCodes = [
+        '11',
+        '12',
+        '13',
+        '14',
+        '15',
+        '16',
+        '17',
+        '18',
+        '19',
+        '20',
+        '23',
+        '25',
+        '28',
+        '29',
+        '30',
+        '31',
+        '33',
+        '34',
+        '35',
+        '36',
+        '38',
+        '39',
+        '40',
+        '42',
+        '43',
+        '44',
+        '60',
+        '62',
+        '66',
+        '68',
+        '69',
+        '70',
+        '71'
+    ];
+
 
     public function __construct()
     {
@@ -39,6 +82,8 @@ class GlsController extends Controller
         $parcel = $jsonData->parcel;
         $errors = [];
         $pl_numbers = [];
+        $printPosition = 1;
+        $printerType = "A4_4x1";
 
         try {
             $this->validateParcel($parcel);
@@ -64,6 +109,9 @@ class GlsController extends Controller
             ], 422);
         }
 
+        $printPosition = $parcel->print_position;
+        $printerType = $parcel->printer_type;
+
         $parcelResponse = Http::withoutVerifying()
             ->post(
                 config('urls.hr.gls') . "/ParcelService.svc/json/PrintLabels",
@@ -71,9 +119,9 @@ class GlsController extends Controller
                     "Username" => $this->user->username,
                     "Password" => $this->passwordHash($this->user->password),
                     "WebshopEngine" => "Woocommerce",
-                    "PrintPosition" => 1,
+                    "PrintPosition" => $printPosition,
                     "ShowPrintDialog" => 0,
-                    "TypeOfPrinter" => "A4_4x1",
+                    "TypeOfPrinter" => $printerType,
                     "ParcelList" => [$this->prepareParcelPayload($parcel)],
                 ]
             );
@@ -137,6 +185,8 @@ class GlsController extends Controller
         $data = [];
         $errors = [];
         $allparcels = [];
+        $printerType = "A4_4x1";
+        $printPosition = 1;
 
         foreach ($parcels as $parcel) {
             try {
@@ -161,6 +211,8 @@ class GlsController extends Controller
             }
 
             $allparcels[] = $this->prepareParcelPayload($parcel);
+            $printPosition = $parcel->print_position;
+            $printerType = $parcel->printer_type;
         }
 
         $parcelResponse = Http::withoutVerifying()
@@ -170,9 +222,9 @@ class GlsController extends Controller
                     "Username" => $this->user->username,
                     "Password" => $this->passwordHash($this->user->password),
                     "WebshopEngine" => "Woocommerce",
-                    "PrintPosition" => 1,
+                    "PrintPosition" => $printPosition,
                     "ShowPrintDialog" => 0,
-                    "TypeOfPrinter" => "A4_4x1",
+                    "TypeOfPrinter" => $printerType,
                     "ParcelList" => $allparcels,
                 ]
             );
@@ -231,6 +283,59 @@ class GlsController extends Controller
 
     public function getParcelStatus(Request $request)
     {
+        $requestBody = $request->getContent();
+        $jsonData = json_decode($requestBody);
+
+        $this->user = $jsonData->user;
+        $parcels = $jsonData->parcels;
+
+        $track_numbers = [];
+        $status_response = [];
+
+        foreach ($parcels as $parcel) {
+            $statusResponse = Http::withoutVerifying()
+                ->post(
+                    config('urls.hr.gls') . "/ParcelService.svc/json/GetParcelStatuses",
+                    [
+                        "Username" => $this->user->username,
+                        "Password" => $this->passwordHash($this->user->password),
+                        "ParcelNumber" => $parcel->parcel_number,
+                        "ReturnPOD" => false,
+                        "LanguageIsoCode" => "HR"
+                    ]
+                );
+
+
+            $statusResponseJson = json_decode($statusResponse->body());
+
+            if (count($statusResponseJson->ParcelStatusList) > 0) {
+                $status = $this->getLatestParcelStatus($statusResponseJson->ParcelStatusList);
+
+                $status_response[] = [
+                    "order_number" => $parcel->order_number,
+                    "parcel_number" => $parcel->parcel_number,
+                    "status_message" => $status->StatusDescription,
+                    "status_code" => $status->StatusCode,
+                    "status_date" => $this->formatGlsDate($status->StatusDate),
+                    "color" => "#fff"
+                ];
+            }
+
+            if (count($statusResponseJson->GetParcelStatusErrors) > 0) {
+                $status_response[] = [
+                    "order_number" => $parcel->order_number,
+                    "parcel_number" => $parcel->parcel_number,
+                    "status_message" => "Greška u dohvatu statusa",
+                    "status_code" => "00",
+                    "status_date" => now()->format('Y-m-d\TH:i:s'),
+                    "color" => config('colors.error')
+                ];
+            }
+        }
+
+        return response()->json([
+            "data" => $status_response
+        ], 200);
 
     }
 
@@ -291,14 +396,14 @@ class GlsController extends Controller
         return [
             "ClientNumber" => $this->user->client_number,
             "ClientReference" => $parcel->order_number,
-            "Count" => $parcel->parcel_count ?? 1,
+            "Count" => $parcel->parcel_count,
             "CODAmount" => $parcel->cod_amount ?? null,
             "CODReference" => $parcel->order_number ?? null,
             "CODCurrency" => $parcel->cod_currency ?? null,
             "PickupAddress" => [
                 "Name" => $parcel->sender_name,
-                "Street" => $parcel->sender_adress,
-                "HouseNumber" => $parcel->sender_adress,
+                "Street" => AdressService::splitAddress($parcel->sender_adress)['street'],
+                "HouseNumber" => AdressService::splitAddress($parcel->sender_adress)['house_number'],
                 "City" => $parcel->sender_city,
                 "ZipCode" => $parcel->sender_postal_code,
                 "CountryIsoCode" => $parcel->sender_country,
@@ -308,8 +413,8 @@ class GlsController extends Controller
             ],
             "DeliveryAddress" => [
                 "Name" => $parcel->recipient_name,
-                "Street" => $parcel->recipient_adress,
-                "HouseNumber" => $parcel->recipient_adress,
+                "Street" => AdressService::splitAddress($parcel->recipient_adress)['street'],
+                "HouseNumber" => AdressService::splitAddress($parcel->recipient_adress)['house_number'],
                 "City" => $parcel->recipient_city,
                 "ZipCode" => $parcel->recipient_postal_code,
                 "CountryIsoCode" => $parcel->recipient_country,
@@ -328,6 +433,12 @@ class GlsController extends Controller
             'cod_amount' => 'nullable|numeric|min:0',
             'parcel_ref_1' => 'nullable|string|max:255',
             'parcel_ref_2' => 'nullable|string|max:255',
+            'parcel_weight' => 'required|numeric|min:0.01',
+            'print_position' => 'required|integer|min:1',
+            'printer_type' => 'required|string|max:255',
+            'additional_services' => 'nullable|string|max:255',
+            'cod_currency' => 'nullable|string|max:3',
+            'parcel_count' => 'required|integer|min:1',
 
             'sender_name' => 'required|string|max:255',
             'sender_phone' => 'required|string|max:30',
@@ -344,7 +455,6 @@ class GlsController extends Controller
             'recipient_city' => 'required|string|max:255',
 
             'location_id' => 'nullable|string|max:50',
-            'parcel_weight' => 'required|numeric|min:0.01',
         ];
 
         $messages = [
@@ -376,5 +486,59 @@ class GlsController extends Controller
     protected function labelToBase64($label)
     {
         return base64_encode(implode(array_map('chr', $label)));
+    }
+
+    protected function getLatestParcelStatus(array $parcelStatusList): ?object
+    {
+        if (empty($parcelStatusList)) {
+            return null;
+        }
+
+        usort($parcelStatusList, function ($a, $b) {
+            return strtotime($a->StatusDate) <=> strtotime($b->StatusDate);
+        });
+
+        return end($parcelStatusList);
+    }
+
+    protected function getColor($status_code)
+    {
+        if (in_array($status_code, $this->successfulStatusCodes)) {
+            return config('colors.successful');
+        } else if (in_array($status_code, $this->unsuccessfulStatusCodes)) {
+            return config('colors.unsuccessful');
+        } else {
+            return config('colors.default');
+        }
+    }
+
+    protected function formatGlsDate($date)
+    {
+        // Parse GLS date format: /Date(1749751680000+0200)/
+        if (preg_match('/\/Date\((\d+)([+-]\d{4})\)\//', $date, $matches)) {
+            $timestamp = (int)($matches[1] / 1000); // Convert milliseconds to seconds
+            $timezoneOffset = $matches[2];
+            
+            // Create DateTime object from timestamp
+            $dateTime = new \DateTime();
+            $dateTime->setTimestamp($timestamp);
+            
+            // Apply timezone offset (convert to hours)
+            $offsetHours = (int)substr($timezoneOffset, 0, 3);
+            $offsetMinutes = (int)substr($timezoneOffset, 3, 2);
+            $offsetSign = substr($timezoneOffset, 0, 1);
+            
+            if ($offsetSign === '+') {
+                $dateTime->add(new DateInterval("PT{$offsetHours}H{$offsetMinutes}M"));
+            } else {
+                $dateTime->sub(new DateInterval("PT{$offsetHours}H{$offsetMinutes}M"));
+            }
+            
+            // Format to ISO 8601 format: YYYY-MM-DDTHH:mm:ss+HH:mm
+            return $dateTime->format('Y-m-d\TH:i:s');
+        }
+        
+        // If parsing fails, return original date
+        return $date;
     }
 }

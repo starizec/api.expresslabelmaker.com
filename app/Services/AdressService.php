@@ -6,7 +6,7 @@ use App\Models\Domain;
 
 class AdressService
 {
-    public function splitAddress($address)
+    public static function splitAddress($address)
     {
         $address = trim($address);
 
