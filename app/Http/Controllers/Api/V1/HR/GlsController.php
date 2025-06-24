@@ -278,7 +278,103 @@ class GlsController extends Controller
 
     public function collectionRequest(Request $request)
     {
+        $requestBody = $request->getContent();
+        $jsonData = json_decode($requestBody);
 
+        $this->user = $jsonData->user;
+        $parcel = $jsonData->parcel;
+        $errors = [];
+        $pl_numbers = [];
+        $printPosition = 1;
+        $printerType = "A4_4x1";
+
+        try {
+            $this->validateParcel($parcel);
+        } catch (ValidationException $e) {
+            $error_message = implode(' | ', collect($e->errors())->flatten()->all());
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
+            return response()->json([
+                'errors' =>
+                    [
+                        [
+                            'order_number' => $parcel->order_number ?? 'unknown',
+                            'error_message' => $error_message,
+                            'error_code' => '702'
+                        ]
+                    ]
+            ], 422);
+        }
+
+        $printPosition = $parcel->print_position;
+        $printerType = $parcel->printer_type;
+
+        $parcelResponse = Http::withoutVerifying()
+            ->post(
+                config('urls.hr.gls') . "/ParcelService.svc/json/PrintLabels",
+                [
+                    "Username" => $this->user->username,
+                    "Password" => $this->passwordHash($this->user->password),
+                    "WebshopEngine" => "Woocommerce",
+                    "PrintPosition" => $printPosition,
+                    "ShowPrintDialog" => 0,
+                    "TypeOfPrinter" => $printerType,
+                    "ParcelList" => [$this->prepareParcelPayload($parcel)],
+                ]
+            );
+
+
+
+        $parcelResponseJson = json_decode($parcelResponse->body());
+
+        if (!$parcelResponse->successful() || ($parcelResponse->successful() && count($parcelResponseJson->PrintLabelsErrorList) > 0)) {
+            foreach ($parcelResponseJson->PrintLabelsErrorList as $error) {
+                $errors[] = $error->ErrorCode . " - " . $error->ErrorDescription;
+            }
+
+            $error_message = $parcelResponse->successful()
+                ? implode(' | ', collect($errors)->flatten()->all())
+                : $parcelResponse->status() . " - GLS Server error";
+
+            ApiErrorLogger::apiError(
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
+                $request,
+                $error_message,
+                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
+            );
+
+            return response()->json([
+                "errors" => [
+                    'order_number' => $parcel->order_number ?? 'unknown',
+                    'error_message' => 'GLS poruka: ' . $error_message,
+                    'error_code' => '602'
+                ]
+            ], $parcelResponse->status());
+        }
+
+        foreach ($parcelResponseJson->PrintLabelsInfoList as $parcelInfo) {
+            $pl_numbers[] = $parcelInfo->ParcelNumber;
+        }
+
+        $pl_numbers = implode(",", $pl_numbers);
+
+        UserService::addUsage($this->user);
+
+        ApiUsageLogger::apiUsage($this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain, $request);
+
+        return response()->json([
+            "data" => [
+                "order_number" => $parcel->order_number,
+                "parcels" => $pl_numbers,
+                "label" => $this->labelToBase64($parcelResponseJson->Labels)
+            ]
+        ], 201);
     }
 
     public function getParcelStatus(Request $request)
@@ -516,28 +612,28 @@ class GlsController extends Controller
     {
         // Parse GLS date format: /Date(1749751680000+0200)/
         if (preg_match('/\/Date\((\d+)([+-]\d{4})\)\//', $date, $matches)) {
-            $timestamp = (int)($matches[1] / 1000); // Convert milliseconds to seconds
+            $timestamp = (int) ($matches[1] / 1000); // Convert milliseconds to seconds
             $timezoneOffset = $matches[2];
-            
+
             // Create DateTime object from timestamp
             $dateTime = new \DateTime();
             $dateTime->setTimestamp($timestamp);
-            
+
             // Apply timezone offset (convert to hours)
-            $offsetHours = (int)substr($timezoneOffset, 0, 3);
-            $offsetMinutes = (int)substr($timezoneOffset, 3, 2);
+            $offsetHours = (int) substr($timezoneOffset, 0, 3);
+            $offsetMinutes = (int) substr($timezoneOffset, 3, 2);
             $offsetSign = substr($timezoneOffset, 0, 1);
-            
+
             if ($offsetSign === '+') {
                 $dateTime->add(new DateInterval("PT{$offsetHours}H{$offsetMinutes}M"));
             } else {
                 $dateTime->sub(new DateInterval("PT{$offsetHours}H{$offsetMinutes}M"));
             }
-            
+
             // Format to ISO 8601 format: YYYY-MM-DDTHH:mm:ss+HH:mm
             return $dateTime->format('Y-m-d\TH:i:s');
         }
-        
+
         // If parsing fails, return original date
         return $date;
     }
