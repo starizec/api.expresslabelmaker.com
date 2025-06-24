@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Http;
 use App\Services\UserService;
 use App\Services\Logger\ApiUsageLogger;
 use DateInterval;
+use App\Models\DeliveryLocationHeader;
+use App\Models\DeliveryLocation;
 
 class GlsController extends Controller
 {
@@ -430,13 +432,49 @@ class GlsController extends Controller
         }
 
         return response()->json([
-            "data" => $status_response
-        ], 200);
+            "data" => [
+                "statuses" => $status_response
+            ]
+        ], 201);
 
     }
 
     public function getDeliveryLocations()
     {
+        $header = DeliveryLocationHeader::where('courier_id', $this->courier->id)->latest()->first();
+        $deliveryLocations = DeliveryLocation::where('header_id', $header->id)->get();
+
+        foreach ($deliveryLocations as $location) {
+            $features[] = [
+                'type' => 'Feature',
+                'geometry' => [
+                    'type' => 'Point',
+                    'coordinates' => [(float) $location->lon, (float) $location->lat]
+                ],
+                'properties' => [
+                    'id' => $location->id,
+                    'location_id' => $location->location_id,
+                    'name' => $location->name,
+                    'place' => $location->place,
+                    'postal_code' => $location->postal_code,
+                    'street' => $location->street,
+                    'house_number' => $location->house_number,
+                    'type' => $location->type,
+                    'active' => $location->active,
+                ]
+            ];
+        }
+
+        $geojson = [
+            'type' => 'FeatureCollection',
+            'features' => $features
+        ];
+
+        return response()->json([
+            "data" => [
+                "geojson" => $geojson
+            ]
+        ], 201);
 
     }
 

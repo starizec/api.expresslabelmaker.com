@@ -78,6 +78,11 @@ class DeliveryLocationHeadersResource extends Resource
                     ->openUrlInNewTab()
                     ->icon('heroicon-o-globe-alt')
                     ->label('HP Locations'),
+                Tables\Actions\Action::make('gls')
+                    ->url(fn() => route('gls-delivery-locations'))
+                    ->openUrlInNewTab()
+                    ->icon('heroicon-o-globe-alt')
+                    ->label('GLS Locations'),
             ]);
     }
 

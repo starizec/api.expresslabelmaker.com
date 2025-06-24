@@ -39,6 +39,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('overseas/delivery-locations', [App\Http\Controllers\DeliveryLocations\HR\OverseasController::class, 'getDeliveryLocations'])->name('overseas-delivery-locations');
         Route::get('dpd/delivery-locations', [App\Http\Controllers\DeliveryLocations\HR\DpdController::class, 'getDeliveryLocations'])->name('dpd-delivery-locations');
         Route::get('hp/delivery-locations', [App\Http\Controllers\DeliveryLocations\HR\HpController::class, 'getDeliveryLocations'])->name('hp-delivery-locations');
+        Route::get('gls/delivery-locations', [App\Http\Controllers\DeliveryLocations\HR\GlsController::class, 'getDeliveryLocations'])->name('gls-delivery-locations');
     });
 });
 
