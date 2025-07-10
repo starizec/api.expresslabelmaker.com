@@ -451,40 +451,50 @@ class OverseasController extends Controller
 
     protected function prepareParcelPayload($parcel)
     {
+        $additionalServicesIds = explode(',', $parcel->additional_services);
+        
+        $notify_type = 0;
+
+        foreach ($additionalServicesIds as $additionalServiceId) {
+            if ($additionalServiceId == "SMS") {
+                $notify_type += 2;
+            }
+
+            if ($additionalServiceId == "EMAIL") {
+                $notify_type += 1;
+            }
+        }
+
         $payload = [
             "Cosignee" => [
-                "Name" => $parcel->name1,
+                "Name" => $parcel->recipient_name,
                 "CountryCode" => strtoupper($this->courier->country->short),
-                "Zipcode" => $parcel->pcode,
-                "City" => $parcel->city,
-                "StreetAndNumber" => $parcel->rPropNum,
-                "NotifyGSM" => $parcel->phone ?? null,
-                "NotifyEmail" => $parcel->email ?? null,
+                "Zipcode" => $parcel->recipient_postal_code,
+                "City" => $parcel->recipient_city,
+                "StreetAndNumber" => $parcel->recipient_adress,
+                "NotifyGSM" => $parcel->recipient_phone ?? null,
+                "NotifyEmail" => $parcel->recipient_email ?? null,
             ],
-            "CosigneeNotifyType" => 3,
-            "NumberOfCollies" => $parcel->num_of_parcel,
-            "UnitAmount" => $parcel->num_of_parcel,
+            "CosigneeNotifyType" => $notify_type,
+            "NumberOfCollies" => $parcel->parcel_count,
+            "UnitAmount" => $parcel->parcel_count,
             "Ref1" => $parcel->order_number,
-            "Ref3" => $parcel->sender_remark ?? null,
+            "Ref2" => $parcel->parcel_ref_1 ?? null,
             "CODValue" => !empty($parcel->cod_amount) ? $parcel->cod_amount : null,
             "CODCurrency" => !empty($parcel->cod_amount) ? 0 : null,
-            "DeliveryRemark" => $parcel->sender_remark ?? null,
-            "Remark" => $parcel->sender_remark ?? null,
+            "DeliveryRemark" => $parcel->parcel_remark ?? null,
+            "Remark" => $parcel->parcel_remark ?? null,
         ];
 
         if ($parcel->pudo_id) {
-            $location = DeliveryLocation::where('id', $parcel->pudo_id)->latest()->first();
+            $location = DeliveryLocation::where('id', $parcel->location_id)->latest()->first();
+
             $payload["DeliveryParcelShop"] = $location->location_id;
+            
             unset($payload["Cosignee"]["Zipcode"]);
             unset($payload["Cosignee"]["City"]);
             unset($payload["Cosignee"]["StreetAndNumber"]);
         }
-
-        \Log::info('Overseas parcel payload:', [
-            'courier' => $this->courier->name,
-            'country' => $this->courier->country->short,
-            'payload' => $payload
-        ]);
 
         return $payload;
     }
@@ -492,86 +502,94 @@ class OverseasController extends Controller
 
     protected function prepareCollectionPayload($parcel)
     {
+        $additionalServicesIds = explode(',', $parcel->additional_services);
+        
+        $notify_type = 0;
+
+        foreach ($additionalServicesIds as $additionalServiceId) {
+            if ($additionalServiceId == "SMS") {
+                $notify_type += 2;
+            }
+
+            if ($additionalServiceId == "EMAIL") {
+                $notify_type += 1;
+            }
+        }
+
         return [
             "Sender" => [
-                "Name" => $parcel->cname1,
+                "Name" => $parcel->sender_name,
                 "CountryCode" => strtoupper($this->courier->country->short),
-                "Zipcode" => $parcel->cpostal,
-                "City" => $parcel->ccity,
-                "StreetAndNumber" => $parcel->cstreet,
-                "NotifyGSM" => $parcel->cphone,
-                "NotifyEmail" => $parcel->cemail,
+                "Zipcode" => $parcel->sender_postal_code,
+                "City" => $parcel->sender_city,
+                "StreetAndNumber" => $parcel->sender_adress,
+                "NotifyGSM" => $parcel->sender_phone,
+                "NotifyEmail" => $parcel->sender_email,
             ],
             "Cosignee" => [
-                "Name" => $parcel->name1,
+                "Name" => $parcel->recipient_name,
                 "CountryCode" => strtoupper($this->courier->country->short),
-                "Zipcode" => $parcel->pcode,
-                "City" => $parcel->city,
-                "StreetAndNumber" => $parcel->rPropNum,
-                "NotifyGSM" => $parcel->phone,
-                "NotifyEmail" => $parcel->email,
+                "Zipcode" => $parcel->recipient_postal_code,
+                "City" => $parcel->recipient_city,
+                "StreetAndNumber" => $parcel->recipient_adress,
+                "NotifyGSM" => $parcel->recipient_phone,
+                "NotifyEmail" => $parcel->recipient_email,
             ],
             "IsSenderNonCustomer" => true,
-            "CosigneeNotifyType" => 0,
-            "NumberOfCollies" => $parcel->num_of_parcel,
-            "UnitAmount" => $parcel->num_of_parcel,
+            "CosigneeNotifyType" => $notify_type,
+            "NumberOfCollies" => $parcel->parcel_count,
+            "UnitAmount" => $parcel->parcel_count,
             "Ref1" => $parcel->order_number
         ];
     }
 
     protected function validateParcel($parcel)
     {
-        $rules = [
-            'name1' => 'required|string|max:255',
-            'pcode' => 'required|string|max:5|regex:/^[0-9]+$/',
-            'city' => 'required|string|max:255',
-            'rPropNum' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'num_of_parcel' => 'required|integer|min:1',
+        $rules = [ 
+            'recipient_name' => 'required|string|max:255',
+            'recipient_phone' => 'nullable|string|max:20',
+            'recipient_email' => 'nullable|email|max:255',
+            'recipient_adress' => 'required|string|max:255',
+            'recipient_city' => 'required|string|max:255',
+            'recipient_postal_code' => 'required|string|max:5|regex:/^[0-9]+$/',
+        
             'order_number' => 'required|string|max:50',
-            'sender_remark' => 'nullable|string|max:255',
+            'parcel_remark' => 'nullable|string|max:255',
             'cod_amount' => 'nullable|numeric|min:0',
+            'cod_currency' => 'nullable|string|size:3',
+            'location_id' => 'nullable|string|max:50',
+            'parcel_count' => 'required|integer|min:1',
+
+            'additional_services' => 'nullable|string|max:255',
+        
+            'parcel_ref_1' => 'nullable|string|max:100',
         ];
+        
+        
+        $messages = [ 
+            'recipient_name.required' => 'Ime primatelja je obavezno',
+            'recipient_email.email' => 'Email primatelja mora biti ispravan',
+            'recipient_adress.required' => 'Adresa primatelja je obavezna',
+            'recipient_city.required' => 'Grad primatelja je obavezan',
+            'recipient_postal_code.required' => 'Poštanski broj primatelja je obavezan',
+            'recipient_postal_code.regex' => 'Poštanski broj primatelja smije sadržavati samo brojeve',
 
-        $messages = [
-            'name1.required' => 'Ime i prezime je obavezno',
-            'name1.string' => 'Ime i prezime mora biti tekst',
-            'name1.max' => 'Ime i prezime ne smije biti duže od 255 znakova',
+            'parcel_count.required' => 'Broj paketa je obavezan',
+            'parcel_count.integer' => 'Broj paketa mora biti cijeli broj',
+            'parcel_count.min' => 'Broj paketa mora biti barem 1',
 
-            'pcode.required' => 'Poštanski broj je obavezan',
-            'pcode.string' => 'Poštanski broj mora biti tekst',
-            'pcode.max' => 'Poštanski broj ne smije biti duži od 5 znakova',
-            'pcode.regex' => 'Poštanski broj smije sadržavati samo brojeve',
-
-            'city.required' => 'Grad je obavezan',
-            'city.string' => 'Grad mora biti tekst',
-            'city.max' => 'Grad ne smije biti duži od 255 znakova',
-
-            'rPropNum.required' => 'Adresa je obavezna',
-            'rPropNum.string' => 'Adresa mora biti tekst',
-            'rPropNum.max' => 'Adresa ne smije biti duža od 255 znakova',
-
-            'phone.string' => 'Telefon mora biti tekst',
-            'phone.max' => 'Telefon ne smije biti duži od 20 znakova',
-
-            'email.email' => 'Email mora biti u ispravnom formatu',
-            'email.max' => 'Email ne smije biti duži od 255 znakova',
-
-            'num_of_parcel.required' => 'Broj paketa je obavezan',
-            'num_of_parcel.integer' => 'Broj paketa mora biti cijeli broj',
-            'num_of_parcel.min' => 'Broj paketa mora biti veći od 0',
-
-            'order_number.required' => 'Broj narudžbe je obavezan',
-            'order_number.string' => 'Broj narudžbe mora biti tekst',
-            'order_number.max' => 'Broj narudžbe ne smije biti duži od 50 znakova',
-
-            'sender_remark.string' => 'Napomena mora biti tekst',
-            'sender_remark.max' => 'Napomena ne smije biti duža od 255 znakova',
-
-            'cod_amount.numeric' => 'Iznos COD-a mora biti broj',
-            'cod_amount.min' => 'Iznos COD-a mora biti veći od 0',
+            'parcel_remark.string' => 'Napomena uz paket mora biti tekst',
+            'cod_amount.numeric' => 'Iznos pouzeća mora biti broj',
+            'cod_currency.size' => 'Valuta pouzeća mora sadržavati 3 slova (npr. HRK)',
+        
+            'location_id.string' => 'ID lokacije mora biti tekst',
+        
+            'additional_services.string' => 'Dodatne usluge moraju biti tekst',
+        
+            'parcel_ref_1.string' => 'Referenca 1 mora biti tekst',
         ];
+        
+        
 
         $validator = Validator::make((array) $parcel, $rules, $messages);
 
@@ -585,77 +603,74 @@ class OverseasController extends Controller
     protected function validateCollection($parcel)
     {
         $rules = [
-            'cname1' => 'required|string|max:255',
-            'cpostal' => 'required|string|max:5|regex:/^[0-9]+$/',
-            'ccity' => 'required|string|max:255',
-            'cstreet' => 'required|string|max:255',
-            'cphone' => 'nullable|string|max:20',
-            'cemail' => 'nullable|email|max:255',
-            'name1' => 'required|string|max:255',
-            'pcode' => 'required|string|max:5|regex:/^[0-9]+$/',
-            'city' => 'required|string|max:255',
-            'rPropNum' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'num_of_parcel' => 'required|integer|min:1',
+            'recipient_name' => 'required|string|max:255',
+            'recipient_phone' => 'nullable|string|max:20',
+            'recipient_email' => 'nullable|email|max:255',
+            'recipient_adress' => 'required|string|max:255',
+            'recipient_city' => 'required|string|max:255',
+            'recipient_postal_code' => 'required|string|max:5|regex:/^[0-9]+$/',
+
             'order_number' => 'required|string|max:50',
+            'parcel_value' => 'nullable|numeric|min:0',
+            'parcel_weight' => 'nullable|numeric|min:0',
+            'parcel_remark' => 'nullable|string|max:255',
+            'parcel_count' => 'required|integer|min:1',
+
+            'sender_name' => 'required|string|max:255',
+            'sender_phone' => 'required|string|max:20',
+            'sender_email' => 'required|email|max:255',
+            'sender_adress' => 'required|string|max:255',
+            'sender_city' => 'required|string|max:255',
+            'sender_postal_code' => 'required|string|max:5|regex:/^[0-9]+$/',
+
+            'additional_services' => 'nullable|string|max:255',
         ];
+
 
         $messages = [
-            'cname1.required' => 'Ime i prezime pošiljatelja je obavezno',
-            'cname1.string' => 'Ime i prezime pošiljatelja mora biti tekst',
-            'cname1.max' => 'Ime i prezime pošiljatelja ne smije biti duže od 255 znakova',
+            'sender_name.required' => 'Ime pošiljatelja je obavezno',
+            'sender_name.string' => 'Ime pošiljatelja mora biti tekst',
+            'sender_name.max' => 'Ime pošiljatelja ne smije biti duže od 255 znakova',
 
-            'cpostal.required' => 'Poštanski broj pošiljatelja je obavezan',
-            'cpostal.string' => 'Poštanski broj pošiljatelja mora biti tekst',
-            'cpostal.max' => 'Poštanski broj pošiljatelja ne smije biti duži od 5 znakova',
-            'cpostal.regex' => 'Poštanski broj pošiljatelja smije sadržavati samo brojeve',
+            'sender_phone.required' => 'Telefon pošiljatelja je obavezan',
+            'sender_phone.string' => 'Telefon pošiljatelja mora biti tekst',
+            'sender_phone.max' => 'Telefon pošiljatelja ne smije biti duži od 20 znakova',
 
-            'ccity.required' => 'Grad pošiljatelja je obavezan',
-            'ccity.string' => 'Grad pošiljatelja mora biti tekst',
-            'ccity.max' => 'Grad pošiljatelja ne smije biti duži od 255 znakova',
+            'sender_email.required' => 'Email pošiljatelja je obavezan',
+            'sender_email.email' => 'Email pošiljatelja mora biti u ispravnom formatu',
+            'sender_email.max' => 'Email pošiljatelja ne smije biti duži od 255 znakova',
 
-            'cstreet.required' => 'Adresa pošiljatelja je obavezna',
-            'cstreet.string' => 'Adresa pošiljatelja mora biti tekst',
-            'cstreet.max' => 'Adresa pošiljatelja ne smije biti duža od 255 znakova',
+            'sender_adress.required' => 'Adresa pošiljatelja je obavezna',
+            'sender_adress.string' => 'Adresa pošiljatelja mora biti tekst',
+            'sender_adress.max' => 'Adresa pošiljatelja ne smije biti duža od 255 znakova',
 
-            'cphone.string' => 'Telefon pošiljatelja mora biti tekst',
-            'cphone.max' => 'Telefon pošiljatelja ne smije biti duži od 20 znakova',
+            'sender_city.required' => 'Grad pošiljatelja je obavezan',
+            'sender_city.string' => 'Grad pošiljatelja mora biti tekst',
+            'sender_city.max' => 'Grad pošiljatelja ne smije biti duži od 255 znakova',
 
-            'cemail.email' => 'Email pošiljatelja mora biti u ispravnom formatu',
-            'cemail.max' => 'Email pošiljatelja ne smije biti duži od 255 znakova',
+            'sender_postal_code.required' => 'Poštanski broj pošiljatelja je obavezan',
+            'sender_postal_code.string' => 'Poštanski broj pošiljatelja mora biti tekst',
+            'sender_postal_code.regex' => 'Poštanski broj pošiljatelja smije sadržavati samo brojeve',
 
-            'name1.required' => 'Ime i prezime primatelja je obavezno',
-            'name1.string' => 'Ime i prezime primatelja mora biti tekst',
-            'name1.max' => 'Ime i prezime primatelja ne smije biti duže od 255 znakova',
+            'recipient_name.required' => 'Ime primatelja je obavezno',
+            'recipient_email.email' => 'Email primatelja mora biti ispravan',
+            'recipient_adress.required' => 'Adresa primatelja je obavezna',
+            'recipient_city.required' => 'Grad primatelja je obavezan',
+            'recipient_postal_code.required' => 'Poštanski broj primatelja je obavezan',
+            'recipient_postal_code.regex' => 'Poštanski broj primatelja smije sadržavati samo brojeve',
 
-            'pcode.required' => 'Poštanski broj primatelja je obavezan',
-            'pcode.string' => 'Poštanski broj primatelja mora biti tekst',
-            'pcode.max' => 'Poštanski broj primatelja ne smije biti duži od 5 znakova',
-            'pcode.regex' => 'Poštanski broj primatelja smije sadržavati samo brojeve',
+            'parcel_count.required' => 'Broj paketa je obavezan',
+            'parcel_count.integer' => 'Broj paketa mora biti cijeli broj',
+            'parcel_count.min' => 'Broj paketa mora biti barem 1',
 
-            'city.required' => 'Grad primatelja je obavezan',
-            'city.string' => 'Grad primatelja mora biti tekst',
-            'city.max' => 'Grad primatelja ne smije biti duži od 255 znakova',
+            'parcel_value.numeric' => 'Vrijednost paketa mora biti broj',
+            'parcel_weight.numeric' => 'Težina paketa mora biti broj',
+            'parcel_remark.string' => 'Napomena uz paket mora biti tekst',
 
-            'rPropNum.required' => 'Adresa primatelja je obavezna',
-            'rPropNum.string' => 'Adresa primatelja mora biti tekst',
-            'rPropNum.max' => 'Adresa primatelja ne smije biti duža od 255 znakova',
-
-            'phone.string' => 'Telefon primatelja mora biti tekst',
-            'phone.max' => 'Telefon primatelja ne smije biti duži od 20 znakova',
-
-            'email.email' => 'Email primatelja mora biti u ispravnom formatu',
-            'email.max' => 'Email primatelja ne smije biti duži od 255 znakova',
-
-            'num_of_parcel.required' => 'Broj paketa je obavezan',
-            'num_of_parcel.integer' => 'Broj paketa mora biti cijeli broj',
-            'num_of_parcel.min' => 'Broj paketa mora biti veći od 0',
-
-            'order_number.required' => 'Broj narudžbe je obavezan',
-            'order_number.string' => 'Broj narudžbe mora biti tekst',
-            'order_number.max' => 'Broj narudžbe ne smije biti duži od 50 znakova',
+            'additional_services.string' => 'Dodatne usluge moraju biti tekst',
         ];
+
+
 
         $validator = Validator::make((array) $parcel, $rules, $messages);
 
