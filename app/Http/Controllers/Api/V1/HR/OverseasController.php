@@ -475,7 +475,9 @@ class OverseasController extends Controller
         if ($parcel->pudo_id) {
             $location = DeliveryLocation::where('id', $parcel->pudo_id)->latest()->first();
             $payload["DeliveryParcelShop"] = $location->location_id;
-            unset($payload["Cosignee"]); // ukloni jer Overseas ne želi Cosignee za paketomat
+            unset($payload["Cosignee"]["Zipcode"]);
+            unset($payload["Cosignee"]["City"]);
+            unset($payload["Cosignee"]["StreetAndNumber"]);
         }
 
         \Log::info('Overseas parcel payload:', [
