@@ -474,9 +474,15 @@ class OverseasController extends Controller
         ];
 
         if ($parcel->pudo_id) {
-            $location_id = DeliveryLocation::where('location_id', $parcel->pudo_id)->first();
+            $location = DeliveryLocation::where('location_id', $parcel->pudo_id)->latest()->first();
 
-            $payload["DeliveryParcelShop"] = $location_id;
+            $payload["DeliveryParcelShop"] = $location->id;
+            $payload["Cosignee"] = [
+                "Name" => $location->name,
+                "Zipcode" => $location->postal_code,
+                "City" => $location->place,
+                "StreetAndNumber" => $location->street . ' ' . $location->house_number
+            ];
         }
 
         return $payload;
