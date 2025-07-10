@@ -484,7 +484,11 @@ class OverseasController extends Controller
                 "StreetAndNumber" => $location->street . ' ' . $location->house_number
             ];
         }
-
+        \Log::info('Overseas parcel payload:', [
+            'courier' => $this->courier->name,
+            'country' => $this->courier->country->short,
+            'payload' => $payload
+        ]);
         return $payload;
     }
 
