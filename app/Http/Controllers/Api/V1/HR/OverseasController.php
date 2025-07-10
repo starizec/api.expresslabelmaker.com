@@ -468,29 +468,25 @@ class OverseasController extends Controller
             "Ref3" => $parcel->sender_remark ?? null,
             "CODValue" => !empty($parcel->cod_amount) ? $parcel->cod_amount : null,
             "CODCurrency" => !empty($parcel->cod_amount) ? 0 : null,
-
             "DeliveryRemark" => $parcel->sender_remark ?? null,
             "Remark" => $parcel->sender_remark ?? null,
         ];
 
         if ($parcel->pudo_id) {
             $location = DeliveryLocation::where('id', $parcel->pudo_id)->latest()->first();
-
             $payload["DeliveryParcelShop"] = $location->location_id;
-            $payload["Cosignee"] = [
-                "Name" => $location->name,
-                "Zipcode" => $location->postal_code,
-                "City" => $location->place,
-                "StreetAndNumber" => $location->street . ' ' . $location->house_number
-            ];
+            unset($payload["Cosignee"]); // ukloni jer Overseas ne želi Cosignee za paketomat
         }
+
         \Log::info('Overseas parcel payload:', [
             'courier' => $this->courier->name,
             'country' => $this->courier->country->short,
             'payload' => $payload
         ]);
+
         return $payload;
     }
+
 
     protected function prepareCollectionPayload($parcel)
     {
