@@ -84,14 +84,14 @@ class OverseasController extends Controller
             );
 
             return response()->json([
-                "errors" => 
-                [
+                "errors" =>
                     [
-                        'order_number' => $parcel->order_number ?? 'unknown',
-                        'error_message' => 'Overseas poruka: ' . $error_message,
-                        'error_code' => '601'
+                        [
+                            'order_number' => $parcel->order_number ?? 'unknown',
+                            'error_message' => 'Overseas poruka: ' . $error_message,
+                            'error_code' => '601'
+                        ]
                     ]
-                ]
             ], $parcelResponse->status());
         }
 
@@ -181,7 +181,7 @@ class OverseasController extends Controller
                 continue;
             }
 
-            
+
             $parcelResponse = Http::withoutVerifying()->post(
                 config('urls.hr.overseas') . "/createshipment?apikey=$user->apiKey",
                 $this->prepareParcelPayload($parcel->parcel)
@@ -286,8 +286,9 @@ class OverseasController extends Controller
         }
 
         ApiUsageLogger::apiUsage(
-            $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain, 
-            $request);
+            $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain,
+            $request
+        );
 
         return response()->json([
             "data" => [
@@ -450,7 +451,7 @@ class OverseasController extends Controller
 
     protected function prepareParcelPayload($parcel)
     {
-        return [
+        $payload = [
             "Cosignee" => [
                 "Name" => $parcel->name1,
                 "CountryCode" => strtoupper($this->courier->country->short),
@@ -471,6 +472,14 @@ class OverseasController extends Controller
             "DeliveryRemark" => $parcel->sender_remark ?? null,
             "Remark" => $parcel->sender_remark ?? null,
         ];
+
+        if ($parcel->pudo_id) {
+            $location = DeliveryLocation::where('location_id', $parcel->pudo_id)->first();
+
+            $payload["DeliveryParcelShop"] = $location->id;
+        }
+
+        return $payload;
     }
 
     protected function prepareCollectionPayload($parcel)
