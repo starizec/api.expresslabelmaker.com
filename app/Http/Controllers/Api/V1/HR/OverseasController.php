@@ -472,7 +472,7 @@ class OverseasController extends Controller
             "Remark" => $parcel->sender_remark ?? null,
         ];
 
-        if ($parcel->pudo_id) {
+        if (isset($parcel->pudo_id) && $parcel->pudo_id) {
             $location = DeliveryLocation::where('id', $parcel->pudo_id)->latest()->first();
             $payload["DeliveryParcelShop"] = $location->location_id;
             unset($payload["Cosignee"]["Zipcode"]);
