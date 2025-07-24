@@ -10,7 +10,7 @@ return (function () {
                 'overseas' => 'https://api.overseas.hr',
                 'hp-auth' => 'https://dxwebapi.posta.hr:9000/api',
                 'hp' => 'https://dxwebapi.posta.hr:9020/api',
-                'gls' => 'https://api.test.mygls.hr'
+                'gls' => 'https://api.mygls.hr'
             ],
             'si' => [
                 'dpd' => 'https://easyship.si/api'
