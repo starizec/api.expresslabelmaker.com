@@ -381,6 +381,7 @@ class GlsController extends Controller
 
     public function getParcelStatus(Request $request)
     {
+        \Log::info('GlsController@getParcelStatus');
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
 
@@ -402,6 +403,8 @@ class GlsController extends Controller
                         "LanguageIsoCode" => "HR"
                     ]
                 );
+
+            \Log::info('GlsController@getParcelStatus', ['statusResponse' => $statusResponse->body()]);
 
 
             $statusResponseJson = json_decode($statusResponse->body());
