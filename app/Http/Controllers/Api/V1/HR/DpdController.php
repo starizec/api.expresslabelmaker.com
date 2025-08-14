@@ -518,7 +518,7 @@ class DpdController extends Controller
             'sender_country' => 'nullable|string|size:2',
 
             // Kurir/usluge
-            'delivery_sevice' => 'required|string|max:20',
+            'delivery_service' => 'required|string|max:20',
             'delivery_additional_services' => 'nullable|string|max:255',
             'parcel_size' => 'nullable|string|max:20',
             'printer_type' => 'nullable|string|max:20',
@@ -554,7 +554,7 @@ class DpdController extends Controller
             'parcel_count.min' => 'Broj paketa mora biti najmanje 1.',
             'delivery_type.required' => 'Način dostave je obavezan.',
             'location_id.required_if' => 'Za dostavu u paketomat potrebno je poslati location_id.',
-            'delivery_sevice.required' => 'DPD usluga (npr. B2C/B2B) je obavezna.',
+            'delivery_service.required' => 'DPD usluga (npr. B2C/B2B) je obavezna.',
             'parcel_weight.min' => 'Težina mora biti veća od 0.',
             'parcel_remark.max' => 'Napomena može imati najviše 50 znakova.',
         ];
