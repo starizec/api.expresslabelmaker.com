@@ -34,7 +34,7 @@ class UserService
             ];
         }
 
-        $licence = Licence::where('licence_uid', $user->licence)->first();
+        $licence = Licence::where('licence_uid', $user->licence)->latest()->first();
 
         //Postoji li user iz licence
         $user_l = User::find($licence->user_id);
