@@ -462,14 +462,14 @@ class OverseasController extends Controller
                 "NotifyEmail" => $parcel->email ?? null,
             ],
             "CosigneeNotifyType" => 3,
-            "NumberOfCollies" => $parcel->num_of_parcel,
-            "UnitAmount" => $parcel->num_of_parcel,
-            "Ref1" => $parcel->order_number,
-            "Ref3" => $parcel->sender_remark ?? null,
-            "CODValue" => !empty($parcel->cod_amount) ? $parcel->cod_amount : null,
-            "CODCurrency" => !empty($parcel->cod_amount) ? 0 : null,
-            "DeliveryRemark" => $parcel->sender_remark ?? null,
-            "Remark" => $parcel->sender_remark ?? null,
+            "NumberOfCollies" => (int) $parcel->num_of_parcel,
+            "UnitAmount" => (float) $parcel->num_of_parcel,
+            "Ref1" => (string) $parcel->order_number,
+            "Ref3" => (string) $parcel->sender_remark ?? null,
+            "CODValue" => (float) !empty($parcel->cod_amount) ? $parcel->cod_amount : null,
+            "CODCurrency" => (int) !empty($parcel->cod_amount) ? 0 : null,
+            "DeliveryRemark" => (string) $parcel->sender_remark ?? null,
+            "Remark" => (string) $parcel->sender_remark ?? null,
         ];
 
         if (isset($parcel->pudo_id) && $parcel->pudo_id) {
