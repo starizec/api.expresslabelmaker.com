@@ -475,9 +475,13 @@ class OverseasController extends Controller
         if (isset($parcel->pudo_id) && $parcel->pudo_id) {
             $location = DeliveryLocation::where('id', $parcel->pudo_id)->latest()->first();
             $payload["DeliveryParcelShop"] = $location->location_id;
-            unset($payload["Cosignee"]["Zipcode"]);
-            unset($payload["Cosignee"]["City"]);
-            unset($payload["Cosignee"]["StreetAndNumber"]);
+            $payload["Cosignee"]["StreetAndNumber"] = $location->street;
+            $payload["Cosignee"]["Zipcode"] = $location->postal_code;
+            $payload["Cosignee"]["City"] = $location->place;
+
+            //unset($payload["Cosignee"]["Zipcode"]);
+            //unset($payload["Cosignee"]["City"]);
+            //unset($payload["Cosignee"]["StreetAndNumber"]);
         }
 
         \Log::info('Overseas parcel payload:', [
