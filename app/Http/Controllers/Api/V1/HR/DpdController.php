@@ -456,7 +456,6 @@ class DpdController extends Controller
             "parcel_type" => $delivery_service,
             "cod_amount" => !empty($parcel->cod_amount) ? (float) $parcel->cod_amount : null,
             "cod_purpose" => !empty($parcel->cod_amount) ? ($parcel->order_number ?? 'COD') : null,
-            "pudo_id" => $parcel->location_id ? $location->location_id : null,
             "predict" => 0,
         ];
 
@@ -472,6 +471,10 @@ class DpdController extends Controller
                     $payload['predict'] = 1;
                 }
             }
+        }
+
+        if ($location->location_id) {
+            $payload['pudo_id'] = $location->location_id;
         }
 
         Log::info('DPD Payload: ' . json_encode($payload));
