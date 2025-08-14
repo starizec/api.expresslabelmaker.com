@@ -581,11 +581,7 @@ class DpdController extends Controller
         foreach ($parcels as $parcel) {
             $statusResponse = Http::withoutVerifying()
                 ->post(
-                    config('urls.hr.dpd') . "/parcel/parcel_status",
-                    [
-                        "secret" => "FcJyN7vU7WKPtUh7m1bx",
-                        "parcel_number" => $parcel->parcel_number,
-                    ]
+                    config('urls.hr.dpd') . "/parcel/parcel_status?secret=FcJyN7vU7WKPtUh7m1bx&parcel_number=$parcel->parcel_number"
                 );
             Log::info('DPD Status Response: ' . json_encode($statusResponse));
             $statusResponseJson = json_decode($statusResponse->body());
