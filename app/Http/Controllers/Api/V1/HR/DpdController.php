@@ -592,7 +592,7 @@ class DpdController extends Controller
                 "parcel_number" => $parcel->parcel_number,
                 "status_message" => $statusResponseJson->parcel_status,
                 "status_code" => "",
-                "status_date" => now()->format('Y-m-d\TH:i:s'),,
+                "status_date" => now()->format('Y-m-d\TH:i:s'),
                 "color" => "#fff"
             ];
         }

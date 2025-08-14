@@ -681,4 +681,43 @@ class OverseasController extends Controller
         return true;
     }
 
+    public function getParcelStatus(Request $request)
+    {
+        $requestBody = $request->getContent();
+        $jsonData = json_decode($requestBody);
+
+        $this->user = $jsonData->user;
+        $parcels = $jsonData->parcels;
+
+        $status_response = [];
+
+        foreach ($parcels as $parcel) {
+            $statusResponse = Http::withoutVerifying()
+                ->post(
+                    config('urls.hr.overseas') . "/parcel/parcel_status",
+                    [
+                        "secret" => "FcJyN7vU7WKPtUh7m1bx",
+                        "parcel_number" => $parcel->parcel_number,
+                    ]
+                );
+
+            $statusResponseJson = json_decode($statusResponse->body());
+
+            $status_response[] = [
+                "order_number" => $parcel->order_number,
+                "parcel_number" => $parcel->parcel_number,
+                "status_message" => $statusResponseJson->parcel_status,
+                "status_code" => "",
+                "status_date" => now()->format('Y-m-d\TH:i:s'),,
+                "color" => "#fff"
+            ];
+        }
+
+        return response()->json([
+            "data" => [
+                "statuses" => $status_response
+            ]
+        ], 201);
+    }
+
 }
