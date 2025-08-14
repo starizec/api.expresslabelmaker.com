@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 use App\Services\UserService;
 use App\Services\Logger\ApiErrorLogger;
 use App\Services\Logger\ApiUsageLogger;
+use Illuminate\Support\Facades\Log;
 use App\Services\AdressService;
 use App\Models\DeliveryLocationHeader;
 use App\Models\DeliveryLocation;
@@ -475,6 +476,8 @@ class DpdController extends Controller
                 $payload['predict'] = 1;
             }
         }
+
+        Log::info($payload);
 
         return $payload;
     }
