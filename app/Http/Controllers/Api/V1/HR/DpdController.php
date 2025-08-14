@@ -477,7 +477,7 @@ class DpdController extends Controller
             }
         }
 
-        Log::info($payload);
+        Log::info('DPD Payload: ' . json_encode($payload));
 
         return $payload;
     }
