@@ -413,8 +413,6 @@ class DpdController extends Controller
     {
         $recipient_adress = AdressService::splitAddress($parcel->recipient_adress);
 
-        $additionalServicesIds = explode(',', $parcel->additional_services);
-
         switch ($parcel->delivery_service) {
             case "B2C":
                 if ($parcel->cod_amount > 0) {
@@ -469,13 +467,17 @@ class DpdController extends Controller
             "predict" => 0,
         ];
 
-        foreach ($additionalServicesIds as $additionalService) {
-            if ($additionalService == "INS") {
-                $payload['parcel_insurance'] = !empty($parcel->parcel_value) ? (float) $parcel->parcel_value : null;
-            }
+        if (isset($parcel->additional_services)) {
+            $additionalServicesIds = explode(',', $parcel->additional_services);
 
-            if ($additionalService == "NOTIFY") {
-                $payload['predict'] = 1;
+            foreach ($additionalServicesIds as $additionalService) {
+                if ($additionalService == "INS") {
+                    $payload['parcel_insurance'] = !empty($parcel->parcel_value) ? (float) $parcel->parcel_value : null;
+                }
+
+                if ($additionalService == "NOTIFY") {
+                    $payload['predict'] = 1;
+                }
             }
         }
 
