@@ -38,6 +38,8 @@ class DpdController extends Controller
         $user = $jsonData->user;
         $parcel = $jsonData->parcel;
 
+        Log::info('DPD Request: ' . json_encode($parcel));
+
         try {
             $this->validateParcel($parcel);
         } catch (ValidationException $e) {
