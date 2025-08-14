@@ -406,78 +406,78 @@ class DpdController extends Controller
         ], 201);
     }
 
-        protected function prepareParcelPayload($parcel)
-        {
-            $recipient_adress = AdressService::splitAddress($parcel->recipient_adress);
+    protected function prepareParcelPayload($parcel)
+    {
+        $recipient_adress = AdressService::splitAddress($parcel->recipient_adress);
 
-            $additionalServicesIds = explode(',', $parcel->additional_services);
+        $additionalServicesIds = explode(',', $parcel->additional_services);
 
-            switch ($parcel->delivery_service) {
-                case "B2C":
-                    if ($parcel->cod_amount > 0) {
-                        $delivery_service = "D-COD-B2C";
-                    } else if (isset($parcel->location_id)) {
-                        $delivery_service = "D-B2C-PSD";
-                    } else {
-                        $delivery_service = "D-B2C";
-                    }
-                    break;
-                case "B2B":
-                    if ($parcel->cod_amount > 0) {
-                        $delivery_service = "D-COD";
-                    } else {
-                        $delivery_service = "D";
-                    }
-                    break;
-                case "TYRE":
-                    $delivery_service = "D-TYRE";
-                    break;
-                case "TYRE-B2C":
-                    $delivery_service = "D-TYRE-B2C";
-                    break;
-                case "PAL":
-                    $delivery_service = "PAL";
-                    break;
-                case "SWAP":
-                    $delivery_service = "D-SWAP";
-                    break;
-            }
-
-            $location = DeliveryLocation::where('id', $parcel->location_id)->latest()->first();
-
-            $payload = [
-                "name1" => $parcel->recipient_name,
-                "street" => $recipient_adress['street'],
-                "rPropNum" => $recipient_adress['house_number'],
-                "city" => $parcel->recipient_city,
-                "country" => strtoupper($this->courier->country->short),
-                "pcode" => $parcel->recipient_postal_code,
-                "email" => $parcel->recipient_email ?? null,
-                "phone" => $parcel->recipient_phone ?? null,
-                "contact" => $parcel->recipient_name ?? null,
-                "sender_remark" => $parcel->parcel_remark ?? null,
-                "weight" => !empty($parcel->parcel_weight) ? (float) $parcel->parcel_weight : null,
-                "num_of_parcel" => (int) $parcel->parcel_count,
-                "order_number" => $parcel->order_number ?? null,
-                "parcel_type" => $delivery_service,
-                "cod_amount" => !empty($parcel->cod_amount) ? (float) $parcel->cod_amount : null,
-                "cod_purpose" => $parcel->parcel_remark ?? null,
-                "pudo_id" => $parcel->location_id ? $location->location_id : null,
-                "predict" => 0,
-            ];
-
-            foreach ($additionalServicesIds as $additionalService) {
-                if ($additionalService == "INS") {
-                    $payload['parcel_insurance'] = !empty($parcel->parcel_value) ? (float) $parcel->parcel_value : null;
+        switch ($parcel->delivery_service) {
+            case "B2C":
+                if ($parcel->cod_amount > 0) {
+                    $delivery_service = "D-COD-B2C";
+                } else if (isset($parcel->location_id)) {
+                    $delivery_service = "D-B2C-PSD";
+                } else {
+                    $delivery_service = "D-B2C";
                 }
-
-                if ($additionalService == "NOTIFY") {
-                    $payload['predict'] = 1;
+                break;
+            case "B2B":
+                if ($parcel->cod_amount > 0) {
+                    $delivery_service = "D-COD";
+                } else {
+                    $delivery_service = "D";
                 }
-            }
-
-            return $payload;
+                break;
+            case "TYRE":
+                $delivery_service = "D-TYRE";
+                break;
+            case "TYRE-B2C":
+                $delivery_service = "D-TYRE-B2C";
+                break;
+            case "PAL":
+                $delivery_service = "PAL";
+                break;
+            case "SWAP":
+                $delivery_service = "D-SWAP";
+                break;
         }
+
+        $location = DeliveryLocation::where('id', $parcel->location_id)->latest()->first();
+
+        $payload = [
+            "name1" => $parcel->recipient_name,
+            "street" => $recipient_adress['street'],
+            "rPropNum" => $recipient_adress['house_number'],
+            "city" => $parcel->recipient_city,
+            "country" => strtoupper($parcel->recipient_country),
+            "pcode" => $parcel->recipient_postal_code,
+            "email" => $parcel->recipient_email ?? null,
+            "phone" => $parcel->recipient_phone ?? null,
+            "contact" => $parcel->recipient_name ?? null,
+            "sender_remark" => $parcel->parcel_remark ?? null,
+            "weight" => !empty($parcel->parcel_weight) ? (float) $parcel->parcel_weight : null,
+            "num_of_parcel" => (int) $parcel->parcel_count,
+            "order_number" => $parcel->order_number ?? null,
+            "parcel_type" => $delivery_service,
+            "cod_amount" => !empty($parcel->cod_amount) ? (float) $parcel->cod_amount : null,
+            "cod_purpose" => !empty($parcel->cod_amount) ? ($parcel->order_number ?? 'COD') : null,
+            "pudo_id" => $parcel->location_id ? $location->location_id : null,
+            "predict" => 0,
+        ];
+
+        foreach ($additionalServicesIds as $additionalService) {
+            if ($additionalService == "INS") {
+                $payload['parcel_insurance'] = !empty($parcel->parcel_value) ? (float) $parcel->parcel_value : null;
+            }
+
+            if ($additionalService == "NOTIFY") {
+                $payload['predict'] = 1;
+            }
+        }
+
+        return $payload;
+    }
 
     protected function validateParcel($parcel)
     {
