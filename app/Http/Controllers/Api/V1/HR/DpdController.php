@@ -20,6 +20,7 @@ use App\Models\Courier;
 class DpdController extends Controller
 {
     protected $courier;
+    protected $user;
 
     public function __construct()
     {
@@ -35,7 +36,7 @@ class DpdController extends Controller
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
 
-        $user = $jsonData->user;
+        $this->user = $jsonData->user;
         $parcel = $jsonData->parcel;
 
         Log::info('DPD Request: ' . json_encode($parcel));
@@ -46,7 +47,7 @@ class DpdController extends Controller
             $error_message = implode(' | ', collect($e->errors())->flatten()->all());
 
             ApiErrorLogger::apiError(
-                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
                 $request,
                 $error_message,
                 __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
@@ -66,7 +67,7 @@ class DpdController extends Controller
 
         $parcelResponse = Http::withoutVerifying()->post(config('urls.hr.dpd') .
             '/parcel/parcel_import?' .
-            "username=$user->username&password=$user->password&" .
+            "username=$this->user->username&password=$this->user->password&" .
             http_build_query($this->prepareParcelPayload($parcel)));
 
         $parcelResponseJson = json_decode($parcelResponse->body());
@@ -77,7 +78,7 @@ class DpdController extends Controller
                 : $parcelResponse->status() . " - DPD Server error";
 
             ApiErrorLogger::apiError(
-                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message . ' - Client',
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message . ' - Client',
                 $request,
                 $error_message,
                 __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
@@ -103,7 +104,7 @@ class DpdController extends Controller
             "content-type" => "application/x-www-form-urlencoded"
         ])->post(config('urls.hr.dpd') .
                 '/parcel/parcel_print?' .
-                "username=$user->username&password=$user->password&" .
+                "username=$this->user->username&password=$this->user->password&" .
                 "parcels=$pl_numbers");
 
         $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
@@ -114,7 +115,7 @@ class DpdController extends Controller
                 : $parcelLabelResponse->status() . " - DPD Server error";
 
             ApiErrorLogger::apiError(
-                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
                 $request,
                 $error_message,
                 __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
@@ -131,9 +132,9 @@ class DpdController extends Controller
             ], $parcelResponse->status());
         }
 
-        UserService::addUsage($user);
+        UserService::addUsage($this->user);
 
-        ApiUsageLogger::apiUsage($this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain, $request);
+        ApiUsageLogger::apiUsage($this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain, $request);
 
         return response()->json([
             "data" => [
@@ -148,7 +149,7 @@ class DpdController extends Controller
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
 
-        $user = $jsonData->user;
+        $this->user = $jsonData->user;
         $parcels = $jsonData->parcels;
 
         $data = [];
@@ -163,7 +164,7 @@ class DpdController extends Controller
                 $error_message = implode(' | ', collect($e->errors())->flatten()->all());
 
                 ApiErrorLogger::apiError(
-                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
                     $request,
                     $error_message,
                     __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
@@ -180,7 +181,7 @@ class DpdController extends Controller
 
             $parcelResponse = Http::withoutVerifying()->post(config('urls.hr.dpd') .
                 '/parcel/parcel_import?' .
-                "username=$user->username&password=$user->password&" .
+                "username=$this->user->username&password=$this->user->password&" .
                 http_build_query($this->prepareParcelPayload($parcel->parcel)));
 
             $parcelResponseJson = json_decode($parcelResponse->body());
@@ -191,14 +192,14 @@ class DpdController extends Controller
                     : $parcelResponse->status() . " - DPD Server error";
 
                 ApiErrorLogger::apiError(
-                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message . ' - Client',
+                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message . ' - Client',
                     $request,
                     $error_message,
                     __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
                 );
 
                 ApiErrorLogger::apiError(
-                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message . ' - Server',
+                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message . ' - Server',
                     $this->prepareParcelPayload($parcel->parcel),
                     $error_message,
                     __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
@@ -223,7 +224,7 @@ class DpdController extends Controller
                 "content-type" => "application/x-www-form-urlencoded"
             ])->post(config('urls.hr.dpd') .
                     '/parcel/parcel_print?' .
-                    "username=$user->username&password=$user->password&" .
+                    "username=$this->user->username&password=$this->user->password&" .
                     "parcels=$pl_numbers");
 
             $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
@@ -234,7 +235,7 @@ class DpdController extends Controller
                     : $parcelLabelResponse->status() . " - DPD Server error";
 
                 ApiErrorLogger::apiError(
-                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
                     $request,
                     $error_message,
                     __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
@@ -249,7 +250,7 @@ class DpdController extends Controller
                 continue;
             }
 
-            UserService::addUsage($user);
+            UserService::addUsage($this->user);
 
             $data[] = [
                 'order_number' => $parcel->order_number ?? 'unknown',
@@ -268,7 +269,7 @@ class DpdController extends Controller
                 "content-type" => "application/x-www-form-urlencoded"
             ])->post(config('urls.hr.dpd') .
                     '/parcel/parcel_print?' .
-                    "username=$user->username&password=$user->password&" .
+                    "username=$this->user->username&password=$this->user->password&" .
                     "parcels=$all_pl_numbers");
 
             $allParcelLabelResponseJson = json_decode($allParcelLabelResponse->body());
@@ -279,7 +280,7 @@ class DpdController extends Controller
                     : $allParcelLabelResponse->status() . " - DPD Server error";
 
                 ApiErrorLogger::apiError(
-                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                    $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
                     $request,
                     $error_message,
                     __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
@@ -297,7 +298,7 @@ class DpdController extends Controller
         }
 
         ApiUsageLogger::apiUsage(
-            $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain,
+            $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain,
             $request
         );
 
@@ -315,14 +316,14 @@ class DpdController extends Controller
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
 
-        $user = $jsonData->user;
+        $this->user = $jsonData->user;
         $parcel = $jsonData->parcel;
 
         $parcelResponse = Http::withoutVerifying()->accept('*/*')->withHeaders([
             "content-type" => "application/x-www-form-urlencoded"
         ])->post(config('urls.hr.dpd') .
                 '/collection_request/cr_import?' .
-                "username=$user->username&password=$user->password&" .
+                "username=$this->user->username&password=$this->user->password&" .
                 http_build_query($parcel));
 
         $parcelResponseJson = json_decode($parcelResponse->body());
@@ -335,7 +336,7 @@ class DpdController extends Controller
             $error_message = $parcelResponseJson->reference === null ? 'Missing parcel data.' : $error_message;
 
             ApiErrorLogger::apiError(
-                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message,
                 $request,
                 $error_message,
                 __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
@@ -354,7 +355,7 @@ class DpdController extends Controller
             ], $parcelResponse->status());
         }
 
-        UserService::addUsage($user);
+        UserService::addUsage($this->user);
 
         return response()->json([
             "data" => [
@@ -573,23 +574,28 @@ class DpdController extends Controller
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
 
-        $this->user = $jsonData->user;
+        $user = $jsonData->user;
         $parcels = $jsonData->parcels;
 
         $status_response = [];
-        Log::info('DPD Parcels: ' . json_encode($parcels));
+
         foreach ($parcels as $parcel) {
-            $statusResponse = Http::withoutVerifying()
-                ->post(
-                    config('urls.hr.dpd') . "/parcel/parcel_status?secret=FcJyN7vU7WKPtUh7m1bx&parcel_number=$parcel->parcel_number"
-                );
-            Log::info('DPD Status Response: ' . json_encode($statusResponse));
+            $parcelNumber = trim((string) ($parcel->parcel_number ?? ''));
+
+            $statusResponse = Http::withOptions(['verify' => false])
+                ->get('https://easyship.hr/api/parcel/parcel_status', [
+                    'secret' => 'FcJyN7vU7WKPtUh7m1bx',
+                    'parcel_number' => $parcelNumber,
+                    'username' => $user->username,
+                    'password' => $user->password,
+                ]);
+
             $statusResponseJson = json_decode($statusResponse->body());
 
             $status_response[] = [
                 "order_number" => $parcel->order_number,
                 "parcel_number" => $parcel->parcel_number,
-                "status_message" => $statusResponseJson->parcel_status,
+                "status_message" => $statusResponseJson->parcel_status ?? 'Unknown',
                 "status_code" => "",
                 "status_date" => now()->format('Y-m-d\TH:i:s'),
                 "color" => "#fff"
