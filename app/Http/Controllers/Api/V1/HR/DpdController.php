@@ -410,7 +410,7 @@ class DpdController extends Controller
             case "B2C":
                 if ($parcel->cod_amount > 0) {
                     $delivery_service = "D-COD-B2C";
-                } elseif (isset($parcel->location_id)) {
+                } elseif (isset($parcel->location_id) && $parcel->location_id != "") {
                     $delivery_service = "D-B2C-PSD";
                 } else {
                     $delivery_service = "D-B2C";
@@ -473,7 +473,7 @@ class DpdController extends Controller
             }
         }
 
-        if (isset($location->location_id)) {
+        if (isset($location->location_id) && $location->location_id != "") {
             $payload['pudo_id'] = $location->location_id;
         }
 
