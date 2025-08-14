@@ -83,13 +83,6 @@ class DpdController extends Controller
                 __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
             );
 
-            ApiErrorLogger::apiError(
-                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message . ' - Server',
-                $this->prepareParcelPayload($parcel),
-                $error_message,
-                __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
-            );
-
             return response()->json([
                 "errors" => [
                     [
