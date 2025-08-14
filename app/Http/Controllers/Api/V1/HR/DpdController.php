@@ -473,7 +473,7 @@ class DpdController extends Controller
             }
         }
 
-        if ($location->location_id) {
+        if (isset($location->location_id)) {
             $payload['pudo_id'] = $location->location_id;
         }
 
