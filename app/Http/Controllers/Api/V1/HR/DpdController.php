@@ -577,7 +577,7 @@ class DpdController extends Controller
         $parcels = $jsonData->parcels;
 
         $status_response = [];
-
+        Log::info('DPD Parcels: ' . json_encode($parcels));
         foreach ($parcels as $parcel) {
             $statusResponse = Http::withoutVerifying()
                 ->post(
@@ -587,7 +587,7 @@ class DpdController extends Controller
                         "parcel_number" => $parcel->parcel_number,
                     ]
                 );
-
+            Log::info('DPD Status Response: ' . json_encode($statusResponse));
             $statusResponseJson = json_decode($statusResponse->body());
 
             $status_response[] = [
