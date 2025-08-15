@@ -451,17 +451,20 @@ class OverseasController extends Controller
 
     protected function prepareParcelPayload($parcel)
     {
-        $additionalServicesIds = explode(',', $parcel->additional_services);
-        
+
+
         $notify_type = 0;
+        if (isset($parcel->additional_services)) {
+            $additionalServicesIds = explode(',', $parcel->additional_services);
+            
+            foreach ($additionalServicesIds as $additionalServiceId) {
+                if ($additionalServiceId == "SMS") {
+                    $notify_type += 2;
+                }
 
-        foreach ($additionalServicesIds as $additionalServiceId) {
-            if ($additionalServiceId == "SMS") {
-                $notify_type += 2;
-            }
-
-            if ($additionalServiceId == "EMAIL") {
-                $notify_type += 1;
+                if ($additionalServiceId == "EMAIL") {
+                    $notify_type += 1;
+                }
             }
         }
 
@@ -501,7 +504,7 @@ class OverseasController extends Controller
     protected function prepareCollectionPayload($parcel)
     {
         $additionalServicesIds = explode(',', $parcel->additional_services);
-        
+
         $notify_type = 0;
 
         foreach ($additionalServicesIds as $additionalServiceId) {
@@ -543,14 +546,14 @@ class OverseasController extends Controller
 
     protected function validateParcel($parcel)
     {
-        $rules = [ 
+        $rules = [
             'recipient_name' => 'required|string|max:255',
             'recipient_phone' => 'nullable|string|max:20',
             'recipient_email' => 'nullable|email|max:255',
             'recipient_adress' => 'required|string|max:255',
             'recipient_city' => 'required|string|max:255',
             'recipient_postal_code' => 'required|string|max:5|regex:/^[0-9]+$/',
-        
+
             'order_number' => 'required|string|max:50',
             'parcel_remark' => 'nullable|string|max:255',
             'cod_amount' => 'nullable|numeric|min:0',
@@ -559,12 +562,12 @@ class OverseasController extends Controller
             'parcel_count' => 'required|integer|min:1',
 
             'additional_services' => 'nullable|string|max:255',
-        
+
             'parcel_ref_1' => 'nullable|string|max:100',
         ];
-        
-        
-        $messages = [ 
+
+
+        $messages = [
             'recipient_name.required' => 'Ime primatelja je obavezno',
             'recipient_email.email' => 'Email primatelja mora biti ispravan',
             'recipient_adress.required' => 'Adresa primatelja je obavezna',
@@ -579,15 +582,15 @@ class OverseasController extends Controller
             'parcel_remark.string' => 'Napomena uz paket mora biti tekst',
             'cod_amount.numeric' => 'Iznos pouzeća mora biti broj',
             'cod_currency.size' => 'Valuta pouzeća mora sadržavati 3 slova (npr. HRK)',
-        
+
             'location_id.string' => 'ID lokacije mora biti tekst',
-        
+
             'additional_services.string' => 'Dodatne usluge moraju biti tekst',
-        
+
             'parcel_ref_1.string' => 'Referenca 1 mora biti tekst',
         ];
-        
-        
+
+
 
         $validator = Validator::make((array) $parcel, $rules, $messages);
 
@@ -683,12 +686,12 @@ class OverseasController extends Controller
     {
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
-        
+
         $this->user = $jsonData->user;
         $parcels = $jsonData->parcels;
 
         $status_response = [];
-        
+
         foreach ($parcels as $parcel) {
             $apiKey = $this->user->apiKey ?? '';
             $statusResponse = Http::withoutVerifying()
