@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
+use App\Classes\ParcelClass;
 use App\Classes\MultiParcelResponse;
+
 
 use App\Services\UserService;
 use App\Services\Logger\ApiErrorLogger;
@@ -449,15 +451,11 @@ class OverseasController extends Controller
         ], 201);
     }
 
-    protected function prepareParcelPayload($parcel)
+    protected function prepareParcelPayload(ParcelClass $parcel)
     {
-
-
         $notify_type = 0;
         if (isset($parcel->additional_services)) {
-            $additionalServicesIds = explode(',', $parcel->additional_services);
-            
-            foreach ($additionalServicesIds as $additionalServiceId) {
+            foreach ($parcel->additionalServicesArray() as $additionalServiceId) {
                 if ($additionalServiceId == "SMS") {
                     $notify_type += 2;
                 }
@@ -501,13 +499,11 @@ class OverseasController extends Controller
     }
 
 
-    protected function prepareCollectionPayload($parcel)
+    protected function prepareCollectionPayload(ParcelClass $parcel)
     {
-        $additionalServicesIds = explode(',', $parcel->additional_services);
-
         $notify_type = 0;
 
-        foreach ($additionalServicesIds as $additionalServiceId) {
+        foreach ($parcel->additionalServicesArray() as $additionalServiceId) {
             if ($additionalServiceId == "SMS") {
                 $notify_type += 2;
             }
