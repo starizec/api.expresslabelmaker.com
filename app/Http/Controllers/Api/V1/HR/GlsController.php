@@ -15,7 +15,7 @@ use App\Services\Logger\ApiUsageLogger;
 use DateInterval;
 use App\Models\DeliveryLocationHeader;
 use App\Models\DeliveryLocation;
-
+use Illuminate\Support\Facades\Log;
 class GlsController extends Controller
 {
     protected $courier;
@@ -113,7 +113,7 @@ class GlsController extends Controller
 
         $printPosition = $parcel->print_position;
         $printerType = $parcel->printer_type;
-
+        Log::info(json_encode($this->prepareParcelPayload($parcel)));
         $parcelResponse = Http::withoutVerifying()
             ->post(
                 config('urls.hr.gls') . "/ParcelService.svc/json/PrintLabels",
@@ -527,6 +527,7 @@ class GlsController extends Controller
                 ];
             }
         }
+
         return [
             "ClientNumber" => $this->user->client_number,
             "ClientReference" => $parcel->order_number,
