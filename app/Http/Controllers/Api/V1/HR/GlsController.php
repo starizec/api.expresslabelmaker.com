@@ -528,13 +528,10 @@ class GlsController extends Controller
             }
         }
 
-        return [
+        $payload = [
             "ClientNumber" => $this->user->client_number,
             "ClientReference" => $parcel->order_number,
             "Count" => $parcel->parcel_count,
-            "CODAmount" => $parcel->cod_amount ?? null,
-            "CODReference" => $parcel->order_number ?? null,
-            "CODCurrency" => $parcel->cod_currency ?? null,
             "PickupAddress" => [
                 "Name" => $parcel->sender_name,
                 "Street" => AdressService::splitAddress($parcel->sender_adress)['street'],
@@ -559,6 +556,14 @@ class GlsController extends Controller
             ],
             "ServiceList" => $service_list
         ];
+
+        if($parcel->cod_amount && $parcel->cod_amount > 0) {
+            $payload["CODAmount"] = $parcel->cod_amount;
+            $payload["CODReference"] = $parcel->order_number;
+            $payload["CODCurrency"] = $parcel->cod_currency;
+        }
+
+        return $payload;
     }
 
     protected function validateParcel($parcel)
