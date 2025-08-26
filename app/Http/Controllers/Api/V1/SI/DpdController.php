@@ -100,7 +100,7 @@ class DpdController extends Controller
             $parcelResponse = Http::post(config('urls.si.dpd') .
                 '/parcel/parcel_import?' .
                 "username=$user->username&password=$user->password&" .
-                http_build_query($parcel->parcel));
+                http_build_query($parcel));
 
             $parcelResponseJson = json_decode($parcelResponse->body());
 

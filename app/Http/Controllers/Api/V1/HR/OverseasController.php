@@ -161,7 +161,7 @@ class OverseasController extends Controller
 
         foreach ($parcels as $parcel) {
             try {
-                $this->validateParcel($parcel->parcel);
+                $this->validateParcel($parcel);
             } catch (ValidationException $e) {
                 $error_message = implode(' | ', collect($e->errors())->flatten()->all());
 
@@ -184,7 +184,7 @@ class OverseasController extends Controller
 
             $parcelResponse = Http::withoutVerifying()->post(
                 config('urls.hr.overseas') . "/createshipment?apikey=$user->apiKey",
-                $this->prepareParcelPayload($parcel->parcel)
+                $this->prepareParcelPayload($parcel)
             );
 
             $parcelResponseJson = json_decode($parcelResponse->body());

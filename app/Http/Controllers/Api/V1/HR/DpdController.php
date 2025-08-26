@@ -159,7 +159,7 @@ class DpdController extends Controller
 
         foreach ($parcels as $parcel) {
             try {
-                $this->validateParcel($parcel->parcel);
+                $this->validateParcel($parcel);
             } catch (ValidationException $e) {
                 $error_message = implode(' | ', collect($e->errors())->flatten()->all());
 
@@ -182,7 +182,7 @@ class DpdController extends Controller
             $parcelResponse = Http::withoutVerifying()->post(config('urls.hr.dpd') .
                 '/parcel/parcel_import?' .
                 "username=$this->user->username&password=$this->user->password&" .
-                http_build_query($this->prepareParcelPayload($parcel->parcel)));
+                http_build_query($this->prepareParcelPayload($parcel)));
 
             $parcelResponseJson = json_decode($parcelResponse->body());
 
@@ -200,7 +200,7 @@ class DpdController extends Controller
 
                 ApiErrorLogger::apiError(
                     $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $this->user->domain . ' - ' . $error_message . ' - Server',
-                    $this->prepareParcelPayload($parcel->parcel),
+                    $this->prepareParcelPayload($parcel),
                     $error_message,
                     __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
                 );
