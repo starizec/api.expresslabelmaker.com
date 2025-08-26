@@ -68,7 +68,7 @@ class DpdController extends Controller
 
         $parcelResponse = Http::withoutVerifying()->post(config('urls.hr.dpd') .
             '/parcel/parcel_import?' .
-            "username=$this->user->username&password=$this->user->password&" .
+            'username='.$this->user->username.'&password='.$this->user->password.'&'.
             http_build_query($this->prepareParcelPayload($parcel)));
 
         $parcelResponseJson = json_decode($parcelResponse->body());
