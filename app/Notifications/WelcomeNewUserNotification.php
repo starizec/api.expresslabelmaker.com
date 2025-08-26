@@ -71,6 +71,7 @@ class WelcomeNewUserNotification extends Notification implements ShouldQueue
             'password.reset',
             Carbon::now()->addMinutes(Config::get('auth.passwords.users.expire', 60)),
             [
+                'lang' => app()->getLocale() ?: 'hr', // Use current locale or default to 'en'
                 'token' => app('auth.password.broker')->createToken($notifiable),
                 'email' => $notifiable->getEmailForPasswordReset(),
             ]
