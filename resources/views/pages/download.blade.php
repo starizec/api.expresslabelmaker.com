@@ -5,7 +5,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6 text-center">
-                    <a href="{{ Storage::disk('public')->url($plugin_downloads->plugin_download_link) }}"
+                    <a href="{{ Storage::url($plugin_downloads->plugin_download_link) }}"
                         class="btn btn-light btn-lg me-3" download>
                         Preuzmi plugin
                     </a>

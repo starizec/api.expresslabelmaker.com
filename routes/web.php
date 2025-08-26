@@ -31,6 +31,7 @@ Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}'], 'defau
         Route::get('/profile', [App\Http\Controllers\UserProfileController::class, 'index'])->name('profile');
         Route::put('/profile/update', [App\Http\Controllers\UserProfileController::class, 'update'])->name('profile.update');
         Route::post('/logout', [App\Http\Controllers\Auth\LogoutController::class, 'logout'])->name('logout');
+        Route::post('/payment/submit-offer', [App\Http\Controllers\PaymentController::class, 'submitOffer'])->name('payment.submit-offer');
     });
 });
 
@@ -44,3 +45,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 Route::post('/contact', [App\Http\Controllers\ContactController::class, 'submit'])->name('contact.submit');
+
+// Test route for Mailpit
+Route::get('/test-mail', function () {
+    Mail::raw('This is a test email from Laravel to Mailpit!', function ($message) {
+        $message->to('test@example.com')
+                ->subject('Test Email - Mailpit');
+    });
+    
+    return 'Test email sent! Check Mailpit at http://localhost:8025';
+});
