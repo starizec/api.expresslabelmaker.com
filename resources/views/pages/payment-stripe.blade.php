@@ -3,15 +3,6 @@
 @section('title', $licence->domain->name)
 
 @section('content')
-    @if(session('success'))
-        <div class="container mt-3">
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        </div>
-    @endif
-    
     <div style="background: linear-gradient(to right, #045cb8, #047adb)" class="pt-5 pb-5">
         <div class="container">
             <div class="row">
@@ -21,9 +12,9 @@
                             <h5 class="mb-0">{{ __('payment.personal_and_company_info') }}</h5>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('payment.submit-offer', ['lang' => app()->getLocale()]) }}" method="POST">
+                            <form action="{{ route('profile.update', ['lang' => app()->getLocale()]) }}" method="POST">
                                 @csrf
-                                @method('POST')
+                                @method('PUT')
                                 <input type="hidden" name="licence_id" value="{{ $licence->id }}">
 
                                 <!-- Personal Information -->
@@ -45,7 +36,7 @@
                                             <input type="text"
                                                 class="form-control @error('last_name') is-invalid @enderror" id="last_name"
                                                 name="last_name"
-                                                value="{{ old('last_name', $licence->user->last_name ?? '') }}" required>
+                                                value="{{ old('last_name', $licence->user->last_name ?? '') }}">
                                             @error('last_name')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -131,7 +122,7 @@
                                         </div>
                                     </div>
                                 </div>
-
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -159,23 +150,68 @@
 
                             <div class="mb-4">
                                 <h6 class="mb-2">{{ __('payment.payment_cost') }}</h6>
-                                <p class="font-weight-bold">{{ number_format($price, 2) }} €</p>
+                                <p class="font-weight-bold">{{ number_format($licence->price, 2) }} €</p>
                             </div>
 
                             <div class="d-grid mb-4">
-                                <button type="submit" class="btn btn-lg btn-success btn-block shadow"
+                                <button type="button" class="btn btn-lg btn-success btn-block shadow"
+                                    id="payment-button"
                                     style="
                                     box-shadow: 1px 1px 21px -1px rgba(0,0,0,0.39);
                                     -webkit-box-shadow: 1px 1px 21px -1px rgba(0,0,0,0.39);
                                     -moz-box-shadow: 1px 1px 21px -1px rgba(0,0,0,0.39);
                                     ">
-                                    {{ __('payment.request_offer') }} <i class="bi bi-forward"></i>
+                                    <i class="bi bi-credit-card-fill"></i> {{ __('payment.proceed_to_payment') }}
                                 </button>
                             </div>
-                            </form>
+                            <div>
+                                <img src="{{ asset('assets/images/stripe-badge-transparent.png') }}" class="img-fluid">
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        @push('scripts')
+            <script src="https://js.stripe.com/v3/"></script>
+            <script>
+                document.getElementById('payment-button').addEventListener('click', async function() {
+                    try {
+                        const response = await fetch(
+                            '{{ route('payment.create-session', ['lang' => app()->getLocale(), 'licence_uid' => $licence->licence_uid]) }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                }
+                            });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                        }
+
+                        const session = await response.json();
+
+                        if (!session.id) {
+                            throw new Error('No session ID received from server');
+                        }
+
+                        const stripe = Stripe('{{ config('services.stripe.key') }}');
+                        const result = await stripe.redirectToCheckout({
+                            sessionId: session.id
+                        });
+
+                        if (result.error) {
+                            alert(result.error.message);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('An error occurred while processing your payment: ' + error.message);
+                    }
+                });
+            </script>
+        @endpush
     @endsection

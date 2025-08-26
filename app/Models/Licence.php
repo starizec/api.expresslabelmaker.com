@@ -22,6 +22,13 @@ class Licence extends Model
         'licence_type_id'
     ];
 
+    protected $casts = [
+        'valid_from' => 'datetime',
+        'valid_until' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

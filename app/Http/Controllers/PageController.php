@@ -38,6 +38,8 @@ class PageController extends Controller
             $valid_until = Carbon::parse($licence->valid_until)->addYear()->addDay()->toDateString();
         }
 
-        return view('pages.payment', compact('licence', 'valid_until'));
+        $price = 150;
+
+        return view('pages.payment', compact('licence', 'valid_until', 'price'));
     }
 }
