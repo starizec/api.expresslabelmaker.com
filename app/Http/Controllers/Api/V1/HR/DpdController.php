@@ -39,9 +39,6 @@ class DpdController extends Controller
         $this->user = $jsonData->user;
         $parcel = $jsonData->parcel;
 
-        Log::info('DPD Request: ' . json_encode($this->prepareParcelPayload($parcel)));
-
-
         try {
             $this->validateParcel($parcel);
         } catch (ValidationException $e) {
@@ -406,7 +403,6 @@ class DpdController extends Controller
 
     protected function prepareParcelPayload($parcel)
     {
-        Log::info('DPD Payload: ' . json_encode($parcel));
         $recipient_adress = AdressService::splitAddress($parcel->recipient_adress);
 
         switch ($parcel->delivery_service) {
@@ -479,8 +475,6 @@ class DpdController extends Controller
         if (isset($location->location_id) && $location->location_id != "") {
             $payload['pudo_id'] = $location->location_id;
         }
-
-        Log::info('DPD Payload: ' . json_encode($payload));
 
         return $payload;
     }
