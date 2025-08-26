@@ -3,15 +3,29 @@
 @section('title', $licence->domain->name)
 
 @section('content')
-    @if(session('success'))
-        <div class="container mt-3">
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    @if (session('success'))
+        <!-- Success Modal -->
+        <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="successModalLabel">{{ __('messages.request_offer_success') }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>{{ __('messages.request_offer_success') }}</p>
+                        <p>{{ __('messages.request_offer_success_message', ['email' => $licence->user->email]) }}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="{{ route('profile', ['lang' => app()->getLocale()]) }}" class="btn btn-secondary">{{ __('messages.go_to_profile') }}</a>
+                    </div>
+                </div>
             </div>
         </div>
     @endif
-    
+
     <div style="background: linear-gradient(to right, #045cb8, #047adb)" class="pt-5 pb-5">
         <div class="container">
             <div class="row">
@@ -21,7 +35,8 @@
                             <h5 class="mb-0">{{ __('payment.personal_and_company_info') }}</h5>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('payment.submit-offer', ['lang' => app()->getLocale()]) }}" method="POST">
+                            <form action="{{ route('payment.submit-offer', ['lang' => app()->getLocale()]) }}"
+                                method="POST">
                                 @csrf
                                 @method('POST')
                                 <input type="hidden" name="licence_id" value="{{ $licence->id }}">
@@ -179,3 +194,12 @@
             </div>
         </div>
     @endsection
+
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                successModal.show();
+            });
+        </script>
+    @endif

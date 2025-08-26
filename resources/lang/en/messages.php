@@ -79,4 +79,9 @@ return [
 
     'licence_bought_notification' => 'Licence bought for :domain.',
     'licence_bought_added' => 'Licence for :domain is bought and is valid until :valid_until.',
+
+    'go_to_profile' => 'Go to my profile',
+
+    'request_offer_success' => 'Your request has been successfully submitted.',
+    'request_offer_success_message' => 'We will send you an offer to your email address (:email) in the shortest possible time.',
 ]; 
