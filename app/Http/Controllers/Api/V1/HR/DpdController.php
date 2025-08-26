@@ -478,7 +478,7 @@ class DpdController extends Controller
             $payload['pudo_id'] = $location->location_id;
         }
 
-        Log::info('DPD Payload: ' . json_encode($payload));
+        //Log::info('DPD Payload: ' . json_encode($payload));
 
         return $payload;
     }
