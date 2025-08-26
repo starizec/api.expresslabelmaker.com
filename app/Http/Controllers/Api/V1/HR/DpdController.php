@@ -105,7 +105,7 @@ class DpdController extends Controller
             "content-type" => "application/x-www-form-urlencoded"
         ])->post(config('urls.hr.dpd') .
                 '/parcel/parcel_print?' .
-                "username=$this->user->username&password=$this->user->password&" .
+                'username='.$this->user->username.'&password='.$this->user->password.'&'.
                 "parcels=$pl_numbers");
 
         $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
@@ -182,7 +182,7 @@ class DpdController extends Controller
 
             $parcelResponse = Http::withoutVerifying()->post(config('urls.hr.dpd') .
                 '/parcel/parcel_import?' .
-                "username=$this->user->username&password=$this->user->password&" .
+                'username='.$this->user->username.'&password='.$this->user->password.'&'.
                 http_build_query($this->prepareParcelPayload($parcel)));
 
             $parcelResponseJson = json_decode($parcelResponse->body());
@@ -225,7 +225,7 @@ class DpdController extends Controller
                 "content-type" => "application/x-www-form-urlencoded"
             ])->post(config('urls.hr.dpd') .
                     '/parcel/parcel_print?' .
-                    "username=$this->user->username&password=$this->user->password&" .
+                    'username='.$this->user->username.'&password='.$this->user->password.'&'.
                     "parcels=$pl_numbers");
 
             $parcelLabelResponseJson = json_decode($parcelLabelResponse->body());
@@ -270,7 +270,7 @@ class DpdController extends Controller
                 "content-type" => "application/x-www-form-urlencoded"
             ])->post(config('urls.hr.dpd') .
                     '/parcel/parcel_print?' .
-                    "username=$this->user->username&password=$this->user->password&" .
+                    'username='.$this->user->username.'&password='.$this->user->password.'&'.
                     "parcels=$all_pl_numbers");
 
             $allParcelLabelResponseJson = json_decode($allParcelLabelResponse->body());
@@ -324,7 +324,7 @@ class DpdController extends Controller
             "content-type" => "application/x-www-form-urlencoded"
         ])->post(config('urls.hr.dpd') .
                 '/collection_request/cr_import?' .
-                "username=$this->user->username&password=$this->user->password&" .
+                'username='.$this->user->username.'&password='.$this->user->password.'&'.
                 http_build_query($parcel));
 
         $parcelResponseJson = json_decode($parcelResponse->body());
