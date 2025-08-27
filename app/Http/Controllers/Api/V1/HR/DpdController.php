@@ -500,7 +500,6 @@ class DpdController extends Controller
             'cod_amount' => 'nullable|numeric|min:0',
             'cod_currency' => 'nullable|string|size:3',
             'delivery_type' => 'nullable|string|in:Adresa,Paketomat',
-            'location_type' => 'nullable|string|in:Paketomat,Benza,Poštanski ured',
             'location_id' => 'required_if:delivery_type,Paketomat|nullable|string|max:7',
             'parcel_count' => 'required|integer|min:1',
 
