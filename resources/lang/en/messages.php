@@ -84,4 +84,8 @@ return [
 
     'request_offer_success' => 'Your request has been successfully submitted.',
     'request_offer_success_message' => 'We will send you an offer to your email address (:email) in the shortest possible time.',
+
+    'Regards' => 'Regards',
+
+    'email_action_trouble' => "If you're having trouble clicking the \":actionText\" button, copy and paste the URL below\ninto your web browser:",
 ]; 
