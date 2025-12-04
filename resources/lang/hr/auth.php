@@ -27,8 +27,10 @@ return [
 
     'registration_confirmation_subject' => 'Potvrda registracije - ExpressLabelMaker.com',
     'registration_confirmation_greeting' => 'Dobrodošli u ExpressLabelMaker.com!',
-    'registration_confirmation_message' => 'Hvala vam na registraciji! Vaš korisnički račun je uspješno kreiran. Sada se možete prijaviti i početi koristiti naše usluge.',
-    'registration_confirmation_button' => 'Prijavite se',
+    'registration_confirmation_message' => 'Hvala vam na registraciji! Vaš korisnički račun je uspješno kreiran.',
+    'registration_confirmation_plugin_instructions' => 'Da biste počeli s izradom adresnica, preuzmite naš WooCommerce plugin i prenesite ga na svoju web trgovinu.',
+    'registration_confirmation_button' => 'Preuzmi Plugin',
+    'registration_confirmation_documentation' => 'Ako vam treba pomoć pri instalaciji, molimo posjetite našu <a href=":url">stranicu s dokumentacijom</a>.',
     'registration_confirmation_footer' => 'Ako niste vi zatražili otvaranje računa, molimo zanemarite ovu poruku.',
 
 ];

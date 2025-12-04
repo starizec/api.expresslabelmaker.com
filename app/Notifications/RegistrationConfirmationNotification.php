@@ -36,13 +36,19 @@ class RegistrationConfirmationNotification extends Notification implements Shoul
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $loginUrl = URL::route('login', ['lang' => app()->getLocale() ?: 'hr']);
+        $locale = app()->getLocale() ?: 'hr';
+        $downloadUrl = url('/' . $locale . '/download');
+        $documentationUrl = url('/hr/documentation/installation');
+        
+        $documentationText = Lang::get('auth.registration_confirmation_documentation', ['url' => $documentationUrl]);
         
         return (new MailMessage)
             ->subject(Lang::get('auth.registration_confirmation_subject'))
             ->greeting(Lang::get('auth.registration_confirmation_greeting'))
             ->line(Lang::get('auth.registration_confirmation_message'))
-            ->action(Lang::get('auth.registration_confirmation_button'), $loginUrl)
+            ->line(Lang::get('auth.registration_confirmation_plugin_instructions'))
+            ->action(Lang::get('auth.registration_confirmation_button'), $downloadUrl)
+            ->line(new \Illuminate\Support\HtmlString($documentationText))
             ->line(Lang::get('auth.registration_confirmation_footer'));
     }
 

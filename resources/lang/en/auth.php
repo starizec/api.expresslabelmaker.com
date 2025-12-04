@@ -27,8 +27,10 @@ return [
 
     'registration_confirmation_subject' => 'Registration Confirmation - ExpressLabelMaker.com',
     'registration_confirmation_greeting' => 'Welcome to ExpressLabelMaker.com!',
-    'registration_confirmation_message' => 'Thank you for registering! Your account has been successfully created. You can now log in and start using our services.',
-    'registration_confirmation_button' => 'Log In',
+    'registration_confirmation_message' => 'Thank you for registering! Your account has been successfully created.',
+    'registration_confirmation_plugin_instructions' => 'To start creating shipping labels, download our WooCommerce plugin and upload it to your web store.',
+    'registration_confirmation_button' => 'Download Plugin',
+    'registration_confirmation_documentation' => 'If you need help with installation, please visit our <a href=":url">documentation page</a>.',
     'registration_confirmation_footer' => 'If you did not create an account, please ignore this email.',
 
 ];
