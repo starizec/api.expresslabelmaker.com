@@ -25,5 +25,10 @@ return [
     'welcome_password_expiry' => 'Poveznica za postavljanje lozinke vrijedi :count minuta.',
     'welcome_no_action' => 'Ako niste vi zatražili otvaranje računa, slobodno zanemarite ovu poruku.',
 
+    'registration_confirmation_subject' => 'Potvrda registracije - ExpressLabelMaker.com',
+    'registration_confirmation_greeting' => 'Dobrodošli u ExpressLabelMaker.com!',
+    'registration_confirmation_message' => 'Hvala vam na registraciji! Vaš korisnički račun je uspješno kreiran. Sada se možete prijaviti i početi koristiti naše usluge.',
+    'registration_confirmation_button' => 'Prijavite se',
+    'registration_confirmation_footer' => 'Ako niste vi zatražili otvaranje računa, molimo zanemarite ovu poruku.',
 
 ];

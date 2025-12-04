@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class RegisterController extends Controller
@@ -31,6 +32,14 @@ class RegisterController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
+        // Send registration confirmation email
+        try {
+            $user->sendRegistrationConfirmationNotification();
+        } catch (\Exception $e) {
+            // Log error but don't break registration flow
+            Log::error('Error sending registration confirmation email: ' . $e->getMessage());
+        }
 
         Auth::login($user);
 

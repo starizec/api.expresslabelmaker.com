@@ -74,4 +74,14 @@ class User extends Authenticatable implements FilamentUser
     {
         $this->notify(new \App\Notifications\WelcomeNewUserNotification());
     }
+
+    /**
+     * Send the registration confirmation notification.
+     *
+     * @return void
+     */
+    public function sendRegistrationConfirmationNotification()
+    {
+        $this->notify(new \App\Notifications\RegistrationConfirmationNotification());
+    }
 }

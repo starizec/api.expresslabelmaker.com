@@ -25,4 +25,10 @@ return [
     'welcome_password_expiry' => 'This password setup link will expire in :count minutes.',
     'welcome_no_action' => 'If you did not create an account, no further action is required.',
 
+    'registration_confirmation_subject' => 'Registration Confirmation - ExpressLabelMaker.com',
+    'registration_confirmation_greeting' => 'Welcome to ExpressLabelMaker.com!',
+    'registration_confirmation_message' => 'Thank you for registering! Your account has been successfully created. You can now log in and start using our services.',
+    'registration_confirmation_button' => 'Log In',
+    'registration_confirmation_footer' => 'If you did not create an account, please ignore this email.',
+
 ];
