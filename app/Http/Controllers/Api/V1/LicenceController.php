@@ -68,8 +68,6 @@ class LicenceController extends Controller
             ], 403);
         }
 
-        $isNewUser = false;
-
         if (User::where('email', $data->email)->exists()) {
             $user = User::where('email', $data->email)->first();
         } else {
@@ -80,8 +78,6 @@ class LicenceController extends Controller
                 'email' => $data->email,
                 'password' => Hash::make($randomPassword),
             ]);
-
-            $isNewUser = true;
 
             // Send password setup notification
             try {
@@ -96,13 +92,13 @@ class LicenceController extends Controller
             'user_id' => $user->id
         ]);
 
-        if (!$isNewUser) {
-            try {
-                $domain->sendNewDomainNotification($domain->name);
-            } catch (\Exception $e) {
-                Log::error('Error sending new domain notification: ' . $e->getMessage());
-            }
+
+        try {
+            $domain->sendNewDomainNotification($domain->name);
+        } catch (\Exception $e) {
+            Log::error('Error sending new domain notification: ' . $e->getMessage());
         }
+
 
         $licence = Licence::create([
             'user_id' => $user->id,
