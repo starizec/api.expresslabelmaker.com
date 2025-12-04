@@ -37,6 +37,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationItems([
                 \Filament\Navigation\NavigationItem::make()
+                    ->label('Home')
+                    ->icon('heroicon-o-home')
+                    ->url('/')
+                    ->openUrlInNewTab()
+                    ->sort(-1),
+                \Filament\Navigation\NavigationItem::make()
                     ->label('Logs')
                     ->icon('heroicon-o-document-text')
                     ->url('/log-viewer')

@@ -489,10 +489,12 @@ class GlsController extends Controller
         }
 
         if (isset($parcel->location_id) && $parcel->location_id != "") {
+            $location = DeliveryLocation::where('id', $parcel->location_id)->latest()->first();
+
             $service_list[] = [
                 "Code" => "PSD",
                 "PSDParameter" => [
-                    "StringValue" => $parcel->location_id
+                    "StringValue" => $location->location_id
                 ]
             ];
         }
@@ -504,27 +506,29 @@ class GlsController extends Controller
                 $service_list[] = [
                     "Code" => "INS",
                     "INSParameter" => [
-                        "Value" => $parcel->parcel_value
+                        "Value" => (float) $parcel->parcel_value
                     ]
                 ];
             }
 
-            if ($additionalServiceId == "FDS") {
-                $service_list[] = [
-                    "Code" => "FDS",
-                    "FDSParameter" => [
-                        "Value" => $parcel->recipient_email
-                    ]
-                ];
-            }
+            if (!isset($parcel->location_id) || $parcel->location_id == "") {
+                if ($additionalServiceId == "FDS") {
+                    $service_list[] = [
+                        "Code" => "FDS",
+                        "FDSParameter" => [
+                            "Value" => $parcel->recipient_email
+                        ]
+                    ];
+                }
 
-            if ($additionalServiceId == "FSS") {
-                $service_list[] = [
-                    "Code" => "FSS",
-                    "FSSParameter" => [
-                        "Value" => $parcel->recipient_phone
-                    ]
-                ];
+                if ($additionalServiceId == "FSS") {
+                    $service_list[] = [
+                        "Code" => "FSS",
+                        "FSSParameter" => [
+                            "Value" => $parcel->recipient_phone
+                        ]
+                    ];
+                }
             }
         }
 

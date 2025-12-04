@@ -7,6 +7,16 @@
                     style="max-height: 60px;">
             </div>
 
+            <div class="col-md-4 mb-3 mb-md-0">
+                <p>
+                        EMEDIA DESIGN, obrt za informatičke usluge <br>
+                        Murterska 34, <br>
+                        31000 Osijek <br>
+                        OIB: 38958395267 <br>
+                        MBS: 98499971
+                </p>
+            </div>
+
             <div class="col-md-2">
                 <ul class="list-unstyled">
                     <li class="mb-2"><a href="/{{ app()->getLocale() }}/#kontakt"
@@ -36,10 +46,7 @@
                 </ul>
             </div>
 
-            <div class="col-md-4 text-center mb-3 mb-md-0">
-                <img src="{{ asset('assets/logos/stripe-logo.png') }}" alt="ExpressLabelMaker Logo" class="img-fluid"
-                    style="max-height: 60px;">
-            </div>
+            
         </div>
     </div>
 </footer>
