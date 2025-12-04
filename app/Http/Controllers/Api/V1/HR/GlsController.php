@@ -503,10 +503,11 @@ class GlsController extends Controller
 
         foreach ($additionalServicesIds as $additionalServiceId) {
             if ($additionalServiceId == "INS") {
+                $parcel_value = $parcel->parcel_value > 165.90 ? (float) $parcel->parcel_value : 165.90;
                 $service_list[] = [
                     "Code" => "INS",
                     "INSParameter" => [
-                        "Value" => (float) $parcel->parcel_value
+                        "Value" => $parcel_value
                     ]
                 ];
             }
