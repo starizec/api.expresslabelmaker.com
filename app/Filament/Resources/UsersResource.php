@@ -29,17 +29,20 @@ class UsersResource extends Resource
                             ->email()
                             ->required()
                             ->unique(ignoreRecord: true),
-                        Forms\Components\TextInput::make('name')
-                            ->required()
-                            ->maxLength(255),
                         Forms\Components\TextInput::make('first_name')
                             ->maxLength(255),
                         Forms\Components\TextInput::make('last_name')
                             ->maxLength(255),
                         Forms\Components\TextInput::make('password')
                             ->password()
+                            ->default('')
+                            ->required(fn (string $context): bool => $context === 'create')
+                            ->afterStateHydrated(function (Forms\Components\TextInput $component) {
+                                // Always set password field to empty when editing
+                                $component->state('');
+                            })
                             ->dehydrated(fn ($state) => filled($state))
-                            ->required(fn (string $context): bool => $context === 'create'),
+                            ->dehydrateStateUsing(fn ($state) => bcrypt($state)),
                     ]),
 
                 Forms\Components\Section::make('Company Information')
