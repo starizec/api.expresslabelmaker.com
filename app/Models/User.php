@@ -84,4 +84,20 @@ class User extends Authenticatable implements FilamentUser
     {
         $this->notify(new \App\Notifications\RegistrationConfirmationNotification());
     }
+
+    /**
+     * Get the domains for the user.
+     */
+    public function domains()
+    {
+        return $this->hasMany(Domain::class);
+    }
+
+    /**
+     * Get the licences for the user.
+     */
+    public function licences()
+    {
+        return $this->hasMany(Licence::class);
+    }
 }

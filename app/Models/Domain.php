@@ -31,4 +31,12 @@ class Domain extends Model
     {   
         $this->user->notify(new NewDomainNotification($domain));
     }
+
+    /**
+     * Get the licences for the domain.
+     */
+    public function licences()
+    {
+        return $this->hasMany(Licence::class);
+    }
 }

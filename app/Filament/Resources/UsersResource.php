@@ -72,6 +72,18 @@ class UsersResource extends Resource
                             ->label('Admin Access')
                             ->default(false),
                     ]),
+
+                Forms\Components\Section::make('Moje licence')
+                    ->schema([
+                        Forms\Components\View::make('filament.forms.components.user-licences')
+                            ->visible(fn ($record) => $record !== null),
+                    ])
+                    ->visible(function ($record) {
+                        if (!$record) {
+                            return false;
+                        }
+                        return $record->domains()->with('licences')->exists();
+                    }),
             ]);
     }
 
@@ -79,8 +91,6 @@ class UsersResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('company_name')
