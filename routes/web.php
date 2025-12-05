@@ -45,13 +45,3 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 Route::post('/contact', [App\Http\Controllers\ContactController::class, 'submit'])->name('contact.submit');
-
-// Test route for Mailpit
-Route::get('/test-mail', function () {
-    Mail::raw('This is a test email from Laravel to Mailpit!', function ($message) {
-        $message->to('test@example.com')
-                ->subject('Test Email - Mailpit');
-    });
-    
-    return 'Test email sent! Check Mailpit at http://localhost:8025';
-});

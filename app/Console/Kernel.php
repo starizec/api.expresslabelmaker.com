@@ -15,7 +15,26 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Schedule delivery location fetch jobs to run daily at 5:00 AM
+        $schedule->job(new \App\Jobs\FetchOverseasDeliveryLocations)
+            ->dailyAt('05:00')
+            ->withoutOverlapping()
+            ->onOneServer();
+
+        $schedule->job(new \App\Jobs\FetchDpdDeliveryLocations)
+            ->dailyAt('05:00')
+            ->withoutOverlapping()
+            ->onOneServer();
+
+        $schedule->job(new \App\Jobs\FetchHpDeliveryLocations)
+            ->dailyAt('05:00')
+            ->withoutOverlapping()
+            ->onOneServer();
+
+        $schedule->job(new \App\Jobs\FetchGlsDeliveryLocations)
+            ->dailyAt('05:00')
+            ->withoutOverlapping()
+            ->onOneServer();
     }
 
     /**
