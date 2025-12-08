@@ -381,7 +381,6 @@ class GlsController extends Controller
 
     public function getParcelStatus(Request $request)
     {
-        \Log::info('GlsController@getParcelStatus');
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
 
@@ -403,8 +402,6 @@ class GlsController extends Controller
                         "LanguageIsoCode" => "HR"
                     ]
                 );
-
-            \Log::info('GlsController@getParcelStatus', ['statusResponse' => $statusResponse->body()]);
 
 
             $statusResponseJson = json_decode($statusResponse->body());
@@ -615,8 +612,7 @@ class GlsController extends Controller
             'parcel_weight.min' => 'Težina paketa mora biti veća od 0.',
         ];
 
-        // Convert object to array and handle null values properly
-        $data = json_decode(json_encode($parcel), true);
+        $data = (array) $parcel;
 
         $validator = Validator::make($data, $rules, $messages);
 

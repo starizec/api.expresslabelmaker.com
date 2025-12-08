@@ -441,7 +441,7 @@ class DpdController extends Controller
         $payload = [
             "name1" => $parcel->recipient_name,
             "street" => $recipient_adress['street'],
-            "rPropNum" => $recipient_adress['house_number'] ?? ".",
+            "rPropNum" => $recipient_adress['house_number'],
             "city" => $parcel->recipient_city,
             "country" => strtoupper($parcel->recipient_country),
             "pcode" => $parcel->recipient_postal_code,
@@ -481,9 +481,6 @@ class DpdController extends Controller
 
     protected function validateParcel($parcel)
     {
-        // Convert object to array and handle null values properly
-        $parcelArray = json_decode(json_encode($parcel), true);
-        
         $rules = [
             // Primatelj
             'recipient_id' => 'nullable|string|max:100',
@@ -544,21 +541,21 @@ class DpdController extends Controller
         ];
 
         $messages = [
-            'recipient_name.required' => 'Ime primatelja je obavezno',
-            'recipient_adress.required' => 'Ulica primatelja je obavezna',
-            'recipient_city.required' => 'Grad je obavezan',
-            'recipient_country.required' => 'Država primatelja je obavezna',
-            'recipient_postal_code.required' => 'Poštanski broj je obavezan',
-            'parcel_count.required' => 'Broj paketa je obavezan',
-            'parcel_count.min' => 'Broj paketa mora biti najmanje 1',
-            'delivery_type.required' => 'Način dostave je obavezan',
-            'location_id.required_if' => 'Za dostavu u paketomat potrebno je poslati location_id',
-            'delivery_service.required' => 'Vrsta paketa je obavezna',
-            'parcel_weight.min' => 'Težina mora biti veća od 0',
-            'parcel_remark.max' => 'Napomena može imati najviše 50 znakova',
+            'recipient_name.required' => 'Ime primatelja je obavezno.',
+            'recipient_adress.required' => 'Adresa primatelja je obavezna.',
+            'recipient_city.required' => 'Grad primatelja je obavezan.',
+            'recipient_country.required' => 'Država primatelja je obavezna.',
+            'recipient_postal_code.required' => 'Poštanski broj je obavezan.',
+            'parcel_count.required' => 'Broj paketa je obavezan.',
+            'parcel_count.min' => 'Broj paketa mora biti najmanje 1.',
+            'delivery_type.required' => 'Način dostave je obavezan.',
+            'location_id.required_if' => 'Za dostavu u paketomat potrebno je poslati location_id.',
+            'delivery_service.required' => 'DPD usluga (npr. B2C/B2B) je obavezna.',
+            'parcel_weight.min' => 'Težina mora biti veća od 0.',
+            'parcel_remark.max' => 'Napomena može imati najviše 50 znakova.',
         ];
 
-        $validator = Validator::make($parcelArray, $rules, $messages);
+        $validator = Validator::make((array) $parcel, $rules, $messages);
 
         if ($validator->fails()) {
             throw new ValidationException($validator);

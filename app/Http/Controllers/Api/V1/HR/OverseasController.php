@@ -13,7 +13,6 @@ use App\Classes\MultiParcelResponse;
 use App\Services\UserService;
 use App\Services\Logger\ApiErrorLogger;
 use App\Services\Logger\ApiUsageLogger;
-use Illuminate\Support\Facades\Log;
 
 use App\Models\DeliveryLocation;
 use App\Models\Courier;
@@ -23,7 +22,6 @@ use App\Models\DeliveryLocationHeader;
 class OverseasController extends Controller
 {
     protected $courier;
-    protected $user;
 
     public function __construct()
     {
@@ -41,13 +39,6 @@ class OverseasController extends Controller
 
         $user = $jsonData->user;
         $parcel = $jsonData->parcel;
-        $this->user = $user;
-        ApiErrorLogger::apiError(
-            '$this->validateParcel($parcel): ',
-            $request,
-            $this->validateParcel($parcel),
-            __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
-        );
 
         try {
             $this->validateParcel($parcel);
@@ -55,7 +46,7 @@ class OverseasController extends Controller
             $error_message = implode(' | ', collect($e->errors())->flatten()->all());
 
             ApiErrorLogger::apiError(
-                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message . ' - ' . $this->validateParcel($parcel),
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
                 $request,
                 $error_message,
                 __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
@@ -552,9 +543,6 @@ class OverseasController extends Controller
 
     protected function validateParcel($parcel)
     {
-        // Convert object to array and handle null values properly
-        $parcelArray = json_decode(json_encode($parcel), true);
-        
         $rules = [
             'recipient_name' => 'required|string|max:255',
             'recipient_phone' => 'nullable|string|max:20',
@@ -577,11 +565,11 @@ class OverseasController extends Controller
 
 
         $messages = [
-            'recipient_name.required' => 'Ime i prezime je obavezno',
+            'recipient_name.required' => 'Ime primatelja je obavezno',
             'recipient_email.email' => 'Email primatelja mora biti ispravan',
-            'recipient_adress.required' => 'Adresa je obavezna',
-            'recipient_city.required' => 'Grad je obavezan',
-            'recipient_postal_code.required' => 'Poštanski broj je obavezan',
+            'recipient_adress.required' => 'Adresa primatelja je obavezna',
+            'recipient_city.required' => 'Grad primatelja je obavezan',
+            'recipient_postal_code.required' => 'Poštanski broj primatelja je obavezan',
             'recipient_postal_code.regex' => 'Poštanski broj primatelja smije sadržavati samo brojeve',
 
             'parcel_count.required' => 'Broj paketa je obavezan',
@@ -601,7 +589,7 @@ class OverseasController extends Controller
 
 
 
-        $validator = Validator::make($parcelArray, $rules, $messages);
+        $validator = Validator::make((array) $parcel, $rules, $messages);
 
         if ($validator->fails()) {
             throw new ValidationException($validator);
@@ -682,10 +670,7 @@ class OverseasController extends Controller
 
 
 
-        // Convert object to array and handle null values properly
-        $parcelArray = json_decode(json_encode($parcel), true);
-
-        $validator = Validator::make($parcelArray, $rules, $messages);
+        $validator = Validator::make((array) $parcel, $rules, $messages);
 
         if ($validator->fails()) {
             throw new ValidationException($validator);
@@ -699,13 +684,13 @@ class OverseasController extends Controller
         $requestBody = $request->getContent();
         $jsonData = json_decode($requestBody);
 
-        $this->user = $jsonData->user;
+        $user = $jsonData->user;
         $parcels = $jsonData->parcels;
 
         $status_response = [];
 
         foreach ($parcels as $parcel) {
-            $apiKey = $this->user->apiKey ?? '';
+            $apiKey = $user->apiKey ?? '';
             $statusResponse = Http::withoutVerifying()
                 ->get(
                     config('urls.hr.overseas') . "/shipmentbyid?apikey=" . $apiKey . "&shipmentid=" . $parcel->parcel_number,

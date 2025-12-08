@@ -604,8 +604,7 @@ class HpController extends Controller
             'parcel_weight.min' => 'Težina paketa mora biti veća od 0.',
         ];
 
-        // Convert object to array and handle null values properly
-        $data = json_decode(json_encode($parcel), true);
+        $data = (array) $parcel;
 
         $validator = Validator::make($data, $rules, $messages);
 
