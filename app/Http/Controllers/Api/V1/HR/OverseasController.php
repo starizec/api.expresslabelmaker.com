@@ -13,6 +13,7 @@ use App\Classes\MultiParcelResponse;
 use App\Services\UserService;
 use App\Services\Logger\ApiErrorLogger;
 use App\Services\Logger\ApiUsageLogger;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\DeliveryLocation;
 use App\Models\Courier;
@@ -41,7 +42,10 @@ class OverseasController extends Controller
         $user = $jsonData->user;
         $parcel = $jsonData->parcel;
         $this->user = $user;
-        
+        Log::info('createLabel', [
+            'parcel' => $parcel
+        ]);
+        Log::info('$this->validateParcel($parcel): ' . $this->validateParcel($parcel));
         try {
             $this->validateParcel($parcel);
         } catch (ValidationException $e) {
