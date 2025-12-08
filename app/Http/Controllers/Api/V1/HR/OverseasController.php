@@ -545,9 +545,6 @@ class OverseasController extends Controller
 
     protected function validateParcel($parcel)
     {
-        \Log::info('Validating parcel', [
-            'parcel' => $parcel
-        ]);
         // Convert object to array and handle null values properly
         $parcelArray = json_decode(json_encode($parcel), true);
         
