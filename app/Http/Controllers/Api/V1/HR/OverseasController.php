@@ -22,6 +22,7 @@ use App\Models\DeliveryLocationHeader;
 class OverseasController extends Controller
 {
     protected $courier;
+    protected $user;
 
     public function __construct()
     {
@@ -39,9 +40,8 @@ class OverseasController extends Controller
 
         $user = $jsonData->user;
         $parcel = $jsonData->parcel;
-        \Log::info('createLabel', [
-            'parcel' => $parcel
-        ]);
+        $this->user = $user;
+        
         try {
             $this->validateParcel($parcel);
         } catch (ValidationException $e) {
