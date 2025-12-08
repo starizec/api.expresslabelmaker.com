@@ -48,14 +48,14 @@ class OverseasController extends Controller
             $this->validateParcel($parcel),
             __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
         );
-        
+
         try {
             $this->validateParcel($parcel);
         } catch (ValidationException $e) {
             $error_message = implode(' | ', collect($e->errors())->flatten()->all());
 
             ApiErrorLogger::apiError(
-                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message,
+                $this->courier->country->short . ' - ' . $this->courier->name . ' - ' . $user->domain . ' - ' . $error_message . ' - ' . $this->validateParcel($parcel),
                 $request,
                 $error_message,
                 __CLASS__ . '@' . __FUNCTION__ . '::' . __LINE__
