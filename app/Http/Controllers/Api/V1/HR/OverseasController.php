@@ -39,7 +39,9 @@ class OverseasController extends Controller
 
         $user = $jsonData->user;
         $parcel = $jsonData->parcel;
-
+        \Log::info('createLabel', [
+            'parcel' => $parcel
+        ]);
         try {
             $this->validateParcel($parcel);
         } catch (ValidationException $e) {
