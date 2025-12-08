@@ -87,7 +87,7 @@ class PaymentController extends Controller
 
         // Send email with all data to info@expresslabelmaker.com
         try {
-            \Mail::send(new \App\Mail\PaymentDataMail($licence));
+            Mail::send(new \App\Mail\PaymentDataMail($licence, $lang));
             Log::info('Payment data email sent successfully for licence: ' . $licence->id);
         } catch (\Exception $e) {
             Log::error('Failed to send payment data email: ' . $e->getMessage());

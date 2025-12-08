@@ -2,57 +2,34 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>New Payment Data - ExpressLabelMaker</title>
+    <title>{{ __('payment.email_title') }}</title>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #045cb8;">New Payment Data Received</h2>
+        <h2 style="color: #045cb8;">{{ __('payment.offer_request') }}</h2>
         
         <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-            <h3 style="color: #045cb8; margin-top: 0;">Licence Information</h3>
-            <p><strong>Licence ID:</strong> {{ $licence->id }}</p>
-            <p><strong>Licence UID:</strong> {{ $licence->licence_uid }}</p>
-            <p><strong>Valid From:</strong> {{ $licence->valid_from && method_exists($licence->valid_from, 'format') ? $licence->valid_from->format('Y-m-d') : ($licence->valid_from ?? 'N/A') }}</p>
-            <p><strong>Valid Until:</strong> {{ $licence->valid_until && method_exists($licence->valid_until, 'format') ? $licence->valid_until->format('Y-m-d') : ($licence->valid_until ?? 'N/A') }}</p>
-            <p><strong>Usage:</strong> {{ $licence->usage ?? 'N/A' }}</p>
-            <p><strong>Usage Limit:</strong> {{ $licence->usage_limit ?? 'N/A' }}</p>
-            <p><strong>Licence Type ID:</strong> {{ $licence->licence_type_id ?? 'N/A' }}</p>
+            <h3 style="color: #045cb8; margin-top: 0;">{{ __('payment.licence_information') }}</h3>
+            <p><strong>{{ __('payment.licence_uid') }}:</strong> {{ $licence->licence_uid }}</p>
+            <p><strong>{{ __('payment.domain_name') }}:</strong> {{ $domain->name }}</p>
+            <p><strong>{{ __('payment.valid_from') }}:</strong> {{ $licence->valid_from && method_exists($licence->valid_from, 'format') ? $licence->valid_from->format('d.m.Y') : ($licence->valid_from ?? 'N/A') }}</p>
+            <p><strong>{{ __('payment.valid_until') }}:</strong> {{ $licence->valid_until && method_exists($licence->valid_until, 'format') ? $licence->valid_until->format('d.m.Y') : ($licence->valid_until ?? 'N/A') }}</p>
         </div>
 
         <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-            <h3 style="color: #045cb8; margin-top: 0;">User Information</h3>
-            <p><strong>User ID:</strong> {{ $user->id }}</p>
-            <p><strong>First Name:</strong> {{ $user->first_name ?? 'N/A' }}</p>
-            <p><strong>Last Name:</strong> {{ $user->last_name ?? 'N/A' }}</p>
-            <p><strong>Email:</strong> {{ $user->email }}</p>
-            <p><strong>Company Name:</strong> {{ $user->company_name ?? 'N/A' }}</p>
-            <p><strong>Company Address:</strong> {{ $user->company_address ?? 'N/A' }}</p>
-            <p><strong>Town:</strong> {{ $user->town ?? 'N/A' }}</p>
-            <p><strong>Country:</strong> {{ $user->country ?? 'N/A' }}</p>
-            <p><strong>VAT Number:</strong> {{ $user->vat_number ?? 'N/A' }}</p>
-            <p><strong>Is Admin:</strong> {{ $user->is_admin ? 'Yes' : 'No' }}</p>
-            <p><strong>Email Verified:</strong> {{ $user->email_verified_at && method_exists($user->email_verified_at, 'format') ? 'Yes' : ($user->email_verified_at ? 'Yes' : 'No') }}</p>
-        </div>
-
-        <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-            <h3 style="color: #045cb8; margin-top: 0;">Domain Information</h3>
-            <p><strong>Domain ID:</strong> {{ $domain->id }}</p>
-            <p><strong>Domain Name:</strong> {{ $domain->name }}</p>
-            <p><strong>Domain User ID:</strong> {{ $domain->user_id }}</p>
-        </div>
-
-        <div style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-            <h3 style="color: #045cb8; margin-top: 0;">Timestamps</h3>
-            <p><strong>Licence Created:</strong> {{ $licence->created_at && method_exists($licence->created_at, 'format') ? $licence->created_at->format('Y-m-d H:i:s') : ($licence->created_at ?? 'N/A') }}</p>
-            <p><strong>Licence Updated:</strong> {{ $licence->updated_at && method_exists($licence->updated_at, 'format') ? $licence->updated_at->format('Y-m-d H:i:s') : ($licence->updated_at ?? 'N/A') }}</p>
-            <p><strong>User Created:</strong> {{ $user->created_at && method_exists($user->created_at, 'format') ? $user->created_at->format('Y-m-d H:i:s') : ($user->created_at ?? 'N/A') }}</p>
-            <p><strong>User Updated:</strong> {{ $user->updated_at && method_exists($user->updated_at, 'format') ? $user->updated_at->format('Y-m-d H:i:s') : ($user->updated_at ?? 'N/A') }}</p>
-            <p><strong>Domain Created:</strong> {{ $domain->created_at && method_exists($domain->created_at, 'format') ? $domain->created_at->format('Y-m-d H:i:s') : ($domain->created_at ?? 'N/A') }}</p>
-            <p><strong>Domain Updated:</strong> {{ $domain->updated_at && method_exists($domain->updated_at, 'format') ? $domain->updated_at->format('Y-m-d H:i:s') : ($domain->updated_at ?? 'N/A') }}</p>
+            <h3 style="color: #045cb8; margin-top: 0;">{{ __('payment.user_information') }}</h3>
+            <p><strong>{{ __('payment.first_name') }}:</strong> {{ $user->first_name ?? 'N/A' }}</p>
+            <p><strong>{{ __('payment.last_name') }}:</strong> {{ $user->last_name ?? 'N/A' }}</p>
+            <p><strong>{{ __('payment.email') }}:</strong> {{ $user->email }}</p>
+            <p><strong>{{ __('payment.company_name') }}:</strong> {{ $user->company_name ?? 'N/A' }}</p>
+            <p><strong>{{ __('payment.company_address') }}:</strong> {{ $user->company_address ?? 'N/A' }}</p>
+            <p><strong>{{ __('payment.town') }}:</strong> {{ $user->town ?? 'N/A' }}</p>
+            <p><strong>{{ __('payment.country') }}:</strong> {{ $user->country ?? 'N/A' }}</p>
+            <p><strong>{{ __('payment.vat_number') }}:</strong> {{ $user->vat_number ?? 'N/A' }}</p>
         </div>
 
         <p style="color: #666; font-size: 12px; margin-top: 30px;">
-            This email was automatically generated by ExpressLabelMaker.com when payment data was submitted.
+            {{ __('payment.email_footer') }}
         </p>
     </div>
 </body>

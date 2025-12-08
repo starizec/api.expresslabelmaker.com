@@ -481,13 +481,17 @@ class HpController extends Controller
     {
         $parcel->payed_by = 1;
 
+        if (isset($parcel->location_id)) {
+            $location = DeliveryLocation::where('id', $parcel->location_id)->latest()->first();
+        }
+
         if (!isset($parcel->location_id) || $parcel->location_id == "" || $parcel->location_id == null) {
             $deliveryTypeId = $this->deliveryTypes["ADR"];
 
-        } elseif (isset($parcel->location_id) && $parcel->location_type == "PU") {
+        } elseif (isset($parcel->location_id) && $location->type == "PU") {
             $deliveryTypeId = $this->deliveryTypes["PU"];
 
-        } elseif (isset($parcel->location_id) && $parcel->location_type == "PAK") {
+        } elseif (isset($parcel->location_id) && $location->type == "PAK") {
             $deliveryTypeId = $this->deliveryTypes["PAK"];
         }
 
@@ -556,7 +560,7 @@ class HpController extends Controller
                     "recipient_hnum_suffix" => (string) ".",
                     "recipient_zip" => (string) $parcel->recipient_postal_code,
                     "recipient_city" => (string) $parcel->recipient_city,
-                    "recipient_delivery_center" => (string) isset($parcel->location_id) ? $parcel->location_id : null,
+                    "recipient_delivery_center" => (string) isset($location->location_id) ? $location->location_id : null,
                 ],
                 "additional_services" => $additionalServices,
                 "packages" => $packages

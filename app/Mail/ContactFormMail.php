@@ -33,6 +33,7 @@ class ContactFormMail extends Mailable
         }
 
         return $this->subject('Nova kontakt poruka - ExpressLabelMaker')
+                    ->replyTo($this->email)
                     ->view('emails.contact-form')
                     ->with([
                         'email' => $this->email,

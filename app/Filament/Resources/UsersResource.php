@@ -29,17 +29,20 @@ class UsersResource extends Resource
                             ->email()
                             ->required()
                             ->unique(ignoreRecord: true),
-                        Forms\Components\TextInput::make('name')
-                            ->required()
-                            ->maxLength(255),
                         Forms\Components\TextInput::make('first_name')
                             ->maxLength(255),
                         Forms\Components\TextInput::make('last_name')
                             ->maxLength(255),
                         Forms\Components\TextInput::make('password')
                             ->password()
+                            ->default('')
+                            ->required(fn (string $context): bool => $context === 'create')
+                            ->afterStateHydrated(function (Forms\Components\TextInput $component) {
+                                // Always set password field to empty when editing
+                                $component->state('');
+                            })
                             ->dehydrated(fn ($state) => filled($state))
-                            ->required(fn (string $context): bool => $context === 'create'),
+                            ->dehydrateStateUsing(fn ($state) => bcrypt($state)),
                     ]),
 
                 Forms\Components\Section::make('Company Information')
@@ -69,6 +72,18 @@ class UsersResource extends Resource
                             ->label('Admin Access')
                             ->default(false),
                     ]),
+
+                Forms\Components\Section::make('Moje licence')
+                    ->schema([
+                        Forms\Components\View::make('filament.forms.components.user-licences')
+                            ->visible(fn ($record) => $record !== null),
+                    ])
+                    ->visible(function ($record) {
+                        if (!$record) {
+                            return false;
+                        }
+                        return $record->domains()->with('licences')->exists();
+                    }),
             ]);
     }
 
@@ -76,8 +91,6 @@ class UsersResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('company_name')

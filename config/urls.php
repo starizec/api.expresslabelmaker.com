@@ -19,7 +19,7 @@ return (function () {
         'development' => [
             'hr' => [
                 'dpd' => 'https://easyship.hr/api', 
-                'overseas' => 'https://apitest.overseas.hr',
+                'overseas' => 'https://api.overseas.hr',
                 'hp-auth' => 'https://dxwebapit.posta.hr:9000/api',
                 'hp' => 'https://dxwebapit.posta.hr:9020/api',
                 'gls' => 'https://api.test.mygls.hr'

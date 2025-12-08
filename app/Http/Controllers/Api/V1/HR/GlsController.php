@@ -15,7 +15,7 @@ use App\Services\Logger\ApiUsageLogger;
 use DateInterval;
 use App\Models\DeliveryLocationHeader;
 use App\Models\DeliveryLocation;
-
+use Illuminate\Support\Facades\Log;
 class GlsController extends Controller
 {
     protected $courier;
@@ -113,7 +113,7 @@ class GlsController extends Controller
 
         $printPosition = $parcel->print_position;
         $printerType = $parcel->printer_type;
-
+        Log::info(json_encode($this->prepareParcelPayload($parcel)));
         $parcelResponse = Http::withoutVerifying()
             ->post(
                 config('urls.hr.gls') . "/ParcelService.svc/json/PrintLabels",
@@ -492,10 +492,12 @@ class GlsController extends Controller
         }
 
         if (isset($parcel->location_id) && $parcel->location_id != "") {
+            $location = DeliveryLocation::where('id', $parcel->location_id)->latest()->first();
+
             $service_list[] = [
                 "Code" => "PSD",
                 "PSDParameter" => [
-                    "StringValue" => $parcel->location_id
+                    "StringValue" => $location->location_id
                 ]
             ];
         }
@@ -504,39 +506,40 @@ class GlsController extends Controller
 
         foreach ($additionalServicesIds as $additionalServiceId) {
             if ($additionalServiceId == "INS") {
+                $parcel_value = $parcel->parcel_value > 165.90 ? (float) $parcel->parcel_value : 165.90;
                 $service_list[] = [
                     "Code" => "INS",
                     "INSParameter" => [
-                        "Value" => $parcel->parcel_value
+                        "Value" => $parcel_value
                     ]
                 ];
             }
 
-            if ($additionalServiceId == "FDS") {
-                $service_list[] = [
-                    "Code" => "FDS",
-                    "FDSParameter" => [
-                        "Value" => $parcel->recipient_email
-                    ]
-                ];
-            }
+            if (!isset($parcel->location_id) || $parcel->location_id == "") {
+                if ($additionalServiceId == "FDS") {
+                    $service_list[] = [
+                        "Code" => "FDS",
+                        "FDSParameter" => [
+                            "Value" => $parcel->recipient_email
+                        ]
+                    ];
+                }
 
-            if ($additionalServiceId == "FSS") {
-                $service_list[] = [
-                    "Code" => "FSS",
-                    "FSSParameter" => [
-                        "Value" => $parcel->recipient_phone
-                    ]
-                ];
+                if ($additionalServiceId == "FSS") {
+                    $service_list[] = [
+                        "Code" => "FSS",
+                        "FSSParameter" => [
+                            "Value" => $parcel->recipient_phone
+                        ]
+                    ];
+                }
             }
         }
-        return [
+
+        $payload = [
             "ClientNumber" => $this->user->client_number,
             "ClientReference" => $parcel->order_number,
             "Count" => $parcel->parcel_count,
-            "CODAmount" => $parcel->cod_amount ?? null,
-            "CODReference" => $parcel->order_number ?? null,
-            "CODCurrency" => $parcel->cod_currency ?? null,
             "PickupAddress" => [
                 "Name" => $parcel->sender_name,
                 "Street" => AdressService::splitAddress($parcel->sender_adress)['street'],
@@ -561,6 +564,14 @@ class GlsController extends Controller
             ],
             "ServiceList" => $service_list
         ];
+
+        if($parcel->cod_amount && $parcel->cod_amount > 0) {
+            $payload["CODAmount"] = $parcel->cod_amount;
+            $payload["CODReference"] = $parcel->order_number;
+            $payload["CODCurrency"] = $parcel->cod_currency;
+        }
+
+        return $payload;
     }
 
     protected function validateParcel($parcel)

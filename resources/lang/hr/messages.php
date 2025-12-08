@@ -79,4 +79,13 @@ return [
 
     'licence_bought_notification' => 'Licenca kupljena za :domain.',
     'licence_bought_added' => 'Licenca za domenu :domain je kupljena i vrijedi do :valid_until.',
+
+    'go_to_profile' => 'Idi na moj profil',
+
+    'request_offer_success' => 'Vaš zahtjev je uspješno zaprimljen.',
+    'request_offer_success_message' => 'Ponudu ćemo poslati na vašu e-mail adresu (:email) u najkraćem mogućem roku.',
+
+    'Regards' => 'S poštovanjem',
+
+    'email_action_trouble' => "Ako imate problema s klikom na gumb \":actionText\", kopirajte i zalijepite URL ispod\nu svoj web preglednik:",
 ]; 

@@ -23,12 +23,27 @@ class DomainsResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name'),
-                Forms\Components\Select::make('user_id')
-                    ->relationship(
-                        name: 'user',
-                        titleAttribute: 'email',
-                    )->searchable()
+                Forms\Components\Section::make('Domain Information')
+                    ->schema([
+                        Forms\Components\TextInput::make('name'),
+                        Forms\Components\Select::make('user_id')
+                            ->relationship(
+                                name: 'user',
+                                titleAttribute: 'email',
+                            )->searchable()
+                    ]),
+
+                Forms\Components\Section::make('Licence')
+                    ->schema([
+                        Forms\Components\View::make('filament.forms.components.domain-licences')
+                            ->visible(fn ($record) => $record !== null),
+                    ])
+                    ->visible(function ($record) {
+                        if (!$record) {
+                            return false;
+                        }
+                        return $record->licences()->exists();
+                    }),
             ]);
     }
 

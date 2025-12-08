@@ -8,7 +8,7 @@ use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Log;
 use App\Services\DomainService;
 use App\Services\Logger\ApiErrorLogger;
 
@@ -68,8 +68,6 @@ class LicenceController extends Controller
             ], 403);
         }
 
-        $isNewUser = false;
-
         if (User::where('email', $data->email)->exists()) {
             $user = User::where('email', $data->email)->first();
         } else {
@@ -81,10 +79,12 @@ class LicenceController extends Controller
                 'password' => Hash::make($randomPassword),
             ]);
 
-            $isNewUser = true;
-
             // Send password setup notification
-            $user->sendPasswordSetupNotification();
+            try {
+                $user->sendPasswordSetupNotification();
+            } catch (\Exception $e) {
+                Log::error('Error sending password setup notification: ' . $e->getMessage());
+            }
         }
 
         $domain = Domain::firstOrCreate([
@@ -92,7 +92,13 @@ class LicenceController extends Controller
             'user_id' => $user->id
         ]);
 
-        $domain->sendNewDomainNotification($domain->name);
+
+        try {
+            $domain->sendNewDomainNotification($domain->name);
+        } catch (\Exception $e) {
+            Log::error('Error sending new domain notification: ' . $e->getMessage());
+        }
+
 
         $licence = Licence::create([
             'user_id' => $user->id,

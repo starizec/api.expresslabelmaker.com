@@ -1,0 +1,1976 @@
+---
+alwaysApply: true
+---
+# DPD EasyShip Webservice
+
+# User Manual
+
+For DPD Slovenia and DPD Croatia
+
+Version 1. 96
+
+Date: 30. 08. 2024
+
+
+## Webservices user manual
+
+- 1. Parcel generation Content
+- 2. Parcel label print
+- 3. Parcel manifest print
+- 4. Parcel status
+- 5. Parcel delete
+- 6. Parcel cancel
+- 7. Carorder request
+- 8. Carorder cancel
+- 9. Collection request
+- 10. Workday check
+- 11. Postal code check
+- 12. Return on demand label generation
+- 13. Collection request get parcel number
+- 14. DPD Food, DPD Fresh, DPD Frozen
+- 15. Parcel creation errors and description
+- 16. Digital label
+- 17. Return label generation
+
+
+Webservices user manual
+
+This document describes the Web services through which customers can connect their
+
+ERP software with a DPD Easyship application for fast and simple parcel label creation.
+
+## 1. Parcel generation Content
+
+With this interface the customer sends recipient data through a webservice POST method
+and the response is a parcel number.
+
+Web service URL for SI: https://easyship.si/api/parcel/parcel_import
+
+Web service URL for HR: https://easyship.hr/api/parcel/parcel_import
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+Input parameters:
+
+```
+Name Max
+length
+```
+```
+Mandatory Data
+```
+```
+username 20 yes Client’s Easyship username
+password 20 yes Client’s Easyship password
+name1 35 yes Receiver company or personal name
+name2 35 no Receiver additional name (if needed)
+contact 35 no Receiver contact person
+street 35 yes Receiver street
+rPropNum 8 yes Receiver house number (case-sensitive)
+city 35 yes Receiver city
+country 2 yes Receiver country code (ISO 2 standard)
+(Slovenia is SI)
+```
+```
+pcode 9 yes Receiver postal code. Only valid postal code
+for country will be accepted.
+email 50 yes* Receiver e-mail address. One of the two
+fields (phone / email) is mandatory for B2C
+and export parcels.
+If email contains character '+’, it must be
+inserted in encoded format: ‘%2B’
+(test+test@dpd.hr >>> test%2Btest@dpd.hr)
+```
+
+Webservices user manual
+
+```
+phone 30 yes* Receiver phone number. One of the two
+fields (phone / email) is mandatory for B2C
+and export parcels.
+sender_remark 50 no Delivery instructions for courier
+weight 4 no* Parcel weight (kg)
+Decimals are separated by point (''.'').
+Mandatory for DPD Shop, Shop Return,
+Pickup Shop2Home/Business. When
+creating multiple parcels for the same
+receiver, different weight can be set for
+each parcel in the shipment. If
+num_of_parcel = 2, weight can be set as
+“&weight=4.5&weight=6.5” Parcel 1 gets 4.
+kg, Parcel 2 gets 6.5 kg
+num_of_parcel 2 yes Number of parcel labels to be generated
+order_number 20 no Customer’s parcel reference
+order_number2 20 no Customer’s additional parcel reference
+parcel_type 20 yes Parcel type string: DPD Business: D
+DPD Business COD: D-COD
+DPD Home (B2C): D-B2C
+DPD Home COD: D-COD-B2C
+Exchange: D-SWAP
+Tyre: D-TYRE, Tyre (B2C): D-TYRE-B2C
+Parcel shop: D-B2C-PSD
+Pallet: PAL
+DPD Home COD with return label: D-COD-
+B2C-RP
+Pickup Shop2Home: SFSB2C
+Pickup Shop2Business: SFSB2B
+parcel_cod_type 10 no This field is used for the COD amount
+splitting.
+The following values are accepted:
+avg (the amount of each parcel will be the
+average amount of the given cod_amount),
+all (all parcels have the same amount which
+is in the cod_amount field),
+firstonly (only the first parcel will have the
+COD amount and the other parcels will be
+DPD Classic parcels)
+cod_amount 10 no* Mandatory for COD, the value is in
+destination country currency.
+Decimals are separated by point (''.'').
+cod_purpose 14 no* Mandatory for COD, this is customer's COD
+reference
+predict 1 no Predict notification, mandatory for B2C
+parcels, "1" for activation
+```
+return_of_document (^1) no Activate ‘Return of documents’ service, "1"
+for activation
+is_id_check 1 no Required for ID check activation, “1” for
+activation
+id_check_receiver 35 no Required for ID check activation
+Name of person for ID check
+
+
+Webservices user manual
+
+```
+id_check_num 5 no Receiver ID check document number
+sender_name 30 no Sender company name on the label
+sender_city 30 no Sender city on the label
+sender_pcode 9 no Sender postal code on the label. Only valid
+postal code for sender_country will be
+accepted.
+sender_country 2 no Sender country on the label
+sender_street 30 no Sender street on the label
+sender_phone 20 no Sender phone number on the label
+sender_email 100 no* Sender email address. Mandatory for C2C
+parcels
+pudo_id 7 no PUDO ID, mandatory for direct sending to
+PUDO location
+(example: HR00006)
+Please contact local DPD for the list of
+PUDO IDs and locations
+dimension 9 no* 3 D dimension of the parcel (length / width /
+height) in cm without separators.
+*Mandatory for DPD Shop and Pallet
+products (example: 100110120)
+return_name 35 no* Name of the company for parcel return. If
+sender wants to return to address, which is
+different from sender address. *If one of
+the ‘return_’
+return_name2 35 no Contact person on the return address
+return_street 35 no* Return street
+return_PropNum 8 no Return house number
+return_city 35 no* Return city
+return_pcode 9 no* Return postal code
+return_country 2 no* Return country code (ISO2 standard)
+(Slovenia is SI)
+return_phone 20 no Return phone number
+```
+*For export parcels, receiver phone number or email address is mandatory information
+
+Example basic DPD Business parcel for SI:
+
+https://easyship.si/api/parcel/parcel_import?username=user&password=pass&name1=Podjetje
+d.o.o.&name2=Janez Novak&street=Celovska
+cesta&rPropNum=492&city=Ljubljana&country=SI&pcode=1000&email=test@dpd.si&phone=
+3441&sender_remark=Dostava v
+upravo&weight=4.0&order_number=Referenca12&parcel_type=D&num_of_parcel=
+
+Example basic DPD Business parcel for HR:
+
+https://easyship.hr/api/parcel/parcel_import?username=user&password=pass&name1=Matisa d.o.o.&
+name2=Damir
+Novaković&street=Slatinska&rPropNum=4&city=Zagreb&country=HR&pcode=10000&email=test@dp
+d.hr&phone=38591223441&sender_remark=Dostaviti u
+upravu&weight=4.0&order_number=Referenca1&parcel_type=D&num_of_parcel=
+
+Example DPD B2C parcel with COD and predict for SI:
+
+
+Webservices user manual
+
+https://easyship.si/api/parcel/parcel_import?username=user&password=pass&name1=Janez
+Novak&street=Celovška
+cesta&rPropNum=50&city=Ljubljana&country=SI&pcode=1000&email=test@dpd.si&phone=
+9996&sender_remark=Opomba za dostavo&weight=4.0&order_number=referenca2&parcel_type=D-
+COD-B2C&parcel_cod_type=avg&num_of_parcel=1&cod_amount=500.50&cod_purpose=COD-
+ref001&predict=
+
+Example DPD B2C parcel with COD and predict for HR:
+
+https://easyship.hr/api/parcel/parcel_import?username=user&password=pass&name1=Damir
+Novaković&street=Nova
+Dalmacija&rPropNum=50&city=Zagreb&country=HR&pcode=10000&email=test@dpd.hr&phone=
+91569996&sender_remark=Nazovite prije
+dostave&weight=4.0&order_number=referenca2&parcel_type=D-COD-
+B2C&parcel_cod_type=avg&num_of_parcel=1&cod_amount=500.50&cod_purpose=COD-
+ref001&predict=
+
+Example basic DPD Business parcel, with different sender information for SI:
+
+https://easyship.si/api/parcel/parcel_import?username=user&password=pass&name1=Podjetje
+d.o.o.&name2=Janez Novak&street=Celovška
+cesta&rPropNum=45&city=Ljubljana&country=SI&pcode=1000&email=test@dpd.si&phone=
+6555&sender_remark=Dostava v
+upravo&weight=4.0&order_number=referenca1&parcel_type=D&num_of_parcel=1&sender_name=Au
+stria company
+GMBH&sender_city=Wien&sender_pcode=1200&sender_country=AT&sender_street=Wien Strasse 1
+&sender_phone=24352456356&sender_email=sales@austria.at
+
+Example basic DPD Business parcel, with different sender information for HR:
+
+https://easyship.hr/api/parcel/parcel_import?username=user&password=pass&name1=Matisa
+d.o.o.&name2=Damir Novaković&street=Nova
+Dalmacija&rPropNum=45&city=Zagreb&country=HR&pcode=10000&email=test@dpd.hr&phone=
+913430607&sender_remark=Dostaviti u
+upravu&weight=4.0&order_number=referenca1&parcel_type=D&num_of_parcel=1&sender_name=Au
+stria Company
+GMBH&sender_city=Wien&sender_pcode=1200&sender_country=AT&sender_street=Wien Strasse
+1&sender_phone=24352456356&sender_email=sales@austria.at
+
+Example sending of parcel direct to PUDO for SI:
+
+https://easyship.si/api/parcel/parcel_import?username=user&password=pass&name1=Janez
+Novak&city=Ljubljana&street=Celovška
+cesta&rPropNum=13&pcode=1000&country=SI&weight=1&num_of_parcel=1&parcel_type=D-B2C-
+PSD&order_number=123&pudo_id=SI00006&phone=38630666555&email=janez@gmail.com&dimen
+sion= 010020030
+
+Example sending of parcel direct to PUDO for HR:
+
+https://easyship.hr/api/parcel/parcel_import?username=user&password=pass&name1=Damir
+Novaković&city=Zagreb&street=Zagrebačka
+ulica&rPropNum=13&pcode=10000&country=HR&weight=1&num_of_parcel=1&parcel_type=D-B2C-
+PSD&order_number=123&pudo_id=HR00006&phone=385911231214&email=ivan@gmail.com&dimens
+ion=
+
+Example sending of B2B parcel from PUDO (Ship From Shop) for SI:
+
+https://easyship.si/api/parcel/parcel_import?username=user&password=pass&name1=Janez
+Novak&city=Ljubljana&street=Ljubljanska
+37&country=SI&pcode=1000&phone=38630666555&email=janez@gmail.com&num_of_parcel=1&we
+
+
+Webservices user manual
+
+ight=4&order_number=referenca1&parcel_type=SFSB2B&parcel_cod_type=&cod_amount=&cod_pur
+pose=&dimension=
+
+Example sending of B2B parcel from PUDO (Ship From Shop) for HR:
+
+https://easyship.hr/api/parcel/parcel_import?username=user&password=pass&name1=Damir
+Jakubin&street=Slatinska&rPropNum=
+7&city=Zagreb&country=HR&pcode=10000&email=damir@gmail
+&phone= 385911231214 &sender_remark=Nazovite prije
+dostave&weight=4.0&order_number=referenca1&parcel_type=SFSB2B&parcel_cod_type=&num_of_
+parcel=1&cod_amount=&cod_purpose=&predict= 1 &dimension=
+
+Example sending of B2C parcel from PUDO (Ship From Shop) for SI:
+
+https://easyship.si/api/parcel/parcel_import?username=user&password=pass&name1=Janez
+Novak&city=Ljubljana&street=Ljubljanska
+37&country=SI&pcode=1000&phone=38630666555&email=janez@gmail.com&num_of_parcel=1&we
+ight=4&order_number=referenca1&parcel_type=SFSB2C&parcel_cod_type=&cod_amount=&cod_pur
+pose=&dimension=
+
+Example sending of B2C parcel from PUDO (Ship From Shop) for HR:
+
+https://easyship.hr/api/parcel/parcel_import?username=user&password=pass&name1=Damir
+Jakubin&street=Slatinska&rPropNum=7&city=Zagreb&country=HR&pcode=10000&email=damir@g
+mail&phone= 385911231214 &sender_remark=Nazovite prije
+dostave&weight=4&order_number=referenca1&parcel_type=SFSB2C&parcel_cod_type=&num_of_p
+arcel=1&cod_amount=&cod_purpose=&predict= 1 &dimension=
+
+Example basic DPD Business parcel with document return for SI:
+
+https://easyship.si/api/parcel/parcel_import?username=user&password=pass&name1=Podjetje
+d.o.o.&name2=Janez Novak&street=Celovska
+cesta&rPropNum=492&city=Ljubljana&country=SI&pcode=1000&email=test@dpd.si&phone=
+3441&sender_remark=Dostava v
+upravo&weight=4.0&order_number=Referenca12&parcel_type=D&num_of_parcel=1&return_of_doc
+ument=
+
+Example basic DPD Business parcel with document return for HR:
+
+https://easyship.hr/api/parcel/parcel_import?username=user&password=pass&name1=Matisa d.o.o.&
+name2=Damir
+Novaković&street=Slatinska&rPropNum=4&city=Zagreb&country=HR&pcode=10000&email=test@dp
+d.hr&phone=38591223441&sender_remark=Dostaviti u
+upravu&weight=4.0&order_number=Referenca1&parcel_type=D&num_of_parcel=1&return_of_docu
+ment=
+
+Example DPD B2C parcel with COD and return label for SI:
+
+https://easyship.si/api/parcel/parcel_import?username=user&password=pass&name1=Janez
+Novak&street=Celovška
+cesta&rPropNum=50&city=Ljubljana&country=SI&pcode=1000&email=test@dpd.si&phone=
+9996&sender_remark=Opomba za dostavo&weight=4.0&order_number=referenca2&parcel_type=D-
+COD-B2C-RP&parcel_cod_type=avg&num_of_parcel=1&cod_amount=500.50&cod_purpose=COD-
+ref001&predict=1&dimension=
+
+Example DPD B2C parcel with COD and return label for HR:
+
+https://easyship.hr/api/parcel/parcel_import?username=user&password=pass&name1=Damir
+Novaković&street=Nova
+Dalmacija&rPropNum=50&city=Zagreb&country=HR&pcode=10000&email=test@dpd.hr&phone=
+91569996&sender_remark=Nazovite prije
+
+
+Webservices user manual
+
+dostave&weight=4.0&order_number=referenca2&parcel_type=D-COD-B2C-
+RP&parcel_cod_type=avg&num_of_parcel=1&cod_amount=500.50&cod_purpose=COD-
+ref001&predict=1&dimension=
+
+Example PALLET parcel for SI with dimension:
+
+https://easyship.si/api/parcel/parcel_import?username=user&password=pass&name1=Podjetje
+d.o.o.&name2=Janez Novak&street=Celovska
+cesta&rPropNum=492&city=Ljubljana&country=SI&pcode=1000&email=test@dpd.si&phone=
+3441&sender_remark=Dostava v
+upravo&weight=4.0&order_number=Referenca12&parcel_type=PAL&num_of_parcel=1&dimension=
+99100110
+
+Example PALLET parcel for HR with dimension:
+
+https://easyship.hr/api/parcel/parcel_import?username=user&password=pass&name1=Matisa d.o.o.&
+name2=Damir
+Novaković&street=Slatinska&rPropNum=4&city=Zagreb&country=HR&pcode=10000&email=test@dp
+d.hr&phone=38591223441&sender_remark=Dostaviti u
+upravu&weight=4.0&order_number=Referenca1&parcel_type=PAL&num_of_parcel=1&dimension=
+9100120
+
+Example multiple DPD Business parcels for SI, each with different weight:
+
+https://easyship.si/api/parcel/parcel_import?username=user&password=pass&name1=Podjetje
+d.o.o.&name2=Janez Novak&street=Celovska
+cesta&rPropNum=492&city=Ljubljana&country=SI&pcode=1000&email=test@dpd.si&phone=
+3441&sender_remark=Dostava v
+upravo&weight=4.0&weight=6.0&order_number=Referenca12&parcel_type=D&num_of_parcel= 2
+
+Example multiple DPD Business parcel for HR, each with different weight:
+
+https://easyship.hr/api/parcel/parcel_import?username=user&password=pass&name1=Matisa d.o.o.&
+name2=Damir
+Novaković&street=Slatinska&rPropNum=4&city=Zagreb&country=HR&pcode=10000&email=test@dp
+d.hr&phone=38591223441&sender_remark=Dostaviti u
+upravu&weight=4.0&weight=6.0&order_number=Referenca1&parcel_type=D&num_of_parcel= 2
+
+Example DPD Business parcels for SI, with different return address:
+
+https://easyship.si/api/parcel/parcel_import?username=user&password=pass&name1=Pod
+jetje d.o.o.&name2=Janez Novak&street=Celovska
+
+cesta&rPropNum=492&city=Ljubljana&country=SI&pcode=1000&email=test@dpd.si&phon
+e=38691223441&sender_remark=Dostava v
+upravo&weight=4.0&order_number=Referenca12&parcel_type=D&num_of_parcel=1&retur
+
+n_name=DPD
+d.o.o.&return_name2=skladišče&return_pcode=1000&return_country=SI&return_street=Lj
+ubljanska Ulica&return_PropNum=44&return_city=Ljubljana&return_phone= 015130000
+
+Example DPD Business parcel for HR, with different return address:
+
+https://easyship.hr/api/parcel/parcel_import?username=user&password=pass&name1=Ma
+tisa d.o.o.&name2=Damir
+
+Novaković&street=Slatinska&rPropNum=4&city=Zagreb&country=HR&pcode=10000&emai
+l=test@dpd.hr&phone=38591223441&sender_remark=Dostaviti u
+upravu&weight=4.0&order_number=Referenca1&parcel_type=D&num_of_parcel=1&return
+_name=DPD
+
+
+Webservices user manual
+
+Croatia&return_name2=skladište&return_pcode= 10360 &return_country=HR&return_stree
+
+t=Zagrebaćka Ulica&return_PropNum=44&return_city=Zagreb&return_phone=
+
+Result:
+
+JSON text with the following parameters
+
+```
+Name Data Format
+status status of the parcel import ‘ok’: no problem occurred
+‘err’: some problem
+occurred, displayed in
+errlog
+```
+```
+errlog Text message about the error Display error message
+```
+```
+pl_number DPD array of parcel number for the inserted
+parcels.
+Returned only if no error occurred.
+```
+### 16972000336597
+
+Example:
+
+{
+
+"status": "ok",
+"errlog": null,
+
+"pl_number": [
+"16972000336597"
+
+]
+}
+
+## 2. Parcel label print
+
+With this interface the customer receives label in a PDF or ZPL format. This request can be
+
+made only for parcels with status 'created'.
+
+Data sending is done automatically in 2-minute intervals after the label has been printed.
+
+After the parcel status has been changed to 'sent', the response to this request will be an
+
+empty PDF.
+
+Web service URL for SI: https://easyship.si/api/parcel/parcel_print
+
+Web service URL for HR: https://easyship.hr/api/parcel/parcel_print
+
+
+Webservices user manual
+
+Customer can select between PDF and ZPL output formats by changing the printer settings
+
+in EasyShip web portal (https://easyship.si or https://easyship.hr), 'Settings' - > 'Printer
+configuration'
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+Input parameters:
+
+```
+Name Max
+length
+```
+```
+Mandatory Data
+```
+```
+username 20 yes Client’s Easyship username
+password 20 yes Client’s Easyship password
+parcels 500 yes Parcel number list, separated with ‘,’ (comma).
+Example:
+16401234567890 , 16401234567891 , 16401122334455
+```
+```
+format 6 no Desired label format output, possible values:
+ZPL, PDF_A4, PDF_A
+```
+Example:
+
+https://easyship.si/api/parcel/parcel_print?username=user&password=pass&parcels=
+69,16965010000070&format=PDF_A
+
+https://easyship.hr/api/parcel/parcel_print?username=user&password=pass&parcels=
+69,17515010000070&format=PDF_A 4
+
+Result:
+
+Returns a parcel label stream with content type:application/octet-stream (A PDF file or a
+
+ZPL string, depending on Printer configuration settings or parameter ‘format’ in webservice
+request)
+
+In case of an error, it returns an error message, example:
+
+{ “status”:”err”, “errlog”:”parcel n
+
+If parcel data has already been transmitted, new parcel_print request will return an empty
+PDF file.
+
+
+Webservices user manual
+
+## 3. Parcel manifest print
+
+With this interface the customer receives a manifest list with parcel numbers in a PDF
+
+format, for which status is set to 'sent'. Parcels with status 'created' will not be visible on
+the manifest list.
+
+Web service URL for SI: https://easyship.si/api/parcel/parcel_manifest_print
+
+Web service URL for HR: https://easyship.hr/api/parcel/parcel_manifest_print
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+Input parameters:
+
+```
+Name Max length Mandatory Data
+username 20 yes Client’s Easyship username
+password 20 yes Client’s Easyship password
+type 20 yes Parcel manifest list type:
+manifest, manifest_cod, summary_list
+date Date (YYYY-MM-DD) yes Parcel date Example: 2019- 01 - 15
+```
+Example:
+
+https://easyship.si/api/parcel/parcel_manifest_print?username=user&password=pass&type=manifes
+t&date=2020- 09 - 07
+
+https://easyship.hr/api/parcel/parcel_manifest_print?username=user&password=pass&type=manife
+st&date=2020- 09 - 07
+
+Result:
+
+Returns a parcel manifest stream with content type:application/octet-stream (Normally a
+PDF file)
+
+
+Webservices user manual
+
+## 4. Parcel status
+
+With this interface the customer requests the latest tracking status of a parcel
+
+Web service URL for SI: https://easyship.si/api/parcel/parcel_status
+
+Web service URL for HR: https://easyship.hr/api/parcel/parcel_status
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+Input parameters:
+
+```
+Name Max
+length
+```
+```
+Mandatory Data
+```
+```
+secret 30 yes The value must be the following:
+FcJyN7vU7WKPtUh7m1bx
+parcel_number 14 yes The chosen parcel number.
+Example: 17515010000162
+```
+Example:
+
+https://easyship.si/api/parcel/parcel_status?secret=FcJyN7vU7WKPtUh7m1bx&parcel_number=
+5010000073
+
+https://easyship.hr/api/parcel/parcel_status?secret=FcJyN7vU7WKPtUh7m1bx&parcel_number=
+5010000073
+
+Result:
+
+Return JSON message format, with the latest parcel status
+
+{
+"parcel_status": "DELIVERED"
+
+}
+
+All statuses that can be returned:
+
+```
+ADDITIONAL_INFORMATION Additional info about parcel
+CANCELLED Parcel data cancelled after PDF label was created
+CANCELLED_SENT Parcel data cancelled after it was sent to DPD
+CONSOLIDATION Parcel is consolidated before export
+CREATED Parcel data was inserted, and parcel number was assigned
+```
+
+Webservices user manual
+
+```
+CUSTOMS_CLEARANCE_PROCESS Parcel is at customs clearance process
+DELETED Parcel deleted
+DELIVERED Parcel was delivered to receiver
+DELIVERED_BY_DRIVER_TO_DPD_PARCELSHOP Parcel was delivered to PUDO location
+DELIVERY_ATTEMPT_NOT_SUCCESSFUL Parcel was not delivered to receiver
+DRIVERS_PICK_UP Courier picked up the parcel at sender's address
+```
+```
+DRIVERS_RETURN
+```
+```
+Courier returned the parcel to DPD depo after unsuccessful
+delivery
+EXPORT_IMPORT_CLEARED Parcel passed the customs clearance and
+HUB_SCAN Parcel arrived in sorting depot
+Inbound Parcel arrived at delivery depot
+```
+```
+Inbound exception
+```
+```
+Parcel is at warehouse and will be out for delivery next
+working day
+LOADING Parcel was loaded to swap body
+NOT_YET_PRINTED Parcel created but not printed
+OUT_FOR_DELIVERY Parcel is out for delivery to receiver
+PICK_UP Parcel entered DPD depot
+PREPARED_TO_CANCEL Parcel data will be cancelled
+PREPARED_TO_SEND Parcel data is ready to be transmitted to DPD
+PRINTED PDF label was created
+Return to sender Parcel returned to sender
+SENT Parcel data was transmitted to DPD
+SYSTEM_RETURN Parcel was prepared to be returned to sender
+UNKNOWN No data at the moment
+WAREHOUSE Parcel is in DPD depot
+```
+## 5. Parcel delete
+
+With this interface the customer can delete not printed labels.
+
+Web service URL for SI: https://easyship.si/api/parcel/parcel_delete
+
+Web service URL for HR: https://easyship.hr/api/parcel/parcel_delete
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+Input parameters:
+
+```
+Name Max
+length
+```
+```
+Mandatory Data
+```
+
+Webservices user manual
+
+```
+username 20 yes Client’s Easyship username
+password 20 yes Client’s Easyship password.
+parcels 500 yes Parcel number list, separated with ‘,’ (comma)
+Example:
+17501234567890 , 17501234567891 , 17501122334455
+```
+Example:
+
+https://easyship.si/api/parcel/parcel_delete?username=user&password=pass&parcels=
+073
+
+https://easyship.hr/api/parcel/parcel_delete?username=user&password=pass&parcels=
+073
+
+Result:
+
+Return JSON message format:
+
+{
+
+"status": "1 deleted",
+"errlog": null
+
+}
+
+In case a parcel cannot be deleted, return JSON message:
+
+{
+"status": "No matched parcels",
+
+"errlog": " 1 not deleted"
+}
+
+## 6. Parcel cancel
+
+With this interface, customer can cancel the parcel after printing and after the data was
+
+sent. Cancelled parcels will not appear on the manifest list.
+
+Parcel data is automatically sent to DPD in 2-minute intervals.
+
+Web service URL for SI: https://easyship.si/api/parcel/parcel_cancel
+
+Web service URL for HR: https://easyship.hr/api/parcel/parcel_cancel
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+
+Webservices user manual
+
+Input parameters:
+
+```
+Name Max
+length
+```
+```
+Mandatory Data
+```
+```
+username 20 yes client’s Easyship username
+password 20 yes client’s Easyship password.
+parcels 500 yes Parcel number list, separated with ‘,’ (comma)
+Example:
+17501234567890 , 17501234567891 , 17501122334455
+```
+Example:
+
+https://easyship.si/api/parcel/parcel_cancel?username=user&password=pass&parcels=
+3386 , 16962000003387
+
+https://easyship.hr/api/parcel/parcel_cancel?username=user&password=pass&parcels=
+3386,
+
+Result:
+
+Return JSON message format:
+
+{
+
+"status": "1 cancelled",
+"errlog": null
+
+}
+
+## 7. Carorder request
+
+With the following interface the customer can place a carorder into DPD system to arrange
+pickup of parcels on their address.
+
+Web service URL for SI: https://easyship.si/api/pickupdiff/pickupdiff_import
+
+Web service URL for HR: https://easyship.hr/api/pickupdiff/pickupdiff_import
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+Input parameters:
+
+
+Webservices user manual
+
+```
+Name Max
+lengt
+h
+```
+```
+Mandatory Data
+```
+```
+username 20 yes Client’s Easyship username
+password 20 yes Client’s Easyship password
+name 35 yes Name of company for pickup
+street 35 yes Pickup street
+postal 9 yes Pickup postal code
+city 35 yes Pickup city
+contact 35 no Contact at pickup
+phone 20 no Contact phone at pickup
+parcels 2 no Number of parcels for pickup
+remark 50 no Remark
+```
+```
+date_from* 12 yes
+Date and time-from for pickup (YYYYMMDDHHMM).
+Example: 20 2102211200.
+```
+```
+date_to 12 yes
+Date and time-to for pickup (YYYYMMDDHHMM).
+Example: 20 2102211400
+```
+* date_from timestamp must be entered 30 minutes ahead of current time. If date_from
+
+timestamp is set to present or past date/time, webservice will return error:
+"Invalid from date (ES-130)"
+
+Example pickup order for SI:
+
+https://easyship.si/api/pickupdiff/pickupdiff_import?username=user&password=pass&name=Podjetj
+e d.o.o.&street=Celovška cesta 492&postal=1000&city=Ljubljana&contact=Janez
+Novak&phone=015130000&parcels=2&remark=Prevzem do
+16.00&date_from=202102231200&date_to= 202102231400
+
+Example pickup order for HR:
+
+https://easyship.hr/api/pickupdiff/pickupdiff_import?username=user&password=pass&name=Firma
+d.o.o.&street=Slatinska 50&postal=10000&city=Zagreb&contact=Damir
+&phone=015130000&parcels=2&remark=Pokupiti do
+14.00&date_from=202102231200&date_to=
+
+Result:
+
+Return JSON message format:
+
+{
+"code": 0,
+
+"message": "OK",
+"dispref": "ESae24a7faffa149deab08114076d7f85c"
+
+}
+
+## 8. Carorder cancel
+
+With the following interface the customer can cancel already placed carorder.
+
+
+Webservices user manual
+
+Web service URL for SI: https://easyship.si/api/pickupdiff/pickupdiff_cancel
+
+Web service URL for HR: https://easyship.hr/api/pickupdiff/pickupdiff_cancel
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+Input parameters:
+
+```
+Name Max
+length
+```
+```
+Mandatory Data
+```
+```
+username 20 yes Client’s Easyship username
+password 20 yes Client’s Easyship password
+```
+```
+dispref 35 yes
+Generated with pickup_import at
+carorder creation
+```
+Example:
+
+https://easyship.si/api/pickupdiff/pickupdiff_cancel?username=user&password=pass&dispref=ES5d
+dfb1384c045c58e4188a474d7b
+
+https://easyship.hr/api/pickupdiff/pickupdiff_cancel?username=user&password=pass&dispref=ES5d
+8dfb1384c045c58e4188a474d7b
+
+Result:
+
+Return JSON message format:
+
+{
+
+"code": 0,
+"message": "OK",
+
+"dispref": "ESae24a7faffa149deab08114076d7f85c"
+}
+
+## 9. Collection request
+
+With the following interface the customer can create a collection request order.
+
+Web service URL for SI: https://easyship.si/api/collection_request/cr_import
+
+Web service URL for HR: https://easyship.hr/api/collection_request/cr_import
+
+
+Webservices user manual
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+Input parameters:
+
+```
+Name
+Max
+length
+Mandatory Data
+```
+```
+username 20 yes Client’s Easyship username
+password 20 yes Client’s Easyship password
+cname 35 yes Sender company or personal name
+cname 1 35 no Sender contact person
+cstreet 35 yes Sender street
+```
+```
+cPropertyNumber 8 yes
+```
+```
+Sender house number (case-
+sensitive)
+ccity 35 yes Sender city
+cpostal 8 yes Sender postal code
+ccountry 2 yes Sender country code, format: ISO 2
+cphone 20 yes Sender phone number
+cemail 30 no Sender E-mail address
+info1 30 no Reference / Remark for delivery 1
+info2 30 no Remark for delivery 2
+rname 35 yes Receiver company or personal name
+rname2 35 no Receiver contact person
+rstreet 35 yes Receiver street
+```
+```
+rPropertyNumber 8 yes
+```
+```
+Receiver house number (case-
+sensitive)
+rcity 35 yes Receiver city
+rpostal 8 yes Receiver postal code
+rcountry 2 yes Receiver country code, format: ISO 2
+rphone 20 yes Receiver phone number
+remail 30 no Receiver E-mail address
+num_of_parcel 2 no Number of parcels for collection
+weight 4 no Weight of parcel for collection
+```
+```
+pickup_date 8 no
+```
+```
+Date of pickup, format: YYYYMMDD.
+If not inserted, pickup date will be set
+to next working day
+```
+Example collection request order for SI:
+
+https://easyship.si/api/collection_request/cr_import?username=user&password=pass&cname=Jane
+z Novak&cstreet=Celovska cesta
+50&ccity=Ljubljana&cpostal=1000&ccountry=SI&cphone=38630111222&cemail=stranka@gmail.com&i
+
+
+Webservices user manual
+
+nfo1=Ref:12345&info2=FieldINFO2&rname=Podjetje d.o.o.&rstreet=Celovska cesta
+492&rcity=Ljubljana&rpostal=1000&rcountry=SI&rphone=38630111222&remail=info@podjetje.si&nu
+m_of_parcel=1&weight=5&pickup_date=
+
+Example collection request order for HR:
+
+https://easyship.hr/api/collection_request/cr_import?username=user&password=pass&cname=Dam
+ir Novaković&cstreet=Slatinska
+4A&ccity=Zagreb&cpostal=10000&ccountry=HR&cphone=38530111222&cemail=stranka@gmail.com
+&info1=Ref:12345&info2=Polje INFO2&rname=Firma d.o.o.&rstreet=Zagrebacka
+5 &rcity=Zagreb&rpostal=1000 0 &rcountry=HR&rphone=38 591 111222&remail=info@fima.hr&num_of_
+parcel=1&weight=5&pickup_date=
+
+Result:
+
+Return JSON message format:
+
+{
+
+"status": "OK",
+"errlog": null,
+
+"reference": "[ESa4e5f77c06364fa181fae458ee7bcfe0]",
+"code": 0
+
+}
+
+## 10. Workday check
+
+With the following interface the customer can check if a date is working day or holiday in
+any European country.
+
+Web service URL for SI: https://easyship.si/api/date/workingday
+
+Web service URL for HR: https://easyship.hr/api/date/workingday
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+Input parameters:
+
+```
+Name
+```
+```
+Max
+Mandatory Data
+length
+username 20 yes Client’s Easyship username
+password 20 yes Client’s Easyship password
+date 8 yes Date for check, format: YYYYMMDD
+```
+
+Webservices user manual
+
+```
+country 3 yes
+Country of workday check. ISO Alpha-
+2 or Alpha- 3 encoding
+```
+Example workday check for SI:
+
+https://easyship.si/api/date/workingday?username=user&password=pass&date=20210625&country
+=AT
+
+https://easyship.si/api/date/workingday?username=user&password=pass&date=20210625&country
+=HR
+
+Example workday check for HR:
+
+https://easyship.hr/api/date/workingday?username=user&password=pass&date=20210625&country
+=FR
+
+https://easyship.hr/api/date/workingday?username=user&password=pass&date=20210625&country
+=SI
+
+Result:
+
+Return JSON message format if day is workday:
+
+{
+
+"content": {
+"workingDay": true
+
+},
+
+"status": 200,
+"message": "Success"
+
+}
+
+Return JSON message format if day is holiday:
+
+{
+"content": {
+
+"workingDay": false
+},
+
+"status": 200,
+"message": "Success"
+
+}
+
+## 11. Postal code check
+
+With the following interface, customer can check if the queried postal code exists in the
+given Business unit.
+
+
+Webservices user manual
+
+Web service URL for SI: https://easyship.si/api/cities/getByPostCode
+
+Web service URL for HR: https://easyship.hr/api/cities/getByPostCode
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+Input parameters:
+
+```
+Name
+```
+```
+Max
+Mandatory Data
+length
+username 20 yes Client’s Easyship username
+password 20 yes Client’s Easyship password
+buCode 3 yes Business Unit code
+postCode 9 yes Postal code – CASE SENSITIVE
+```
+Example postal code check for SI:
+
+https://easyship.si/api/cities/getByPostCode?username=user1&password=pass&buCode=0 26 &postC
+ode= 1000
+
+Example postal code check for HR:
+
+https://easyship.hr/api/cities/getByPostCode?username=user1&password=pass&buCode=0 28 &post
+Code= 10360
+
+Result:
+
+Return JSON message format. When postal code is validated, name of the city will be
+returned:
+
+{
+
+"content": [
+
+{
+
+"name": "LJUBLJANA",
+
+"postalCode": " 1000 "
+
+}
+
+],
+
+"status": 200,
+
+"message": "Success"
+
+}
+
+Return JSON message format. When postal code is not validated, content will be empty:
+
+
+Webservices user manual
+
+{
+
+"content": [],
+"status": 200,
+"message": "Success"
+
+}
+
+Business Unit and country codes:
+
+These are the BU and country codes used in European countries:
+
+```
+BU
+Code Company
+```
+```
+Country
+code
+001 DPD Germany DE
+002 Chronopost France FR
+003 DPD Greece GR
+004 PostNord Sverige SE
+005 DPD RU RU
+```
+### 006
+
+```
+DPD Norge c/o PostNord
+Logistics NO
+007 PostNord (Finland) FI
+008 GeoPost International FR
+```
+### 009
+
+```
+DPD Denmark c/o Post
+Danmark DK
+010 DPD Netherlands NL
+011 DPD UK GB
+```
+### 013
+
+```
+VNPT Vietnam Posts &
+Telecom VN
+014 DPD Austria AT
+015 DPD Czech Republic CZ
+016 DPD Slovakia SK
+017 DPD Hungary HU
+018 GeoPost Bulgaria BG
+019 Estafeta Mexicana MX
+020 SEUR ES
+021 DPD Poland PL
+022 La Poste Tunisienne TN
+023 BRT IT
+024 Yurtici Kargo Servisi TR
+025 DPD Kazakhstan KZ
+026 DPD Slovenia SI
+027 Lagermax (Serbia) RS
+028 DPD Croatia HR
+029 Lagermax BiH BA
+030 DPD Portugal PT
+031 DPD Estonia EE
+032 DPD Lithuania LT
+033 DPD Latvia LV
+```
+
+Webservices user manual
+
+```
+034 DPD Belgium BE
+035 DPD Luxembourg LU
+036 DPD Switzerland CH
+037 Pallet network
+038 DPD France FR
+039 Colissimo FR
+040 DPD Belarus BY
+041 DPD Romania RO
+043 DPD Laser South Africa ZA
+044 DTDC Cargo & Courier IN
+045 PostNord International
+046 DPD Ireland IE
+047 Nova Poshta UA
+048 International Express FR
+049 DPDgroup Headquarters FR
+050 Tigers
+051 Pickup Services
+052 Stuart
+```
+### 053
+
+```
+Chronopost France UK
+Gateway GB
+054 Lenton China
+055 Biologistic FR
+056 Primetime Austria AT
+```
+## 12. Return on demand label generation
+
+With the following interface the customer can create a return on demand label for B2C
+parcels, which are not older than 30 days
+
+Web service URL for SI: https://easyship.si/api/parcel/return_label
+
+Web service URL for HR: https://easyship.hr/api/parcel/return_label
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+Input parameters:
+
+```
+Name
+```
+```
+Max
+Mandatory Data
+length
+```
+
+Webservices user manual
+
+```
+username 20 yes Client’s Easyship username
+password 20 yes Client’s Easyship password
+```
+```
+returnParcelNum 14 yes
+Parcel number for which the return
+label will be created
+```
+```
+weight 4 yes
+```
+```
+Parcel weight (kg), mandatory for DPD
+SHOP services (DPD Shop, DPD Shop
+Return, Ship from Shop)
+Decimals are separated by point (''.'').
+```
+```
+dimension 9 no
+```
+```
+3D dimension of the parcel (length /
+width / height) in cm without
+separators. Example: 100110120)
+```
+Example return on demand label creation for SI:
+
+https://easyship.si/api/parcel/return_label?username=user&password=pass&returnParcelNum=1696
+5004432305 &weight=1&dimension=020030040
+
+Example return on demand label creation for HR:
+
+https://easyship.hr/api/parcel/return_label?username=user&password=pass&returnParcelNum=175
+02800004665 &weight=1&dimension=020030040
+
+Result:
+
+JSON text with the following parameters
+
+```
+Name Data Format
+status status of the parcel import ‘ok’: no problem occurred
+‘err’: some problem
+occurred, displayed in
+errlog
+```
+```
+errlog Text message about the error Display error message
+pl_number DPD parcel number of the return label
+Returned only if no error occurred.
+```
+### 16965004432306
+
+Example:
+
+{
+"status": "ok",
+
+"errlog": null,
+"pl_number": [
+
+" 16965004432306 "
+]
+
+}
+
+If a parcel is not eligible for return (not a B2C parcel or older than 30 days), webservice will
+return JSON messages with error description:
+
+
+Webservices user manual
+
+### {
+
+"status": "err",
+
+"errlog": "Can not create return label for non B2C type parcel (ES-308)",
+"pl_number": null
+
+}
+
+### {
+
+"status": "err",
+"errlog": "Return label on demand not possible for parcels older than 30 days (ES-307)",
+
+"pl_number": null
+}
+
+## 13. Collection request get parcel number
+
+With the following interface the customer can request a tracking parcel number for the
+created collection request by providing a reference number, which was returned when
+collection request was created. Parcel number for created collection request is returned
+
+on the day of pickup, when the parcel number is generated.
+
+Web service URL for SI: https://easyship.si/api/collection_request/parcel_number
+
+Web service URL for HR: https://easyship.hr/api/collection_request/parcel_number
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+```
+Name
+```
+```
+Max
+Mandatory Data
+length
+username 20 yes Client’s Easyship username
+password 20 yes Client’s Easyship password
+```
+```
+reference 35 yes
+```
+```
+Reference number of collection
+request. Generated when collection
+request was created
+```
+Example get parcel number for collection request for SI:
+
+https://easyship.si/api/collection_request/parcel_number?username=user&password=pass&referen
+ce=ESa7753ebf55ef4931a2c7a335b8a4c9ce
+
+Example get parcel number for collection request for HR:
+
+https://easyship.hr/api/collection_request/parcel_number?username=user&password=pass&referen
+ce=ESa7753ebf55ef4931a2c7a335b8a4c9ce
+
+
+Webservices user manual
+
+Result:
+
+JSON text with the following parameters
+
+```
+Name Data Format
+content Parcel tracking number if the request was
+successful.
+If parcel number is not found, content is null
+```
+```
+14 - digit DPD parcel
+number
+```
+```
+status Status code 3 - digit status code:
+200 - success
+404 - error
+message Status of the request:
+“Success”
+“Collection Request not found.”
+```
+```
+Text format
+```
+Example:
+
+{
+
+"content": "17507701158704",
+"status": 200,
+
+"message": "Success"
+}
+
+If the parcel number was not yet assigned to the reference, webservice will return JSON
+message with error description:
+
+{
+"content": null,
+
+"status": 404,
+"message": "Parcel number not found."
+
+}
+
+If the reference does not exist, webservice will return JSON message with error
+
+description:
+
+{
+
+"content": null,
+"status": 404,
+
+"message": "Collection Request not found."
+}
+
+## 14. DPD Food, DPD Fresh, DPD Frozen
+
+
+Webservices user manual
+
+The following pages contain instructions and examples for creating parcel labels for DPD
+
+Food, DPD Fresh and DPD Frozen products. Delivery parameters are the same as described
+in chapter 1. Parcel generation. Please contact your sales representative if you want to use
+this service.
+
+Additional parameters which are required:
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+```
+Name Max
+length
+```
+```
+Mandatory Data
+```
+```
+type_of_goods 1 yes Type of goods in the parcel. Always ‘ 1 ’ for all
+food products
+features 1 yes Type of food product in the parcel:
+1 – Fresh
+2 - Frozen
+3 - Food (ambient)
+limit_date 8 yes Food expiration date, format YYYYMMDD
+temp_min 5 no Minimum temperature to keep product.
+Example: -2.00.
+Decimals are separated by point (''.'').
+temp_max 5 no Maximum temperature to keep product.
+Example: 4.00.
+Decimals are separated by point (''.'').
+description 100 no Description of the goods inside the parcel
+```
+parcel_type parameter for Food products:
+
+```
+Name of the product Temperature
+parcel_type in webservice
+request
+```
+```
+DPD Food Dry Food D-FOOD
+DPD Food Today Dry Food D-FOOD-SD
+DPD Food COD Dry Food D-FOOD-COD
+DPD Food Today COD Dry Food D-FOOD-SD-COD
+DPD Food B2C Dry Food D-FOOD-B2C
+DPD Food B2C Today Dry Food D-FOOD-B2C-SD
+DPD Food B2C COD Dry Food D-FOOD-B2C-COD
+DPD Food B2C Today COD Dry Food D-FOOD-B2C-SD-COD
+DPD Fresh Fresh 0-4° D-FRESH
+DPD Fresh Today Fresh 0-4° D-FRESH-SD
+```
+
+Webservices user manual
+
+```
+DPD Fresh COD Fresh 0-4° D-FRESH-COD
+DPD Fresh Today COD Fresh 0-4° D-FRESH-SD-COD
+DPD Fresh B2C Fresh 0-4° D-FRESH-B2C
+DPD Fresh B2C Today Fresh 0-4° D-FRESH-B2C-SD
+DPD Fresh B2C COD Fresh 0-4° D-FRESH-B2C-COD
+DPD Fresh B2C Today COD Fresh 0-4° D-FRESH-B2C-SD-COD
+DPD Frozen Frozen -18° (and less) D-FROZEN
+DPD Frozen Today Frozen -18° (and less) D-FROZEN-SD
+DPD Frozen COD Frozen -18° (and less) D-FROZEN-COD
+DPD Frozen Today COD Frozen -18° (and less) D-FROZEN-SD-COD
+DPD Frozen B2C Frozen -18° (and less) D-FROZEN-B2C
+DPD Frozen B2C Today Frozen -18° (and less) D-FROZEN-B2C-SD
+DPD Frozen B2C COD Frozen -18° (and less) D-FROZEN-B2C-COD
+DPD Frozen B2C Today COD Frozen -18° (and less) D-FROZEN-B2C-SD-COD
+```
+Example DPD FOOD parcel for SI:
+
+https://easyship.si/api/parcel/parcel_import?username=user&password=pass&name1=Janez
+Novak&street=Celovska&rPropNum=11&city=Ljubljana&country=SI&pcode=1000&email=janez@gmail.
+com&phone= 38631000111 &weight=4&num_of_parcel=1&order_number=154785474&parcel_type=D-
+FOOD&num_order=1&type_of_goods=1&features=3&limit_date=20220 809 &description=DPD
+Food&num_of_parcel=1
+
+Example DPD FOOD parcel for HR:
+
+https://easyship.hr/api/parcel/parcel_import?username=user&password=pass&name1=Matisa d.o.o.&
+name2=Damir
+Novaković&street=Slatinska&rPropNum=4&city=Zagreb&country=HR&pcode=10000&email=test@dp
+d.hr&phone=38591223441&sender_remark=Dostaviti u
+upravu&weight=4.0&order_number=Referenca1&parcel_type=D-
+FOOD&num_order=1&type_of_goods=1&features=3&limit_date=20220809&description=DPD
+Food&num_of_parcel=1
+
+Example DPD FRESH COD parcel for SI:
+
+https://easyship.si/api/parcel/parcel_import?username=user&password=pass&name1=Janez
+Novak&street=Celovska&rPropNum=11&city=Ljubljana&country=SI&pcode=1000&email=janez@gmail.
+com&phone=38631000111&weight=4&num_of_parcel=1&order_number=154785474&parcel_type=
+D-FRESH-
+COD&num_order=1&parcel_cod_type=all&cod_amount=24.40&cod_purpose=2020947&type_of_goo
+ds=1&features= 1 &limit_date=20220809&description=DPD
+Fresh&temp_min=2.00&temp_max=4.00&num_of_parcel=1
+
+Example DPD FROZEN B2C COD parcel for HR:
+
+https://easyship.hr/api/parcel/parcel_import?username=user&password=pass&name1=Matisa d.o.o.&
+name2=Damir
+Novaković&street=Slatinska&rPropNum=4&city=Zagreb&country=HR&pcode=10000&email=test@dp
+d.hr&phone=38591223441&sender_remark=Dostaviti u
+upravu&weight=4.0&order_number=Referenca1&parcel_type=D-FROZEN-B2C-COD&num_order=1&
+&parcel_cod_type=all&cod_amount=24 0 .40&cod_purpose=202 24567 &type_of_goods=1&features= 2
+
+
+Webservices user manual
+
+&limit_date=20220809&description=DPD Frozen&temp_min=-20.00&temp_max=-
+18.00&num_of_parcel=1
+
+## 15. Parcel creation errors and description
+
+```
+Code Description
+301 Missing Receiver
+302 Missing Sender
+303 Reference too long
+304 Reference2 too long
+305 RETDOC is active but Reference is missing
+306 RETDOC is active but Receiver isn't domestic
+307 Parcel too old for return label on demand
+308 Parcel is not B2C type
+Receiver
+310 Missing Receiver Country
+311 Missing Receiver Country
+312 Missing Receiver Country
+315 Missing Receiver Name
+316 Receiver Name Too Long
+317 Missing Receiver Postal Code
+318 Receiver Postal Code Too Long
+319 Missing Receiver City
+320 Receiver City Too Long
+321 Missing Receiver Street
+322 Receiver Street Too Long
+323 Receiver Street 2 Too Long
+324 Receiver Contact Too Long
+325 Receiver Company Too Long
+326 Receiver Comment Too Long
+327 Receiver Phone Invalid
+328 Receiver Phone Too Long
+329 Receiver Mobile Invalid
+330 Receiver Mobile Too Long
+331 Receiver Email Too Long
+332 Receiver Name 1 Missing
+333 Receiver Name 1 Too Long
+334 Receiver Name 2 Too Long
+335 Receiver Email Invalid
+336 Service code restricted for receiver postal code
+337 Country may not receive parcels
+```
+
+Webservices user manual
+
+```
+338 Missing Receiver House Number
+339 Receiver House Number Too Long
+Sender
+350 Missing Sender Country
+351 Missing Sender Country
+352 Missing Sender Country
+353 Missing Sender Company
+354 Sender Company Too Long
+355 Sender Office Too Long
+356 Missing Sender Street
+357 Sender Street Too Long
+358 Sender Street 2 Too Long
+359 Sender Phone Invalid
+360 Sender Phone Too Long
+361 Sender Mobile Invalid
+362 Sender Mobile Too Long
+363 Missing Sender City
+364 Sender City Too Long
+365 Missing Sender Postal Code
+366 Sender Postal Code Too Long
+367 Sender Email Too Long
+368 Sender Reference Too Long
+369 Sender Contact Too Long
+370 Sender Comment Too Long
+367 Sender Email Too Long
+368 Sender Email Invalid
+Cod
+380 Missing Cod Reference
+381 Cod Reference Too Long
+382 Missing Cod Amount
+383 Cod amount limit exceeded
+Id Check
+390 Id Check Mandatory
+391 Id Check Disabled
+392 Id Check Receiver Missing
+393 Id Check Receiver Too Short
+Predict
+395 Predict is set, but email and mobile are empty
+396 Predict is set, but mobile is empty
+Product
+400 Unknown Product (Received product do not exist)
+```
+
+Webservices user manual
+
+```
+401 Product Unavailable (Product type unavailable)
+402 Product Disabled (Product type is disabled)
+Parcel Shop
+410 Parcel Shop Missing
+411 Parcel Shop is set, but phone is empty
+412 Parcel Shop is set, but weight is not set
+413 Parcel Shop mobile and email mandatory
+Dimension
+414 Dimension must be 9 numerical characters long
+415 Dimension Mandatory
+Desk Delivery
+420 Desk Delivery Mandatory
+421 Desk Delivery Disabled
+422 Desk Delivery Department Missing
+423 Desk Delivery Building Missing
+424 Desk Delivery Floor Missing
+425 Desk Delivery Department Too Long
+426 Desk Delivery Building Too Long
+427 Desk Delivery Floor Too Long
+Number of Parcels
+430 Invalid number of parcels
+431 Invalid number of exchange parcels
+432 Too many exchange parcels
+Goods
+437 Goods type is mandatory
+438 Goods features is mandatory
+439 Limit date must be in YYYYMMDD format
+440 Either both temperatures are given or none
+441 Temperature must start with + or - and be max 7 characters long
+442 Max temp must be bigger than min temp
+443 Parcel goods cares must be numeric
+444 Parcel goods cares is too long (max 10 digits)
+445 Parcel goods description too long (max 200 chars)
+446 Min or max temp out of bounds
+447 Limit date is mandatory
+448 Limit date expired
+```
+
+Webservices user manual
+
+## 16. Digital label
+
+With the following interface the recipient of the parcel can request a digital label in DPD
+
+applications like Return My Parcel in the process for parcel return. Digital label can be used
+instead of printing a return label in a .pdf format. Digital label is accepted only by certain
+Pickup locations for the process of parcel return.
+
+Web service URL for SI: https://easyship.si/api/parcel/print_digital
+
+Web service URL for HR: https://easyship.hr/api/parcel/print_digital
+
+Parameters submit information:
+
+- Method: GET
+- Character encoding: UTF- 8
+- Content type:
+
+Input parameters:
+
+```
+Name
+```
+```
+Max
+Mandatory Data
+length
+username 20 yes Client’s Easyship username
+password 20 yes Client’s Easyship password
+```
+```
+parcel_number 14 yes
+Parcel number for which the digital
+label will be created
+```
+Example get digital label for SI:
+
+https://easyship.si/api/parcel/print_digital?username=user&password=pass&parcel_number=169650
+04334054
+
+Example get digital label for HR:
+
+https://easyship.hr/api/parcel/print_digital?username=user&password=pass&parcel_number= 175020
+04334054
+
+Result:
+
+QR barcode image in a .png format, example:
+
+
+Webservices user manual
+
+## 17. Return label generation
+
+With the following interface, a DPD client can create a DPD return label, without having to
+first create and send an original parcel for the recipient by DPD. Recipient can receive a
+parcel with a different delivery provider and use DPD PUDO network to make a return. In
+
+this case, the recipient becomes a sender of the return parcel.
+
+Web service URL for SI: https://easyship.si/api/parcel/return_parcel_import
+
+Web service URL for HR: https://easyship.hr/api/parcel/return_parcel_import
+
+Parameters submit information:
+
+- Method: POST
+- Character encoding: UTF- 8
+- Content type:
+
+Input parameters:
+
+```
+Name
+Max
+length
+Mandatory Data
+```
+```
+username 20 yes Client’s Easyship username
+password 20 yes Client’s Easyship password
+name1 35 yes Sender company or personal name
+name2 35 no Sender additional name (if needed)
+street 35 yes Sender street
+rPropNum 8 yes Sender house number (case-sensitive)
+city 35 yes Sender city
+```
+```
+country 2 yes
+```
+```
+Sender country code (ISO2 standard)
+(Slovenia is SI)
+```
+```
+pcode 9 yes
+Sender postal code. Only valid postal code for
+country will be accepted.
+```
+```
+email 50 yes*
+```
+```
+Sender e-mail address. One of the two fields (phone /
+email) is mandatory for return parcels.
+If email contains character '+’, it must be inserted in
+encoded format: ‘%2B’
+(test+test@dpd.hr >>> test%2Btest@dpd.hr)
+```
+```
+phone 30 yes*
+Sender phone number. One of the two fields (phone /
+email) is mandatory for return parcels.
+sender_remark 50 no Information for return
+```
+```
+weight 4 yes
+```
+```
+Parcel weight (kg)
+Decimals are separated by point (''.''). Mandatory for
+Shop Return
+num_of_parcel 2 yes Number of parcel labels to be generated
+```
+
+Webservices user manual
+
+```
+order_number 20 no Customer’s parcel reference
+order_number2 20 no Customer’s additional parcel reference
+```
+```
+dimension 9 no
+3D dimension of the parcel (length / width / height) in
+cm without separators.
+```
+```
+return_name 35 no*
+```
+```
+Name of the company for parcel return, if client’s
+return address is different than default address in
+Easyship profile. *If one of the ‘return_’ fields is filled,
+all marked fields become mandatory
+return_name2 35 no Contact person on the return address
+return_street 35 no* Return street
+return_PropNum 8 no Return house number
+return_city 35 no* Return city
+return_pcode 9 no* Return postal code
+```
+```
+return_country 2 no*
+```
+```
+Return country code (ISO2 standard)
+(Slovenia is SI)
+return_phone 20 no Return phone number
+```
+Example return label generation for SI:
+
+https://easyship.si/api/parcel/return_parcel_import?username=user&password=pass&name1=Janez
+Novak&street=Celovska
+cesta&rPropNum=34&city=Ljubljana&country=SI&pcode=1000&email=janez.novak@dpd.si&phone=+3
+8630111222&weight=5&num_of_parcel=1
+
+Example return label generation for HR:
+
+https://easyship.hr/api/parcel/return_parcel_import?username=user&password=pass&name1=Damir
+novakovic&street=Slatinska
+ulica&rPropNum=4A&city=Zagreb&country=HR&pcode=10360&email=damir.novakovic@dpd.hr&pho
+ne=+38591111222&weight=5&num_of_parcel=1
+
+Example return label generation for SI, with different return address:
+
+https://easyship.si/api/parcel/return_parcel_import?username=user&password=pass&name1=Janez
+Novak&street=Celovska
+cesta&rPropNum=34&city=Ljubljana&country=SI&pcode=1000&email=janez.novak@dpd.si&phone=+3
+8630111222&weight=5&num_of_parcel=1&return_name=DPD
+d.o.o.&return_name2=skladišče&return_pcode=1000&return_country=SI&return_street=Ljubljanska
+Ulica&return_PropNum=44&return_city=Ljubljana&return_phone=015130000
+
+Example return label generation for HR, with different return address:
+
+https://easyship.hr/api/parcel/return_parcel_import?username=user&password=pass&name1=Damir
+novakovic&street=Slatinska
+ulica&rPropNum=4A&city=Zagreb&country=HR&pcode=10360&email=damir.novakovic@dpd.hr&pho
+ne=+38591111222&weight=5&num_of_parcel=1&return_name=DPD
+Croatia&return_name2=skladište&return_pcode=10360&return_country=HR&return_street=Zagreba
+ćka Ulica&return_PropNum=44&return_city=Zagreb&return_phone=523453245
+
+
+Webservices user manual
+
+Result:
+
+JSON text with the following parameters
+
+```
+Name Data Format
+status status of the parcel import ‘ok’: no problem occurred
+‘err’: some problem
+occurred, displayed in
+errlog
+```
+```
+errlog Text message about the error Display error message
+```
+```
+pl_number DPD array of parcel number for the inserted
+parcels.
+Returned only if no error occurred.
+```
+### 16972000336597
+
+Positive example:
+
+{
+"status": "ok",
+
+"errlog": null,
+"pl_number": [
+
+"16972000336597"
+]
+
+}
+
+Error example:
+
+{
+"status": "err",
+
+"errlog": "Sender street is mandatory (ES-356)",
+"pl_number": []
+
+}
+
+

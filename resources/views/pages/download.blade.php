@@ -10,6 +10,7 @@
                         Preuzmi plugin
                     </a>
 
+
                     <div class="mt-2 text-white">Version: {{ $plugin_downloads->version }}</div>
 
                 </div>

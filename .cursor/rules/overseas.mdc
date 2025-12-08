@@ -1,0 +1,4979 @@
+---
+alwaysApply: true
+---
+# OEX Client API
+
+Welcome to documentation for OEX Client API interface.
+
+## Contents
+
+```
+About
+```
+```
+Endpoints
+```
+```
+Protocols
+```
+```
+Methods
+```
+```
+AddUpdateSender method
+```
+```
+CancelShipments method
+```
+```
+CommitShipments method
+```
+```
+CreateReturnStickers method
+```
+```
+CreateShipment method
+```
+```
+CreateShipmentWithBarcode method
+```
+```
+PickupsList method
+```
+```
+Places method
+```
+```
+PriceInfo method
+```
+```
+RecentShipments method
+```
+```
+ReturnSticker method
+```
+```
+Senders method
+```
+```
+ShipmentsByAnyRef method
+```
+```
+ShipmentByCargoId method
+```
+```
+ShipmentById method
+```
+```
+ShipmentsByRef1 method
+```
+```
+ShipmentsById method
+```
+```
+SignatureByCargoId method
+```
+```
+Places method
+```
+```
+Places method
+```
+```
+Places method
+```
+```
+ReprintLabels method
+```
+```
+RequestPickup method
+```
+```
+UpdateShipment method
+```
+```
+Warehouse method
+```
+```
+Warehouse traffic method
+```
+```
+ParcelShops method
+```
+```
+DeliveryTime method
+```
+```
+PickupDelyIntervals method
+```
+```
+LegacyCreateApiKeyController method
+```
+```
+LegacyUpdateApiKeyController method
+```
+```
+Method morty/runnersstatus
+```
+```
+Objects
+```
+```
+ClientAPIError
+```
+```
+ClientAPIValidation
+```
+```
+CNAddress
+```
+```
+CNClient
+```
+```
+CNCOD
+```
+```
+CNCommission
+```
+
+```
+CNDepo
+```
+```
+CNEvent
+```
+```
+CNParcelShop
+```
+```
+CNPerson
+```
+```
+CNPickDelyIntervals
+```
+```
+CNTimeInterval
+```
+```
+CNPlace
+```
+```
+CNPrice
+```
+```
+CNPriceInfo
+```
+```
+CNReturnSticker
+```
+```
+CNRoute
+```
+```
+CNShipment
+```
+```
+CNStatus
+```
+```
+CNUnit
+```
+```
+CNWorkingHours
+```
+```
+TimeIntervalDate
+```
+```
+CNWarehouseItem
+```
+```
+CNWarehouseTraffic
+```
+```
+ClientAPICreateShipmentWithBarcodeRequest
+```
+```
+ClientAPICreateShipmentWithBarcodeColli
+```
+```
+ClientAPICreateShipmentRequest
+```
+```
+ClientAPICreateShipmentRequestColli
+```
+```
+Address
+```
+```
+GetDeliveryTimeRequest
+```
+```
+PriceInfoRequest
+```
+```
+AddUpdateSenderResult
+```
+```
+CancelShipmentsResult
+```
+```
+ClientAPICreateShipmentResult
+```
+```
+ClientAPICreateShipmentWithBarcodeResult
+```
+```
+ClientApiShipmentResult
+```
+```
+PostCancelableStatus
+```
+```
+ClientApiParcelShopsResult
+```
+```
+ClientApiShipmentsResult
+```
+```
+ClientApiSignatureResult
+```
+```
+PlacesResult
+```
+```
+ClientApiSendersResult
+```
+```
+APISender
+```
+```
+ClientApiUserInfoResult
+```
+```
+CreateReturnStickersResult
+```
+```
+GetDeliveryTimeResponse
+```
+```
+DeliveryTimes
+```
+```
+GetPickDelyIntervalsResponse
+```
+```
+GetPickupsListResult
+```
+```
+PriceResult
+```
+```
+PrintShipmentsResult
+```
+```
+RemoveColliesResult
+```
+```
+RequestPickupClientResult
+```
+```
+ReturnStickerResult
+```
+```
+ReturnStickersResult
+```
+```
+WarehouseItemsResult
+```
+```
+WarehouseTrafficsResult
+```
+**Errors**
+
+**Validations**
+
+
+## About
+
+OEX Client API is a REST/JSON service that enables other systems to
+interact with OEX Systems
+
+Purpose of OEX Client API is to provide stable, fast and reliable access to
+data related creating and processing shipments, print labels, handle statues
+etc.
+
+All available methods will be described in this document and it will be
+updated in case of any changes. Current version of this document will be
+available here.
+
+## Endpoints
+
+OEX Client API is exposed on following endpoints:
+
+```
+Test system (example): https://apitest.apidomain.com
+Production system (example): https://api.apidomain.com
+```
+To access system, API key and valid access rights are required. Contact
+OEX administrator to provide Client API keys and permits.
+
+## Protocols and method calls
+
+OEX Client API uses JSON for exchange of data.
+
+Any call is required to have following form:
+[http://<apiendpoint>/<methodname>?apikey=<apikey>](http://<apiendpoint>/<methodname>?apikey=<apikey>)
+
+All methods use GET method to receive “apikey” parameter that is always
+mandatory.
+
+Some methods might require additional complex data and it is transferred
+using POST method by setting request body to a value of required JSON
+parameters.
+
+**Example of successful call and result:**
+
+**Request:**
+
+https://apitest.apidomain.com/createshipment?apikey=<apikey>
+
+**POST data:**
+
+```
+{
+"Cosignee": {
+"Name": "Test Receiver",
+"CountryCode": "HR",
+"Zipcode": "21000",
+"City": "Split",
+"StreetAndNumber": "Vidilica Ulica 17",
+"Telephone": "01234567",
+"Fax": "0158372",
+"NotifyGSM": "0981234567",
+"NotifyEmail": "test@test.com"
+},
+"UnitAmount": 3,
+"Ref1": "1234567890"
+}
+```
+**Response:**
+
+```
+{
+"ShipmentID": 62860,
+"PickupTime": "2020-10-05T08:00:00",
+"PickupEndTime": "2020-10-05T15:00:00",
+"DeliveryTime": "2020-10-06T08:00:00",
+"DeliveryEndTime": "2020-10-06T12:00:00",
+"status": 0,
+"error": null,
+"validations": []
+}
+```
+**Example of unsuccessful call:**
+
+**Response:**
+https://apitest.apidomain.com/createshipment?apikey=<apikey>
+
+**POST data:**
+
+
+```
+{
+"Cosignee": {
+"Name": "Test Receiver",
+"CountryCode": "HR",
+"City": "Split",
+"StreetAndNumber": "Vidilica Ulica 17",
+"Telephone": "01234567",
+"Fax": "0158372",
+"NotifyGSM": "0981234567",
+"NotifyEmail": "test@test.com"
+},
+"UnitAmount": 3,
+"Ref1": "1234567890"
+}
+```
+**Response:**
+
+```
+{
+"ShipmentID": 0,
+"PickupTime": null,
+"PickupEndTime": null,
+"DeliveryTime": null,
+"DeliveryEndTime": null,
+"status": 1,
+"error": {
+"Code": 1100,
+"Validations": [
+{
+"Code": 2233,
+"Message": "DeliveryZipCode is mandatory!"
+}
+],
+"Context": null,
+"StackTrace": " at CNCifRequestHelper.GetCifRequest(dbapiuserRow
+user, ClientAPICreateShipmentRequest
+request, List`1 validations) in
+C:\\Projects\\ClientAPI\\Projects\\MortyExtensions\\SupportClasses\\CNCifRequestHelper.vb:line
+231\r\n at
+MortyCore.Controller.CreateShipmentController.processRequest() in
+C:\\Projects\\ClientAPI\\Projects\\MortyExtensions\\MortyControllers\\Components\\API\\ClientAPI\\Cre
+81",
+"Message": "Validation failed, check validations for details!",
+"Data": {},
+"InnerException": null,
+"HelpLink": null,
+"Source": "MortyExtensions",
+"HResult": -
+},
+"validations": [
+{
+"Code": 2233,
+"Message": "DeliveryZipCode is mandatory!"
+}
+]
+}
+```
+# Standard usage
+
+Standard usage involves calling methods in order to facilitate package
+sending and/or pickup.
+
+Shipments can be created in different ways depending on the required
+logistical pathway:
+
+```
+Standard shipment - client prints out label and orders pickup for
+shipments
+Method "createshipment" is called with
+"IsSenderNonCustomer:false".
+Label is printed using "commithipments" method.
+Pickup is requested by calling "requestpickup" method. This
+method is intended to be called once or twice a day for multiple
+commited shipments and will generate pickup lists.
+Pickup at third party location - client creates a shipment that is to be
+picked up on another location. No label is printed and shipment will be
+picked up at sender location.
+Method "createshipment" is called with
+"IsSenderNonCustomer:true" and third party address as
+sender.
+Customer barcode shipment (not available in Serbia) - client
+barcode is scanned an no special label is required pre-sending.
+Pickup is done by daily/permanent pickup orders at client location.
+Method "createshipmentwithbarcode" is called.
+```
+
+# Methods
+
+## AddUpdateSender method
+
+Adds or updates sender in the API user sender list, providing the user has
+permit to manage senders. Senders can be viewed using GetSenders
+method and used in CreateShipment methods.
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/addupdatesender?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+### POST Parameter:
+
+Sender structure to add or update. If SenderID is null, new sender will be added.
+Senders can not be deleted using API methods.
+
+Parameter type: APISender
+
+Example:
+
+```
+{
+"SenderID" 6,
+"Name": "Test Firm ltd.",
+"CountryCode": "HR",
+"Zipcode": "10090",
+"City": "Zagreb",
+"StreetAndNumber": "Zagrebačka Avenija 12",
+"Telephone": "",
+"Fax": "",
+"NotifyGSM": "38598000000",
+"NotifyEmail": "test@test.hr"
+}
+```
+### Return value:
+
+Method run result - contains senderid if successful
+
+Return type: AddUpdateSenderResult
+
+```
+Name Type Description
+```
+```
+senderid Int32 Sender id value that can be used in Create shipments methods
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## CancelShipments method
+
+Method cancels shipments previously created by create shipment call. Can
+only cancel regular or custom sender unprinted shipments (uncommited).
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/cancelshipments?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+### POST Parameter:
+
+List of shipmentsIDs that are to be canceled. More than one shipment can be
+commited at a time, but method wil fail if any is not ready for commiting.
+
+
+Parameter type: Int64[]
+
+Example:
+
+```
+[62870,62860]
+```
+### Return value:
+
+Returns list of canceled shipments
+
+Return type: CancelShipmentsResult
+
+```
+Name Type Description
+```
+```
+shipmentids Int64[] List of successfully canceled shipmentIDs
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## CommitShipments method
+
+Method commmits shipments previously created by create shipment call.
+Can only commit regular and custom sender shipment if api user has
+required permits.
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/commitshipments?apikey=<apikey>&dataonly=
+<dataonly>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+```
+dataonly Boolean False Set this property to true to skip document generation and return shipment
+```
+### POST Parameter:
+
+List of shipmentsIDs to commit. More than one shipment can be commited at a time,
+but method wil fail if any is not ready for commiting.
+
+Parameter type: Int64[]
+
+Example:
+
+```
+[62870,62860]
+```
+### Return value:
+
+Result of shipment commit, will contain label data and basic information about
+shipment. Call ShipmentsById method to access detailed data about commited
+shipment.
+
+Return type: PrintShipmentsResult
+
+
+Example:
+
+```
+{
+"data" [
+{
+"ShipmentID": 62870,
+"SdglfdNr": 7258077,
+"LandNr": 191,
+"MandNr": 1
+},
+{
+"ShipmentID": 62860,
+"SdglfdNr": 7258078,
+"LandNr": 191,
+"MandNr": 1
+}
+],
+"labelsbase64": "...",
+"status": 0,
+"validations": []
+}
+```
+```
+Name Type Description
+```
+```
+data List(CNShipment) List of commited shipments
+Contains only ShipmentID, PickupTime, PickupEndTime, Delive
+For more details call ShipmentsById method.
+```
+```
+labelsbase64 String Base64 encoded PDF with parcel labels
+```
+```
+NumberOfLabels Nullable(Int32) Count of labels
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## CreateReturnStickers method
+
+Creates return stickers for list of shipments and returns generated PDF
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/createreturnstickers?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+### POST Parameter:
+
+List of shipmentsIDs to create return stickers for. More than one sticker can be
+created at a time, but method wil fail if any is not valid.
+
+Parameter type: Int64[]
+
+Example:
+
+```
+[62870,62860]
+```
+### Return value:
+
+Result of create sticker call. Method can be called only once for each shipment.
+
+Return type: CreateReturnStickersResult
+
+```
+Name Type Description
+```
+```
+data List(CNReturnSticker) List of created return stickers
+```
+```
+labelsbase64 String Base64 encoded PDF with stickers
+```
+
+```
+Name Type Description
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## CreateShipment method
+
+This method is used in various ways to create and submit shipments. This is
+the entry point of most shipping processes.
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/createshipment?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+### POST Parameter:
+
+Input object contins all information required to create shipment
+
+Parameter type: ClientAPICreateShipmentRequest
+
+Simple single shipment:
+Minimal call to create shipment, using default sender and cosignee with no colli
+details.
+
+```
+{
+"Cosignee" : {
+"Name": "Test Receiver",
+"CountryCode": "HR",
+"Zipcode": "21000",
+"City": "Split",
+"StreetAndNumber": "Vidilica Ulica 17",
+"Telephone": "01234567",
+"Fax": "0158372",
+"NotifyGSM": "0981234567",
+"NotifyEmail": "test@test.com"
+},
+"UnitAmount": 3,
+"Ref1": "1234567890",
+}
+```
+Simple multicolli shipment:
+Minimal call to create multicolli shipment, using default sender and cosignee with no
+colli details.
+
+```
+{
+"Cosignee" : {
+"Name": "Test Receiver",
+"CountryCode": "HR",
+"Zipcode": "21000",
+"City": "Split",
+"StreetAndNumber": "Vidilica Ulica 17",
+"Telephone": "01234567",
+"Fax": "0158372",
+"NotifyGSM": "0981234567",
+"NotifyEmail": "test@test.com"
+},
+"UnitAmount": 3,
+"Ref1": "1234567890",
+"NumberOfCollies":
+}
+```
+### Return value:
+
+Result of create shipment call, contains new shipmentID if successfull. For more
+details call ShipmentsById method
+
+Return type: ClientAPICreateShipmentResult
+
+
+Example:
+
+```
+{
+"ShipmentID" 63120,
+"PickupTime": "2020-10-06T08:00:00",
+"PickupEndTime": "2020-10-06T15:00:00",
+"DeliveryTime": "2020-10-07T08:00:00",
+"DeliveryEndTime": "2020-10-07T12:00:00",
+"status": 0,
+"error": null,
+"validations": []
+}
+```
+```
+Name Type Description
+```
+```
+shipmentid Int64 ShipmentID of created shipment. Call ShipmentsById for more d
+```
+```
+pickuptime Nullable(DateTime) Assigned starting pickup time for this shipment. Note that this tim
+```
+```
+pickupendtime Nullable(DateTime) Assigned ending pickup time for this shipment. Note that this tim
+```
+```
+deliverytime Nullable(DateTime) Expected start delivery time of this shipment (if picked up at assig
+```
+```
+deliveryendtime Nullable(DateTime) Expected end delivery time of this shipment (if picked up at assig
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## CreateShipmentWithBarcode method
+
+This method is used to create shipments with customer barcode (customer
+prints custom labels).
+Customer barcode shipments are considered automatically commited. No
+pickup can be requested for such shipments using API.
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/createshipmentwithbarcode?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+### POST Parameter:
+
+Input object contins all information required to create shipment including barcode
+
+Parameter type: ClientAPICreateShipmentWithBarcodeRequest
+
+Simple single shipment:
+Minimal call to create shipment, using default sender and cosignee with no colli
+details.
+
+```
+{
+"Cosignee" : {
+"Name": "Test Receiver",
+"CountryCode": "HR",
+"Zipcode": "21000",
+"City": "Split",
+"StreetAndNumber": "Vidilica Ulica 17",
+"Telephone": "01234567",
+"Fax": "0158372",
+"NotifyGSM": "0981234567",
+"NotifyEmail": "test@test.com"
+},
+"UnitAmount": 3,
+"Ref1": "1234567890",
+"Barcode": "4466554"
+}
+```
+### Return value:
+
+
+Result of create shipment call, contains new shipmentID if successfull. For more
+details call ShipmentsById method
+
+Return type: ClientAPICreateShipmentWithBarcodeResult
+
+Example:
+
+```
+{
+"ShipmentID" 63120,
+"status": 0,
+"error": null,
+"validations": []
+}
+```
+```
+Name Type Description
+```
+```
+shipmentid Int64 ShipmentID of created shipment. Call ShipmentsById for more details
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## PickupsList method
+
+Use this method to request pickupslist info for requested pickup
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/pickupslist?apikey=<apikey>&shipmentid=
+<shipmentid>&pickupslistnumber=<pickupslistnumber>&copies=<copies>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+```
+shipmentid Int64 False ID of any shipment in pickups list (search by shipmentid) - NOTE
+```
+```
+pickupslistnumber Int32 False ID of any shipment in pickups list (search by pickup list number) -
+```
+```
+copies Int32 False Number of copies for each pdf document - not mandatory
+```
+### Return value:
+
+Result of request pickups list method. When successfull contains Base64 encoded
+pickups list PDF.
+
+Return type: GetPickupsListResult
+
+```
+Name Type Description
+```
+```
+shipmentids List(Int64) List of shipment ids set for pickup
+```
+```
+pickupdocument String Pickup list document
+```
+```
+pickupinterval TimeIntervalDate Pickup times allocated
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## Places method
+
+
+Returns available locations where delivery is available
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/places?apikey=<apikey>&name=<name>&zipcode=
+<zipcode>&approx=<approx>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+```
+name String False Filter places by name (exact name only)
+```
+```
+zipcode String False Filter places by zipcode
+```
+```
+approx Boolean False When true together with name and zipcode returns best approximate mach
+```
+### Return value:
+
+Contains list of available places
+
+Return type: PlacesResult
+
+```
+Name Type Description
+```
+```
+data List(CNPlace) Contains list of places
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## PriceInfo method
+
+Gets price info.
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/priceinfo?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+### POST Parameter:
+
+Data required to calculate pricing information
+
+Parameter type: PriceInfoRequest
+
+### Return value:
+
+Returns price information for submited data
+
+Return type: PriceResult
+
+```
+Name Type Description
+```
+```
+data CNPriceInfo Requested shipment data is status=
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+
+```
+Name Type Description
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## RecentShipments method
+
+Returns recent shipments for API user.
+If filters are omitted, returns last 30 days of shipments. Use limit and time
+filers to get minimal required set of data to reduce load on the systems.
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/recentshipments?apikey=<apikey>&starttime=
+<starttime>&endtime=<endtime>&limit=<limit>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate
+```
+```
+starttime DateTime (milliseconds from 1.1.1970.) False Start time for search (java time, millisecon
+```
+```
+endtime DateTime (milliseconds from 1.1.1970.) False End time for search (java time, millisecond
+```
+```
+limit Int32 False limit maximum number of results, will retur
+```
+### Return value:
+
+Returns shipments details
+
+Return type: ClientApiShipmentsResult
+
+```
+Name Type Description
+```
+```
+data List(CNShipment) Shipments returned by method
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## ReturnSticker method
+
+Gets data for one return sticker
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/returnsticker?apikey=<apikey>&stickernumber=
+<stickernumber>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+```
+stickernumber String True Sticker full number (starts with "R")
+```
+### Return value:
+
+Return sticker data
+
+Return type: ReturnStickerResult
+
+```
+Name Type Description
+```
+```
+data CNReturnSticker Return sticker object
+```
+
+```
+Name Type Description
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## Senders method
+
+Gets all predefined senders for API user
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/senders?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+### Return value:
+
+Returns sender objects for API User if user has permits
+
+Return type: ClientApiSendersResult
+
+```
+Name Type Description
+```
+```
+data List(APISender) Details about predefined senders
+```
+## ShipmentsByAnyRef method
+
+Finds shipments using any ref or barcode value If filters are omitted, returns
+last 30 days of shipments. Use limit and time filers to get minimal required
+set of data to reduce load on the systems.
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/shipmentsbyanyref?apikey=<apikey>&starttime=
+<starttime>&endtime=<endtime>&ref=<ref>&limit=<limit>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate
+```
+```
+starttime DateTime (milliseconds from 1.1.1970.) False Start time for search (java time, millisecon
+```
+```
+endtime DateTime (milliseconds from 1.1.1970.) False End time for search (java time, millisecond
+```
+```
+ref String True Any ref or barcode
+```
+```
+limit Int32 False limit maximum number of results, will retur
+```
+### Return value:
+
+Returns shipment details
+
+Return type: ClientApiShipmentsResult
+
+```
+Name Type Description
+```
+```
+data List(CNShipment) Shipments returned by method
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+
+```
+Name Type Description
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## ShipmentByCargoId method
+
+Finds shipment by cargoID
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/shipmentbycargoid?apikey=<apikey>&cargoid=<cargoid>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+```
+cargoid String True CargoID of requested shipment (FullCargoID number in format "191001 12345
+```
+### Return value:
+
+Returns shipment details
+
+Return type: ClientApiShipmentResult
+
+```
+Name Type Description
+```
+```
+data CNShipment Contains details about one shipment
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## ShipmentById method
+
+Finds shipment by shipmentID
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/shipmentbyid?apikey=<apikey>&shipmentid=
+<shipmentid>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+```
+shipmentid Int64 True ShipmentID returned by createshipment method
+```
+### Return value:
+
+Returns shipment details
+
+Return type: ClientApiShipmentResult
+
+```
+Name Type Description
+```
+```
+data CNShipment Contains details about one shipment
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+
+```
+Name Type Description
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## ShipmentsByRef1 method
+
+Finds shipments using ref1 or barcode and date of shipment creation
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/shipmentsbyref1?apikey=<apikey>&date=<date>&ref=
+<ref>&limit=<limit>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate th
+```
+```
+date DateTime (milliseconds from 1.1.1970.) True date when to search for shipment
+```
+```
+ref String True ref1 or barcode to search for
+```
+```
+limit Int32 False limit maximum number of results, will return u
+```
+### Return value:
+
+Returns shipment details
+
+Return type: ClientApiShipmentsResult
+
+```
+Name Type Description
+```
+```
+data List(CNShipment) Shipments returned by method
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## ShipmentsById method
+
+Get multiple shipments by shipment ID list.
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/shipmentsbyid?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+### POST Parameter:
+
+List of shipments details.
+
+Parameter type: Int64[]
+
+Example:
+
+```
+[62870,62860]
+```
+### Return value:
+
+Returns shipment details
+
+Return type: ClientApiShipmentsResult
+
+
+```
+Name Type Description
+```
+```
+data List(CNShipment) Shipments returned by method
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## SignatureByCargoId method
+
+Gets signature by shipment cargoID
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/signaturebycargoid?apikey=<apikey>&cargoid=<cargoid>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+```
+cargoid String True CargoID of requested shipment (FullCargoID number in format "191001 12345
+```
+### Return value:
+
+Returns signature details
+
+Return type: ClientApiSignatureResult
+
+```
+Name Type Description
+```
+```
+data String Base64 encoded image (signature)
+```
+```
+shipmentid Nullable(Int64) API ShipmentID
+```
+```
+fullcargoid String FullCargoID of shipment for this signature
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## Places method
+
+Returns available locations where delivery is available
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/labelitempropertiesinternal?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+## Places method
+
+Returns available locations where delivery is available
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/labelitemsinternal?apikey=<apikey>
+
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+## Places method
+
+Returns available locations where delivery is available
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/layoutsinternal?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+## ReprintLabels method
+
+This method can be used to print labels for any shipment (even when it is
+already printed).
+Printed shipment must be commited!
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/reprintlabels?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+### POST Parameter:
+
+A list of shipment IDs
+
+Parameter type: Int32[]
+
+### Return value:
+
+Same as commitshipment returns labels data, api user can execute this method to
+repeat labels printing as many times as necessary
+
+Return type: PrintShipmentsResult
+
+```
+Name Type Description
+```
+```
+data List(CNShipment) List of commited shipments
+Contains only ShipmentID, PickupTime, PickupEndTime, Delive
+For more details call ShipmentsById method.
+```
+```
+labelsbase64 String Base64 encoded PDF with parcel labels
+```
+```
+NumberOfLabels Nullable(Int32) Count of labels
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## RequestPickup method
+
+Use this method to request pickup for commited and printed shipments
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/requestpickup?apikey=<apikey>&prefferedpickuptime=
+<prefferedpickuptime>&copies=<copies>
+
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to a
+```
+```
+prefferedpickuptime DateTime (milliseconds from 1.1.1970.) False Preffered pickup date Actual p
+```
+```
+copies Int32 False Number of copies for each pdf
+```
+### POST Parameter:
+
+List of shipments for pickup or empty for all available shipments.
+
+Parameter type: Int64[]
+
+### Return value:
+
+Result of request pickup method. When successfull contains Base64 encoded
+pickup list PDF.
+
+Return type: RequestPickupClientResult
+
+```
+Name Type Description
+```
+```
+shipmentids List(Int64) List of shipment ids set for pickup
+```
+```
+pickupintervals List(TimeIntervalDate) List of pickup times allocated (one per document)
+```
+```
+pickupdocuments List(String) Pickup list document if customer pickup
+```
+```
+PickupIds List(Nullable`1) List of created pickup list IDs
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## UpdateShipment method
+
+Method used to update unprinted shipment. Only regular and custom
+sender shipments can be updated until the label is printed. If uncommited
+printing is done before update, labels need to be printed again as old ones
+will be invalidated.
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/updateshipment?apikey=<apikey>&shipmentid=
+<shipmentid>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+```
+shipmentid Int64 True ShipmentID returned by create or update shipment
+```
+### POST Parameter:
+
+Update shipment request object is same as create shipment object. Existing data will
+be overwritten.
+
+Parameter type: ClientAPICreateShipmentRequest
+
+### Return value:
+
+Result of update shipment call, contains existing shipmentID if successfull
+
+Return type: ClientAPICreateShipmentResult
+
+
+```
+Name Type Description
+```
+```
+shipmentid Int64 ShipmentID of created shipment. Call ShipmentsById for more d
+```
+```
+pickuptime Nullable(DateTime) Assigned starting pickup time for this shipment. Note that this tim
+```
+```
+pickupendtime Nullable(DateTime) Assigned ending pickup time for this shipment. Note that this tim
+```
+```
+deliverytime Nullable(DateTime) Expected start delivery time of this shipment (if picked up at assig
+```
+```
+deliveryendtime Nullable(DateTime) Expected end delivery time of this shipment (if picked up at assig
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## Warehouse method
+
+Returns warehouse items and quantities
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/warehouse?apikey=<apikey>&itemcode=<itemcode>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+```
+itemcode String False Itemcode filter
+```
+### Return value:
+
+Contains list of available warehouse items
+
+Return type: WarehouseItemsResult
+
+```
+Name Type Description
+```
+```
+data List(CNWarehouseItem) Contains results for this query if successful
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## Warehouse traffic method
+
+Returns warehouse items and quantities
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/warehousetraffic?apikey=<apikey>&itemcode=
+<itemcode>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+```
+itemcode String False Itemcode filter
+```
+
+### Return value:
+
+Contains list of available warehouse items
+
+Return type: WarehouseTrafficsResult
+
+```
+Name Type Description
+```
+```
+data List(CNWarehouseTraffic) Contains results for this query if successful
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## ParcelShops method
+
+Returns available parcel shops (for parcel shop delivery and pickups)
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/parcelshops?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+### Return value:
+
+Contains available parcel shops
+
+Return type: ClientApiParcelShopsResult
+
+```
+Name Type Description
+```
+```
+data List(CNParcelShop) Parcel shops returned by method
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## DeliveryTime method
+
+Gets available delivery and pickup times
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/deliverytime?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+### POST Parameter:
+
+Request object for delivery times calculation
+
+Parameter type: GetDeliveryTimeRequest
+
+### Return value:
+
+Contains delivery times information
+
+
+Return type: GetDeliveryTimeResponse
+
+```
+Name Type Description
+```
+```
+data DeliveryTimes Contains details about vailable delivery times
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## PickupDelyIntervals method
+
+Returns available time intervals for all available postal codes in country
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/pickupdelyintervals?apikey=<apikey>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+apikey String True OEX Client API key - used to authenticate this call
+```
+### Return value:
+
+Contains list of available time intervals
+
+Return type: GetPickDelyIntervalsResponse
+
+```
+Name Type Description
+```
+```
+data List(CNPickDelyIntervals) Contains list of available pickup and delivery times for postala codes
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer) OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error, contains list of failed validations
+```
+## LegacyCreateApiKeyController method
+
+LegacyCreateApiKeyController
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/api/data/CreateApiKey?response=<response>
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+response String False Response type (json or xml)
+```
+### POST Parameter:
+
+Parameter type: LegacyCreateAPIKeyRequest
+
+## LegacyUpdateApiKeyController method
+
+LegacyUpdateApiKeyController
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/api/data/UpdateApiKey?response=<response>
+
+
+### GET Parameters:
+
+```
+Name Type Mandatory Description
+```
+```
+response String False Response type (json or xml)
+```
+### POST Parameter:
+
+Parameter type: LegacyCreateAPIKeyRequest
+
+## Method morty/runnersstatus
+
+Example call:
+https://nesy-cbg-staging.overseas.hr/morty/runnersstatus
+
+# Objects
+
+## ClientAPIError
+
+```
+Name Type Description
+```
+```
+InnerError Object For internal use
+```
+```
+Validations List(ClientAPIValidation) If validation error,
+contains details about
+failed validations
+```
+```
+Code Int32 Error code
+```
+```
+Severity Severity
+```
+```
+Context Object For internal use
+```
+```
+StackTrace String For internal use
+```
+```
+Message String Error message
+```
+```
+TargetSite MethodBase For internal use
+```
+```
+Data IDictionary For internal use
+```
+```
+InnerException Exception For internal use
+```
+```
+HelpLink String For internal use
+```
+```
+Source String For internal use
+```
+```
+HResult Int32 For internal use
+```
+## ClientAPIValidation
+
+```
+Name Type Description
+```
+```
+Code Int32 Validation code
+```
+```
+Message String Validation message
+```
+## CNAddress
+
+```
+Name Type Description
+```
+```
+AddressID String
+```
+
+```
+Name Type Description
+```
+```
+Name String
+```
+```
+ZipCode String
+```
+```
+Place String
+```
+```
+Street String
+```
+```
+HouseNumber Nullable(Int16)
+```
+```
+HouseNumberAddition String
+```
+```
+CountryPrefix String
+```
+```
+Phone String
+```
+```
+Fax String
+```
+```
+TextPhone String
+```
+```
+Email String
+```
+```
+Lat Nullable(Decimal)
+```
+```
+Long Nullable(Decimal)
+```
+## CNClient
+
+```
+Name Type Description
+```
+```
+ClientID Nullable(Int32)
+```
+```
+ClientName String
+```
+## CNCOD
+
+Cash on delivery info.
+WARNING: For multicolli COD info is allways on Parent shipment
+
+```
+Name Type Description
+```
+```
+Amount Nullable(Decimal)
+```
+```
+AmountCurrency Nullable(Decimal)
+```
+```
+OriginalAmount Nullable(Decimal)
+```
+```
+OriginalAmountCurrency Nullable(Decimal)
+```
+```
+Currency String
+```
+```
+ExchangeRate Nullable(Decimal)
+```
+```
+ExchangeDate Nullable(DateTime)
+```
+```
+ReturnAccount String
+```
+```
+ReturnAccountBank String
+```
+## CNCommission
+
+Commissioning item info info.
+If item requires serial code amount must be 1
+
+
+```
+Name Type Description
+```
+```
+Amount Nullable(Decimal)
+```
+```
+ItemCode String
+```
+## CNDepo
+
+```
+Name Type Description
+```
+```
+CenterID Nullable(Int16)
+```
+```
+Name String
+```
+```
+AbbreviatedName String
+```
+## CNEvent
+
+Shipment event data object
+
+```
+Name Type Description
+```
+```
+TimeOfScan Nullable(DateTime)
+```
+```
+StatusID Nullable(Int32)
+```
+```
+StatusName String
+```
+```
+StatusDescription String
+```
+```
+ScanDepo CNDepo
+```
+```
+Remark String
+```
+```
+ActualReceiver String
+```
+## CNParcelShop
+
+```
+Name Type Description
+```
+```
+CountryID Int16
+```
+```
+CenterID Int16
+```
+```
+ShortName String
+```
+```
+Remark String
+```
+```
+Delivery Nullable(Boolean)
+```
+```
+Dropoff Nullable(Boolean)
+```
+```
+GeoLat Nullable(Decimal)
+```
+```
+GeoLong Nullable(Decimal)
+```
+```
+Address CNAddress
+```
+```
+PSPlace String Parcel city place - Only for
+MIP - use this value when
+creating MIP file that is sent
+to or from parcelshop
+```
+```
+PSZipcode String Parcel city zipcode - Only
+for MIP - use this value
+when creating MIP file that
+is sent to or from
+parcelshop
+```
+
+```
+Name Type Description
+```
+```
+Partner String
+```
+```
+WorkingHours List(CNWorkingHours)
+```
+## CNPerson
+
+```
+Name Type Description
+```
+```
+Name String
+```
+```
+CountryCode String
+```
+```
+ZipCode String
+```
+```
+Place String
+```
+```
+Street String
+```
+```
+LineTelephone String
+```
+```
+LineTelephone2 String
+```
+```
+Long String
+```
+```
+Lat String
+```
+```
+Telephone String
+```
+```
+Email String
+```
+## CNPickDelyIntervals
+
+```
+Name Type Description
+```
+```
+Name String
+```
+```
+Zipcode String
+```
+```
+PickupIntervals List(CNTimeInterval)
+```
+```
+DeliveryIntervals List(CNTimeInterval)
+```
+## CNTimeInterval
+
+```
+Name Type Description
+```
+```
+From Nullable(TimeSpan)
+```
+```
+Until Nullable(TimeSpan)
+```
+## CNPlace
+
+```
+Name Type Description
+```
+```
+ZipCode String
+```
+```
+Name String
+```
+```
+ZipcodeName String
+```
+```
+StandardAvailable Nullable(Boolean)
+```
+
+```
+Name Type Description
+```
+```
+CargoAvailable Nullable(Boolean)
+```
+## CNPrice
+
+```
+Name Type Description
+```
+```
+TotalPrice Nullable(Decimal)
+```
+## CNPriceInfo
+
+Price information object
+
+```
+Name Type Description
+```
+```
+Count Nullable(Double) Amount of units used in
+calculation
+```
+```
+NumberOfCollies Nullable(Int32) Number of packages used for
+calculation
+```
+```
+Net Nullable(Double) NET amount calculated
+```
+```
+Gross Nullable(Double) GROSS amount calculated
+```
+```
+VAT Nullable(Double) VAT amount
+```
+```
+TaxRate Nullable(Double) Taxation rate
+```
+## CNReturnSticker
+
+```
+Name Type Description
+```
+```
+CreateTime Nullable(DateTime)
+```
+```
+ReturnCreateTime Nullable(DateTime)
+```
+```
+CreatedBy Nullable(Int32)
+```
+```
+ReturnCreatedBy Nullable(Int32)
+```
+```
+Info String
+```
+```
+FullID String
+```
+## CNRoute
+
+```
+Name Type Description
+```
+```
+RouteID Nullable(Int16) Route identifier
+```
+```
+Name String Name of the route
+```
+## CNShipment
+
+```
+Name Type Description
+```
+```
+ShipmentID Nullable(Int64) ShipmentID
+```
+```
+CargoID Nullable(Int32) CargoID of shipment
+(8 digits)
+```
+
+**Name Type Description**
+
+**CountryID** Nullable(Int16) CountryID of
+shipment
+
+**CenterID** Nullable(Int16) DepoID of shipment
+
+**ParcelShop** CNParcelShop Delivery parcel shop
+for this shipment
+
+**DropOffParcelShop** CNParcelShop Dropoff parcel shop
+for this shipment
+
+**Client** CNClient Shipment client
+information
+
+**ReceiverDepo** CNDepo Receiver Depo
+information
+
+**ReceiverRoute** CNRoute Receiver route
+information
+
+**ReceiverRouteNumber** Nullable(Int16) Receiver route
+number
+
+**Events** List(CNEvent) Shipment events
+
+**Prices** CNPrice Shipment price
+information (where
+applicable)
+
+**Parent** CNShipment Master shipment
+data (only for slave
+shipments)
+
+**Collies** List(CNShipment) Shipment collies (for
+master shipment
+only)
+
+**CODDetails** CNCOD Cash on delivery
+information
+WARNING: For
+multicolli COD info is
+allways on Parent
+shipment
+
+**IsPickup** Nullable(Boolean) True is this shipment
+is a pickup (should
+be picked up at
+customer or non
+customer location)
+
+**SendDate** Nullable(DateTime) Shipment send date
+
+**CreateDate** Nullable(DateTime) Shipment create
+date
+
+**IsReturnDocument** Nullable(Boolean) True if shipment is a
+return document
+
+
+**Name Type Description**
+
+**APIStatus** APIShipmentStatusFlag (ENUMERATION -
+integer) API status
+flag
+None = 0
+Temp = 1
+Commiting = 2
+Importing = 4
+Routed = 8
+Printed = 32
+Imported = 64
+PickupRequested =
+128
+IsShipment = 256
+Multicolli = 512
+Single = 1024
+PickupCustomer =
+2048
+PickupNonCustomer
+= 4096
+PickupSkipped =
+8192
+FinalPrint = 16384
+IsMip = 32768
+IsCanceled = 65536
+Error = 1073741824
+
+**ColliNr** Nullable(Int16) Colli index of this
+shipment
+
+**PickupRemark** String Pickup remark for
+pickup driver
+
+**DeliveryRemark** String Delivery remark for
+delivery driver
+
+**Remark** String Package content
+remark
+
+**Cosignee** CNPerson Information about
+shipment receiver
+
+**Sender** CNPerson Information about
+shipment sender
+
+**Unit** CNUnit Shipment unit
+information
+
+**Count** Nullable(Decimal) Number of units for
+this shipment
+
+**DeclaredWeight** Nullable(Decimal) Weight for this
+shipment
+
+**VerifiedWeight** Nullable(Decimal) Weight for this
+shipment
+
+**COD** Nullable(Decimal) Cash on delivery
+amount
+
+**CODToPay** Nullable(Decimal) Cash on delivery
+amount remaining to
+pay
+
+**ExWorks** Nullable(Decimal) Amount when
+receiver pays for
+delivery
+
+**ExWorksToPay** Nullable(Decimal) Amount when
+receiver pays for
+delivery - remaining
+for payment
+
+**ExWorksType** Nullable(Int32) Exworks type
+(always 4)
+
+**IsCargo** Nullable(Boolean) Indicates if this is a
+cargo shipment
+
+
+```
+Name Type Description
+```
+```
+IsCanceled Nullable(Boolean) Indicates if this
+shipment is
+canceled
+```
+```
+IsPrinted Nullable(Boolean) Indicates if shipment
+label is printed
+```
+```
+IsMaster Nullable(Boolean) Indicates if parcel
+label is master
+shipment
+```
+```
+DocumentCollection Nullable(Boolean) Indicates whether
+return document is
+requested for this
+shipment
+```
+```
+NotificationType Nullable(Int32) Notification type
+requested
+None - 0
+Email - 1
+SMS - 2
+Both = 3
+```
+```
+Ref1 String First reference or
+barcode
+```
+```
+Ref2 String Second reference
+```
+```
+Ref3 String Third reference
+```
+```
+RefInt String International
+reference where
+applicable
+```
+```
+MultifunctionalBarcode String Multifunctionbarcode
+(for external label
+generation)
+```
+```
+FullCargoID String Full cargo ID
+```
+```
+ServicesLabel String Services label for
+external label
+generation
+```
+```
+ReturnSticker CNReturnSticker Information about
+return sticker if used
+```
+```
+CommissionType Nullable(CommissionTypeFlag) Commissioning type
+0 - None 1 -
+Document 2 - Item
+```
+```
+Commissions List(CNCommission) If Item commission
+is used, enter list of
+commissioned items
+If item requires
+serial code entry,
+amount must be 1
+```
+## CNStatus
+
+```
+Name Type Description
+```
+```
+ID Nullable(Int16)
+```
+```
+Name String
+```
+```
+Description String
+```
+## CNUnit
+
+Contains details information for unit
+
+
+```
+Name Type Description
+```
+```
+UnitID Nullable(Int16) Unit type identifier
+0=Weight
+4=Error
+5=Value
+7=Pieces
+11=pallet(kg)
+12=Letter
+13=S-Box
+14=M-Box
+15=L-Box
+16=XL-Box
+17=WPI
+```
+```
+Name String Unit name
+```
+```
+AbbreviatedName String Unit short name
+```
+```
+Description String Unit description
+```
+## CNWorkingHours
+
+```
+Name Type Description
+```
+```
+Type Nullable(Int32) 1 - Work day 2 - Sunday 3 -
+Saturday 7 - Monday 8 - Tuestad 9
+```
+- Wednesday 10 - Thursday 11 -
+Friday 12 - EXCEPTION
+
+```
+TypeName String
+```
+```
+From Nullable(TimeSpan)
+```
+```
+Until Nullable(TimeSpan)
+```
+## TimeIntervalDate
+
+Represents time interval for various puroses
+
+```
+Name Type Description
+```
+```
+from DateTime Time interval beggining
+```
+```
+until DateTime Time interval end
+```
+## CNWarehouseItem
+
+Warehouse item object
+
+```
+Name Type Description
+```
+```
+ItemCode String Item barcode
+```
+```
+CurrentAmount Nullable(Decimal) Current amount
+in the warehouse
+available for
+commissioning
+```
+```
+Description String Item
+name/description
+```
+```
+Type Nullable(CommissioningItemType) Items type
+0 - Items per
+barcode
+1 - Serial
+number tracking
+```
+## CNWarehouseTraffic
+
+Warehouse operation object
+
+
+```
+Name Type Description
+```
+```
+Item CNWarehouseItem Item details
+```
+```
+Operation Nullable(WarehouseTrafficOperation) Performed
+operation
+0 -
+Set/Inventory
+1 - Added
+quantity
+2 - Removed
+quantity
+3 -
+Commission
+event
+4 - Canceled
+```
+```
+CommitedOn Nullable(DateTime) Time of
+operation
+```
+```
+Description String Operation
+description
+```
+```
+Amount Nullable(Decimal) Amount in
+operation
+```
+```
+SerialNumber String Serial number
+tracked
+```
+```
+Shipment CNShipment Coresponding
+shipment
+(where
+applicable)
+```
+## ClientAPICreateShipmentWithBarcodeRequest
+
+This object is used to create shipments with customer barcode
+
+```
+Name Type Description
+```
+```
+SenderID Nullable(Int32) ID of predefined
+sender that will
+be used for this
+shipment. If both
+SenderID and
+Sender are
+ommited, defult
+sender for API
+user will be used.
+Either SenderID
+or Sender
+structure can be
+used in one call,
+not both.
+```
+```
+Cosignee Address Receiver of this
+shipment
+```
+```
+Sender Address Sender of this
+shipment if
+senderID is not
+used.
+Either SenderID
+or Sender
+structure can be
+used in one call,
+not both.
+```
+```
+CosigneeNotifyType Nullable(Int32) Determines if
+user notification
+is requested
+0 - No
+notifications
+1 - Email
+notification
+2 - SMS
+notification
+3 - Both
+```
+
+**Name Type Description**
+
+**UnitAmount** Nullable(Decimal) Amount of units
+in shipment
+(usually weight
+for unittype=0)
+
+**Ref1** String Ref1 value for
+shipment
+
+**Ref2** String Ref2 value for
+shipment
+
+**Ref3** String Ref3 value for
+shipment
+
+**RefInt** String Internation
+reference for
+shipment
+
+**Barcode** String Single colli
+barcode (only for
+single colli
+shipment, for
+multicolli
+shipments
+specify barcode
+on colli level)
+
+**ExWorksType** Nullable(Int32) ExWorks type
+4 - paid by
+receiver
+
+**CODValue** Nullable(Decimal) Value of Cash On
+Delivery (buyoff)
+
+**CODCurrency** Nullable(Int32) Cash On Delivery
+currency type
+0 - Default
+1 - EUR
+2 - Determined
+by receiver
+country
+
+**Cargo** Boolean Defines shipment
+as cargo
+shipment
+
+**ReturnDocument** Boolean If true, return
+document service
+is requested
+
+**Remark** String Shipment
+contents or other
+remark
+
+**PickupRemark** String Shipment pickup
+remark
+
+**DeliveryRemark** String Shipment
+delivery remark
+
+**DeliveryParcelShop** String If this shipment is
+to be picked up at
+parcel shop,
+identifier of the
+parcel shop.
+Parcel shops can
+be viewed using
+GetParcelShops
+method
+
+**PDFAttachmentBase64** String PDF attachent fot
+this shipment
+
+
+```
+Name Type Description
+```
+```
+Collies List(ClientAPICreateShipmentWithBarcodeColli) List of collies if
+complex
+shipment is to be
+created.
+Either
+NumberOFCollies
+(simple multicolli
+shipment) or
+Collies structure
+(complex
+multicolli
+shipment) can be
+used in one call
+```
+## ClientAPICreateShipmentWithBarcodeColli
+
+```
+Name Type Description
+```
+```
+UnitAmount Nullable(Decimal) Amount of units in this package
+(usually weight for unittype=0)
+```
+```
+Ref1 String Ref1 value for package
+```
+```
+Ref2 String Ref2 value for package
+```
+```
+Ref3 String Ref3 value for package
+```
+```
+RefInt String Internation reference for package
+```
+```
+Remark String Package contents or other remark
+```
+```
+Barcode String This package customer barcode
+```
+## ClientAPICreateShipmentRequest
+
+This object is used to create shipments
+
+```
+Name Type Description
+```
+```
+SenderID Nullable(Int32) ID of predefined sender that
+will be used for this
+shipment. If both SenderID
+and Sender are ommited,
+defult sender for API user
+will be used.
+Either SenderID or Sender
+structure can be used in
+one call, not both.
+```
+```
+Cosignee Address Receiver of this shipment
+```
+```
+Sender Address Sender of this shipment if
+senderID is not used.
+Either SenderID or Sender
+structure can be used in
+one call, not both.
+```
+```
+IsSenderNonCustomer Nullable(Boolean) Mark as true if sender is not
+API user customer.
+Shipment will be picked up
+at non customer site.
+No label printing is available
+for such shipment and it is
+commited at creation
+```
+```
+DeliveryParcelLocker Nullable(Int32) Direct4Me location
+```
+```
+DropOffParcelLocker Nullable(Int32) Direct4Me location
+```
+
+**Name Type Description**
+
+**CosigneeNotifyType** Nullable(Int32) Determines if user
+notification is requested
+0 - No notifications
+1 - Email notification
+2 - SMS notification
+3 - Both
+
+**NumberOfCollies** Nullable(Int32) Number of packages in
+shipment.
+Either NumberOfCollies or
+Collies stucture can be
+used in one call, not both.
+
+**UnitAmount** Nullable(Decimal) Amount of units in shipment
+(usually weight for
+unittype=0)
+
+**Ref1** String Ref1 value for shipment
+
+**Ref2** String Ref2 value for shipment
+
+**Ref3** String Ref3 value for shipment
+
+**RefInt** String Internation reference for
+shipment
+
+**ExWorksType** Nullable(Int32) ExWorks type
+4 - paid by receiver
+
+**CODValue** Nullable(Decimal) Value of Cash On Delivery
+(buyoff)
+
+**CODCurrency** Nullable(Int32) Cash On Delivery currency
+type
+0 - Default
+1 - EUR
+2 - Determined by receiver
+country
+
+**Cargo** Boolean Defines shipment as cargo
+shipment
+
+**ReturnDocument** Boolean If true, return document
+service is requested
+
+**Remark** String Shipment contents or other
+remark
+
+**PickupRemark** String Shipment pickup remark
+
+**DeliveryRemark** String Shipment delivery remark
+
+**PrefferedPickupTime** Nullable(DateTime) Preffered pickup time.
+Available pickup time will be
+automatically assigned
+NOTE:Only valid when for
+IsSenderNonCustomer=true
+shipment. For all other
+shipments first available
+pickup date is assigned.
+Use RequestPickup to
+request pickup.
+
+**DropOffParcelShop** String If this shipment is to be
+delivered at parcel shop,
+identifier of that parcel
+shop.
+Parcel shops can be viewed
+using GetParcelShops
+method
+
+
+```
+Name Type Description
+```
+```
+DeliveryParcelShop String If this shipment is to be
+picked up at parcel shop,
+identifier of the parcel shop.
+Parcel shops can be viewed
+using GetParcelShops
+method
+```
+```
+PDFAttachmentBase64 String PDF attachent fot this
+shipment
+```
+```
+CommissionType CommissionTypeFlag Commissioning type
+0 - none
+1 - Document (must set
+PDFAttachmentBase64)
+2 - Item (must have
+available items at
+warehouse)
+3 - Document and item
+```
+```
+Commissions List(CNCommission) Commissioning details -
+used only for item
+commissioning If item
+requires serial number,
+amount must be 1
+```
+```
+Collies List(ClientAPICreateShipmentRequestColli) List of collies if complex
+shipment is to be created.
+Either NumberOFCollies
+(simple multicolli shipment)
+or Collies structure
+(complex multicolli
+shipment) can be used in
+one call
+```
+## ClientAPICreateShipmentRequestColli
+
+Represents one package in a shipment (colli)
+
+```
+Name Type Description
+```
+```
+UnitAmount Nullable(Decimal) Amount of units in this package
+(usually weight for unittype=0)
+```
+```
+Ref1 String Ref1 value for package
+```
+```
+Ref2 String Ref2 value for package
+```
+```
+Ref3 String Ref3 value for package
+```
+```
+RefInt String Internation reference for package
+```
+```
+Remark String Package contents or other remark
+```
+## Address
+
+Object represents one address (sender or receiver)
+
+```
+Name Type Description
+```
+```
+Name String Person or bussiness name
+```
+```
+CountryCode String Country code in ISO format
+("HR","DE","AT","BA"...)
+```
+```
+Zipcode String Postal code
+```
+```
+City String City name
+```
+```
+StreetAndNumber String Street and street number
+```
+```
+Telephone String Telephone (informational)
+```
+
+```
+Name Type Description
+```
+```
+Fax String Fax (informational)
+```
+```
+NotifyGSM String Mobile number. This number will be
+used if notifications are sent
+```
+```
+NotifyEmail String Email for sending notifications
+```
+## GetDeliveryTimeRequest
+
+Contains data for delivery times calculation
+
+```
+Name Type Description
+```
+```
+PickupDate Nullable(DateTime) Requested pickup
+date
+```
+```
+PickupCountryCode String Pickup country code in
+ISO format
+("HR","DE","AT"...)
+```
+```
+PickupZipCode String Postal code of pickup
+```
+```
+PickupCity String Pickup place name
+```
+```
+DeliveryCountryCode String Destination country
+code in ISO format
+("HR","DE","AT"...)
+```
+```
+DeliveryZipCode String Destination postal
+code
+```
+```
+DeliveryCity String Destination place
+name
+```
+```
+OverseasPrintsLabels Boolean Set true if Overseas
+prints package labels
+```
+## PriceInfoRequest
+
+Object contains required information to calculate pricing information
+
+```
+Name Type Description
+```
+```
+PickupDate DateTime Requested pickup date
+```
+```
+SenderZipCode String Sender postal code
+```
+```
+SenderCountryPrefix String Sender country code in
+ISO format
+("HR","DE","AT","BA"...)
+```
+```
+CosigneeZipCode String Receiver postal code
+```
+```
+ConsigneeCountryPrefix String Receiver country code
+in ISO format
+("HR","DE","AT","BA"...)
+```
+```
+BillingUnit Nullable(Int32) Unit type for this
+calculation
+0 - KG
+4 - Palletes
+5 - Kn (value of goods)
+7 - Pieces
+11 - Palettes (kg)
+12 - Letter
+13 - Small box
+14 - Medium box
+15 - Large box
+16 - Extra large box
+17 - WPI (Weight per
+item)
+```
+
+```
+Name Type Description
+```
+```
+ShipmentWeight Nullable(Double) Shipment weight in KG
+```
+```
+CountOfBillingUnits Nullable(Double) Amount of billin units
+for calculation
+```
+```
+NumberOfCollies Nullable(Int32) Total number of collies
+for calculation
+```
+```
+Weights List(Double) Individual weights of
+packages for this
+calculation
+```
+```
+DropOffParcelShop String DropOff parcel shop ID
+```
+```
+PickupParcelShop String Pickup parcel shop ID
+```
+```
+AllowSaturdayDelivery Nullable(Boolean) Is saturday delivery
+service used?
+```
+```
+IsCargo Nullable(Boolean) Is this cargo shipment?
+```
+```
+ReturnDocument Nullable(Boolean) Is return document
+service used?
+```
+```
+CodAmount Nullable(Double) Cash On Delivery
+amount in default
+currency
+```
+```
+ExWorks Nullable(Boolean) Is Exworks service
+used (paid by receiver)
+```
+## AddUpdateSenderResult
+
+Object represents result of AddUpdateSenders method
+
+```
+Name Type Description
+```
+```
+senderid Int32 Sender id value that can be
+used in Create shipments
+methods
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## CancelShipmentsResult
+
+Object represents result of CancelShipments method
+
+```
+Name Type Description
+```
+```
+shipmentids Int64[] List of successfully canceled
+shipmentIDs
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+
+```
+Name Type Description
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## ClientAPICreateShipmentResult
+
+Contains CreateShipment method call result
+
+```
+Name Type Description
+```
+```
+shipmentid Int64 ShipmentID of created
+shipment. Call
+ShipmentsById for more
+details
+```
+```
+pickuptime Nullable(DateTime) Assigned starting pickup
+time for this shipment.
+Note that this time can
+change if shipment is
+commited or pickup is
+requested at the later
+date
+```
+```
+pickupendtime Nullable(DateTime) Assigned ending pickup
+time for this shipment.
+Note that this time can
+change if shipment is
+commited or pickup is
+requested at the later
+date
+```
+```
+deliverytime Nullable(DateTime) Expected start delivery
+time of this shipment (if
+picked up at assigned
+time)
+```
+```
+deliveryendtime Nullable(DateTime) Expected end delivery
+time of this shipment (if
+picked up at assigned
+time)
+```
+```
+status ClientAPIResultStatus (ENUMERATION -
+integer) OEX Client API
+call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures,
+contains details about
+error
+```
+```
+validations List(ClientAPIValidation) In case of validation
+error, contains list of
+failed validations
+```
+## ClientAPICreateShipmentWithBarcodeResult
+
+Contains data about created shipment
+
+```
+Name Type Description
+```
+```
+shipmentid Int64 ShipmentID of created
+shipment. Call
+ShipmentsById for more
+details
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+
+```
+Name Type Description
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## ClientApiShipmentResult
+
+Shipment object result
+
+```
+Name Type Description
+```
+```
+data CNShipment Contains details about one
+shipment
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## PostCancelableStatus
+
+Result of event cancelation call
+
+```
+Name Type Description
+```
+```
+operationid Int32 Canceled event operation id
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## ClientApiParcelShopsResult
+
+Contains Parcel shop objects
+
+```
+Name Type Description
+```
+```
+data List(CNParcelShop) Parcel shops returned by
+method
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## ClientApiShipmentsResult
+
+
+Contains shipment results
+
+```
+Name Type Description
+```
+```
+data List(CNShipment) Shipments returned by
+method
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## ClientApiSignatureResult
+
+Contains requested signature if present
+
+```
+Name Type Description
+```
+```
+data String Base64 encoded image
+(signature)
+```
+```
+shipmentid Nullable(Int64) API ShipmentID
+```
+```
+fullcargoid String FullCargoID of shipment for
+this signature
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## PlacesResult
+
+Places result object
+
+```
+Name Type Description
+```
+```
+data List(CNPlace) Contains list of places
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## ClientApiSendersResult
+
+Senders result
+
+
+```
+Name Type Description
+```
+```
+data List(APISender) Details about predefined senders
+```
+## APISender
+
+This object represents one sender that can be used in CreateShipment
+methods.
+
+```
+Name Type Description
+```
+```
+senderid Nullable(Int32) This sender ID. API user can
+only use his senders.
+```
+```
+legacykey String (OBSOLETE) - used in old api
+version
+```
+```
+Name String Person or bussiness name
+```
+```
+CountryCode String Country code in ISO format
+("HR","DE","AT","BA"...)
+```
+```
+Zipcode String Postal code
+```
+```
+City String City name
+```
+```
+StreetAndNumber String Street and street number
+```
+```
+Telephone String Telephone (informational)
+```
+```
+Fax String Fax (informational)
+```
+```
+NotifyGSM String Mobile number. This number
+will be used if notifications are
+sent
+```
+```
+NotifyEmail String Email for sending notifications
+```
+## ClientApiUserInfoResult
+
+```
+Name Type Description
+```
+```
+overseasclientid Int32
+```
+```
+overseascargoclientid Int32
+```
+```
+webshopEnabled Boolean
+```
+```
+webshopEnabledSenderInput Boolean
+```
+```
+webshopReferrer String
+```
+```
+webshopMails String
+```
+```
+webshopMailType Nullable(Int16)
+```
+```
+Senders Dictionary(Int32,ClientApiUserSender)
+```
+```
+status ClientAPIResultStatus (ENUMERATION
+```
+- integer) OEX
+Client API call
+result
+0=OK
+1=Error
+2=Validation
+Failed
+
+```
+error ClientAPIError If error occures,
+contains details
+about error
+```
+
+```
+Name Type Description
+```
+```
+validations List(ClientAPIValidation) In case of
+validation error,
+contains list of
+failed validations
+```
+## CreateReturnStickersResult
+
+Represents result of createreturnstickers method and contains PDF stickers
+to be printed
+
+```
+Name Type Description
+```
+```
+data List(CNReturnSticker) List of created return
+stickers
+```
+```
+labelsbase64 String Base64 encoded PDF with
+stickers
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## GetDeliveryTimeResponse
+
+Delivery times result object
+
+```
+Name Type Description
+```
+```
+data DeliveryTimes Contains details about
+vailable delivery times
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## DeliveryTimes
+
+Delivery times object
+
+```
+Name Type Description
+```
+```
+senddate Nullable(DateTime) Available send date
+```
+```
+pickupdate Nullable(DateTime) Available pickup
+date
+```
+```
+pickupzipcode String Postal code of
+pickup
+```
+```
+pickupplace String Pickup city
+```
+```
+deliveryzipcode String Destination postal
+code
+```
+
+```
+Name Type Description
+```
+```
+deliveryplace String Destination place
+name
+```
+```
+pickupintervals List(TimeIntervalDate) Available pickup
+intervals - empty if
+service is not
+available or place is
+not valid
+```
+```
+deliveryintervals List(TimeIntervalDate) Expected delivery
+intervals - empty is
+service is not
+available or place is
+not valid
+```
+```
+pickupplacevalid Boolean Is pickup place
+valid?
+```
+```
+deliveryplacevalid Boolean Is delivery place
+valid?
+```
+```
+ispickupplaceexact Boolean Did pickup place
+and zipcode match
+exactly with input
+(when calling create
+shipment, use list
+provided by Places
+method or
+combination from
+this response)
+```
+```
+isdeliveryplaceexact Boolean Did delivery place
+and zipcode match
+exactly with input
+(when calling create
+shipment, use list
+provided by Places
+method or
+combination from
+this response)
+```
+```
+pickupserviceflags CoverageServicesFlags Available service
+flags at pickup site:
+Express = 1 (first
+bit)
+Cargo = 2 (second
+bit)
+COD = 4 (third bit)
+Exworks = 8 (fourth
+bit)
+ReturnDocument =
+16 (fifth bit)
+```
+```
+deliveryserviceflags CoverageServicesFlags Available service
+flags at delivery
+site:
+Express = 1 (first
+bit)
+Cargo = 2 (second
+bit)
+COD = 4 (third bit)
+Exworks = 8 (fourth
+bit)
+ReturnDocument =
+16 (fifth bit)
+```
+## GetPickDelyIntervalsResponse
+
+Pickup and delivery time intervals object
+
+```
+Name Type Description
+```
+```
+data List(CNPickDelyIntervals) Contains list of available
+pickup and delivery times for
+postala codes
+```
+
+```
+Name Type Description
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## GetPickupsListResult
+
+pickups list result object
+
+```
+Name Type Description
+```
+```
+shipmentids List(Int64) List of shipment ids set
+for pickup
+```
+```
+pickupdocument String Pickup list document
+```
+```
+pickupinterval TimeIntervalDate Pickup times allocated
+```
+```
+status ClientAPIResultStatus (ENUMERATION -
+integer) OEX Client API
+call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures,
+contains details about
+error
+```
+```
+validations List(ClientAPIValidation) In case of validation
+error, contains list of
+failed validations
+```
+## PriceResult
+
+One shipment result object
+
+```
+Name Type Description
+```
+```
+data CNPriceInfo Requested shipment data is
+status=0
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## PrintShipmentsResult
+
+
+```
+Name Type Description
+```
+```
+data List(CNShipment) List of commited
+shipments
+Contains only
+ShipmentID,
+PickupTime,
+PickupEndTime,
+DeliveryTime and
+DeliveryEndTime.
+For more details call
+ShipmentsById
+method.
+```
+```
+labelsbase64 String Base64 encoded PDF
+with parcel labels
+```
+```
+NumberOfLabels Nullable(Int32) Count of labels
+```
+```
+status ClientAPIResultStatus (ENUMERATION -
+integer) OEX Client API
+call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures,
+contains details about
+error
+```
+```
+validations List(ClientAPIValidation) In case of validation
+error, contains list of
+failed validations
+```
+## RemoveColliesResult
+
+Remove collies result object
+
+```
+Name Type Description
+```
+```
+colliids String[] FullCargoIDs of removed
+collies
+```
+```
+shipmentid Int64 ShipmentID of changed
+shipment
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## RequestPickupClientResult
+
+Multiple shipments result object
+
+```
+Name Type Description
+```
+```
+shipmentids List(Int64) List of shipment ids
+set for pickup
+```
+```
+pickupintervals List(TimeIntervalDate) List of pickup times
+allocated (one per
+document)
+```
+```
+pickupdocuments List(String) Pickup list document if
+customer pickup
+```
+
+```
+Name Type Description
+```
+```
+PickupIds List(Nullable`1) List of created pickup
+list IDs
+```
+```
+status ClientAPIResultStatus (ENUMERATION -
+integer) OEX Client
+API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures,
+contains details about
+error
+```
+```
+validations List(ClientAPIValidation) In case of validation
+error, contains list of
+failed validations
+```
+## ReturnStickerResult
+
+Return sticker result object
+
+```
+Name Type Description
+```
+```
+data CNReturnSticker Return sticker object
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## ReturnStickersResult
+
+Return sticker result object
+
+```
+Name Type Description
+```
+```
+data List(CNReturnSticker) Return sticker object
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## WarehouseItemsResult
+
+Multiple warehouse items result object
+
+```
+Name Type Description
+```
+```
+data List(CNWarehouseItem) Contains results for this query
+if successful
+```
+
+```
+Name Type Description
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+## WarehouseTrafficsResult
+
+Multiple warehouse items result object
+
+```
+Name Type Description
+```
+```
+data List(CNWarehouseTraffic) Contains results for this
+query if successful
+```
+```
+status ClientAPIResultStatus (ENUMERATION - integer)
+OEX Client API call result
+0=OK
+1=Error
+2=Validation Failed
+```
+```
+error ClientAPIError If error occures, contains
+details about error
+```
+```
+validations List(ClientAPIValidation) In case of validation error,
+contains list of failed
+validations
+```
+# Errors
+
+Different errors can occure in client api and underlaying systems.
+This list provides list of defind errors, however although error message is
+defined it might be unreachable by current API.
+
+```
+Code Message
+```
+```
+1003 Podatki o številki pošiljke morajo biti vneseni!
+```
+```
+1004 Podatki o ID prevzemnega mesta morajo biti vneseni!
+```
+```
+1005 Podatki o ID procesa morajo biti vneseni.
+```
+```
+1006 Podatki o številki prevzema morajo biti vneseni!
+```
+```
+1007 Format podatkov o številki pošiljke je napačen, preverite številko!
+```
+```
+1009 Za API ključ ni na voljo noben pošiljatelj, za nastavitev privzetih podatkov pošiljatelja se obnite na skrbni
+```
+```
+1010 Za ta ID in API ključ ni pošiljatelja.
+```
+```
+1011 Pošiljka ne more imeti samo enega paketa. Ali ustvarite enopaketno pošiljko ali večpaketno pošiljko, ki im
+```
+```
+1012 Vnesite ali število paketov ali seznam paketov, ne obojega!
+```
+```
+1013 ID stranke ni nastavljen za API ključ, obrnite se na skrbnika.
+```
+```
+1014 ID pošiljke je obvezen!
+```
+```
+1015 Vnesite ali ID pošiljatelja ali podatke zunanjega uporabnika, ne obojega!
+```
+```
+1016 Podatki o pošiljatelju niso bili nastavljeni!
+```
+
+**Code Message**
+
+**1017** Za pošiljke, ki niso pošiljke strank, mora biti nastavljeno število paketov!
+
+**1018** Pošiljka, ki ni pošiljka stranke, ne sme imeti nobenega paketa!
+
+**1023** Pri pošiljkah, ki niso pošiljke strank, priloge niso podprte!
+
+**1024** Pošiljke ni mogoče najti!-({0})-({0})
+
+**1025** Trgovina s pošiljkami ni najdena ali ni veljavna!-({0})-({0})
+
+**1026** Trgovina s pošiljkami nima naslova!-({0})-({0})
+
+**1027** Trgovina s pošiljkami nima določenega kraja/poštne številke!-({0})-({0})
+
+**1029** Trgovina s paketi nima nastavljene poti!-({0})-({0})
+
+**1030** Na prevzemnem mestu ni mogoče oddati pošiljke, ki ni namenjena stranki!
+
+**1031** Pošiljatelj mora biti nastavljen v tej različici klica!
+
+**1032** Prejemnik je obvezen!
+
+**1033** Prevzemnega mesta v drugi državi ni mogoče uporabiti!
+
+**1034** Na prevzemnem mestu lahko oddate samo enopaketne pošiljke!
+
+**1035** Cargo ID je obvezen!
+
+**1036** Niste lastnik te pošiljke, uporabite drug ključ ali se obrnite na skrbnika!
+
+**1037** Nalepka ali pošiljka sta obvezni!
+
+**1038** Uporabnik nima dovoljenja za dodajanje pošiljatelja!
+
+**1039** ID pošiljke ali Cargo ID je obvezen!
+
+**1040** Ta ID enote ni dovoljen, ker nima tarife za stranko!
+
+**1041** Parcel shop is not PointPack!
+
+**1042** Vrednost Cargo ID je napačna!
+
+**1100** Potrditev ni bila uspešna, za podrobnosti preverite potrditve!
+
+**5000** Neznana ali zunanja napaka!
+
+**7000** Overjanje API ključa ni uspelo, preverite svoj ključ!
+
+**7001** Dostop do zahtevanega vira je zavrnjen, bodisi imate napačen ključ bodisi ni dostopa!
+
+**7002** Telo vsebine je prazno, metoda zahteva vnos JSON!
+
+**7003** Vključitev ni dovoljena, ne morete zahtevati več kot 70. ravni podatkov!
+
+**7004** Service gateway trenutno ni pripravljen, poskusite pozneje!
+
+**7005** Gateway service static objects trenutno niso pripravljeni, poskusite znova pozneje!
+
+**7006** Navesti je treba bodisi žeton, enkratni token, ključ, uporabniško ime in geslo bodisi ID androida in pin!
+
+**7007** Gateway service ni uspel, poskusite znova pozneje ali se obrnite na skrbnika, če se napaka ponavlja!
+
+**7008** API uporabnik nima nastavljene stranke, obrnite se na skrbnika!
+
+**7009** Zahtevanih je preveč podatkov!
+
+**7011** Pošiljka ni bila najdena!
+
+**7017** Zahteve za prevzem ni mogoče posodobiti!
+
+
+**Code Message**
+
+**7018** Pošiljke ni mogoče spremeniti v prevzemno pošiljko!
+
+**7019** ID stranke je obvezen!
+
+**7020** Ni podatkov za obdelavo!-({0})-({0})
+
+**7021** Za to lokacijo ni na voljo intervala prevzema, to lahko pomeni napačno lokacijo pošiljatelja (na lokaciji ni
+
+**7022** Za to lokacijo ni na voljo intervala dostave, kar lahko pomeni napačno lokacijo prejemnika (na lokaciji ni
+
+**7023** Pošiljk s črtno kodo stranke ni mogoče posodobiti!
+
+**7024** Pošiljk s črtno kodo stranke ni mogoče prevzeti na lokaciji, ki ni namenjena stranki, prav tako ni mogoče
+
+**7025** Dovoljenje je zavrnjeno! Uporabnik potrebuje dodatna dovoljenja za izvedbo tega dejanja.-({0})-({0})
+
+**7026** Vnosa ni mogoče najti!-({0})-({0})
+
+**7027** Podatkov, ki pripadajo nekomu drugemu, ne morete spreminjati!
+
+**7028** Parameter manjka
+
+**7029** Napaka parametra
+
+**7030** Predmet pripada nekomu drugemu!
+
+**7031** Pošiljka je preklicana!-({0})-({0})
+
+**7032** Pošiljanje v to državo ni na voljo!
+
+**7035** Pošiljke s črtno kodo stranke ni mogoče oddati!-({0})-({0})
+
+**7036** Pošiljka je oddana in je ni več mogoče posodobiti!
+
+**7037** Pošiljka za prevzem mora imeti samo en paket z obveznim številom paketov!
+
+**7038** Paketi za to pošiljko ne obstajajo ali pa je pošiljka samo enopaketna!-({0})-({0})
+
+**7039** Posodobite lahko samo začasne pošiljke!
+
+**7040** Posodobiti je mogoče samo pošiljke zunanjih pošiljateljev ali pošiljke strank!
+
+**7041** Ne morete izbrisati vseh paketov, namesto tega prekličite pošiljko!
+
+**7042** Preveč paketov!
+
+**7043** Ruta ne obstaja!
+
+**7045** Povratna pošiljka je že ustvarjena!-({0})-({0})
+
+**7046** Preveč nalepk (<500), oddajte manjše število!
+
+**7048** Cargo ID je obvezen!
+
+**7049** Pošiljka za vračilo je že ustvarjena za nalepko!-({0})-({0})
+
+**7050** Nimate dovoljenja za ponovno dodelitev številk!
+
+**7053** Teža je obvezna pri autoinig!
+
+**7054** Transakcija ni bila najdena!-({0})-({0})
+
+**7055** Podpis ni veljaven!-({0})-({0})
+
+**7056** Neznani status!-({0})-({0})
+
+**7057** Transakcija je že obdelana!-({0})-({0})
+
+**7058** ID pošiljke ali Cargo ID je obvezen!
+
+
+```
+Code Message
+```
+```
+7059 Ta funkcija ni dovoljena!
+```
+```
+7060 BoxNow-Destination for address not available!
+```
+```
+7061 BoxNow-Failed to get origins!
+```
+```
+7062 BoxNow-Failed to get destinations!
+```
+```
+7063 BoxNow-Receiver has no telephone!
+```
+```
+7064 BoxNow-Destination unavailable!-({0})
+```
+```
+7065 BoxNow-Shipment is multicolli!
+```
+```
+7066 BoxNow-Shipment has COD!
+```
+```
+7067 BoxNow-Shipment has exworks!
+```
+```
+7068 BoxNow-Shipment is cargo!
+```
+```
+7069 BoxNow-Shipment is not commited!
+```
+```
+7070 ID pošiljke je obvezen!
+```
+```
+7071 BoxNow-Failed to create label!
+```
+```
+7072 BoxNow-DailyQuota passed!
+```
+```
+7073 Domestic cargo service is not available!
+```
+```
+7074 Shipment is already in return!
+```
+```
+7075 Shipment not synced yet, try again later!
+```
+```
+7076 Payment by receiver is not allowed on Parcel Shops and Lockers!
+```
+```
+7077 Payment by sender is not allowed on Parcel Shops and Lockers!
+```
+```
+7078 COD is not allowed on Parcel Shops and Lockers!
+```
+```
+8000 Entry is too old and no longer available!
+```
+# Validations
+
+Different validation errors can occure in client api and underlaying systems.
+This list provides list of defind validations, however although validation
+message is defined it might be unreachable by current API.
+
+```
+Code Message
+```
+```
+2000 Podatki o API ključu morajo biti vneseni!
+```
+```
+2001 Podatki o vozniku za prevzemno mesto niso na voljo, preverite ID pošiljke ali se obrnite na skrbnika!
+```
+```
+2002 Podatki o ruti za prevzemno mesto niso na voljo, preverite ID prevzemnega mesta ali se obrnite na skrb
+```
+```
+2004 Paketa/pošiljke ni mogoče najti, preverite številko paketa!
+```
+```
+2007 ID stranke ni nastavljen za tega uporabnika, preverite API ključ ali se obrnite na skrbnika!
+```
+```
+2008 Naslov voznika za prevzemno mesto ni na voljo, preverite ID paketa ali se obrnite na skrbnika!
+```
+```
+2009 Ta pošiljka je tovorna pošiljka in je ni mogoče preusmeriti na prevzemno mesto!
+```
+```
+2010 Ta pošiljka je označena za vračilo (RETS) in je ni mogoče preusmeriti na prevzemno mesto!
+```
+```
+2011 Ta pošiljka je označena kot prevelika pošiljka (OVSZ) in je ni mogoče preusmeriti na prevzemno mesto!
+```
+
+**Code Message**
+
+**2012** Ta pošiljka nima pravilnih statusov za preusmeritev na prevzemno mesto, danes mora imeti statusa najp
+
+**2013** Ta pošiljka ni preusmerjena na to prevzemno mesto, ne morete nastaviti statusov za pošiljke, ki pripadaj
+
+**2014** Postopka ni mogoče obdelati! Za to pošiljko je postopek že v čakalni vrsti, prekličite postopek ali se obrn
+
+**2015** Skladišče prejemnika ni nastavljeno na pošiljki.
+
+**2016** Za to ruto ni nastavljena poštna številka.
+
+**2017** Pošiljka še ni oddana, najprej jo oddajte!-({0})-({0})
+
+**2018** Pošiljka je bila že natisnjena!-({0})-({0})
+
+**2019** Pošiljke ni mogoče natisniti, ker ni pošiljka za stranke!-({0})-({0})
+
+**2020** Pošiljka ni pošiljka API!-({0})-({0})
+
+**2021** To ni pošiljka!-({0})-({0})
+
+**2023** Pošiljka je že prejeta.
+
+**2024** Shipment can not be printed yet as it is noncustomer shipment, please commit and wait for number assi
+
+**2144** Ni mogoče dostaviti v drugo skladišče!
+
+**2145** Format poštne številke namembnega kraja ni pravilen!-({0})-({0})
+
+**2146** Vnesti je treba bodisi število paketov bodisi pakete, ne obojega ali niti enega niti drugega!
+
+**2147** Velja bodisi število nalepk bodisi seznam pkeys, ne oboje!
+
+**2148** Nalepka za vračilo te pošiljke je že bila ustvarjena!-({0})-({0})
+
+**2149** ID nalepke je obvezen!
+
+**2150** Nalepka ne obstaja!
+
+**2151** Nalepko za vračilo je mogoče ustvariti samo za pakete!
+
+**2152** Ta nalepka zahteva številko pošiljke!
+
+**2153** Nalepka pripada drugi pošiljki!
+
+**2154** Paket je zabranjen za isporuku na PS, vratite kuriru!-({0})-({0})
+
+**2155** Prevelikega paketa ni mogoče preusmeriti na prevzemno mesto!
+
+**2157** To prevzemno mesto se zapira in paketa tu ni več mogoče prevzeti!
+
+**2159** Manjka obvezni parameter!
+
+**2160** Oblika Številke je napačna je napačna!-({0})-({0})
+
+**2161** This parcel shop is not active!
+
+**2200** Paramater ID procesa mora biti vnesen!
+
+**2201** Parameter enterby mora biti vnesen!
+
+**2202** Proces ni bil najden, preverite ID procesa!
+
+**2203** Proces je že obdelan ali preklican!
+
+**2204** Procesa, ki pripada nekomu drugemu, ni mogoče preklicati!
+
+**2205** Parameter obdelave mora biti vnesen!
+
+**2206** Parameter obdelave mora biti večji od nič!
+
+
+**Code Message**
+
+**2207** Naenkrat lahko zberete največ 10000 dogodkov!
+
+**2208** Parameter ključ dogodka mora biti vnesen!
+
+**2209** Parameter ID uporabnika mora biti vnesen!
+
+**2210** Parameter mvmtnr mora biti vnesen!
+
+**2211** Parameter pkey mora biti vnesen!
+
+**2212** Parameter picknr mora biti vnesen!
+
+**2213** Parameter sdglfdnr mora biti vnesen!
+
+**2214** pošiljka/paket ni najden!-({0})-({0})
+
+**2215** pošiljka/paket ne velja za ta klic!-({0})-({0})
+
+**2216** pošiljka/paket ni pošiljka API in ni veljavna za ta klic!-({0})-({0})
+
+**2217** pošiljka/paket še ni oddan in ni veljaven za ta klic!-({0})-({0})
+
+**2218** Parameter ulica mora biti vnesen!
+
+**2219** Parameter poštna številka mora biti prisoten!
+
+**2220** Parameter prostor mora biti prisoten!
+
+**2221** Telo zahtevka zahteva podatke in ne more biti prazno!
+
+**2222** Samo pošiljke, paketi niso veljavni!-({0})-({0})
+
+**2223** ID stranke in številka morata biti vnesena!
+
+**2224** pošiljka/paket pripada drugemu uporabniku in ni veljaven za ta klic!-({0})-({0})
+
+**2225** Prevzem te pošiljke je že zahtevan!-({0})-({0})
+
+**2226** samo pošiljke, paketi ali prevzemi niso veljavni!-({0})-({0})
+
+**2229** Oddate lahko samo svoje pošiljke!-({0})-({0})
+
+**2230** Podrejene pošiljke ni mogoče oddati, oddajte glavni vnos!-({0})-({0})
+
+**2231** Vnesite samo začasne pošiljke!-({0})-({0})
+
+**2232** Poštna številka prevzema je obvezna!
+
+**2233** Poštna številka dostave je obvezna!
+
+**2235** Parameter številka prevzemnega lista mora biti vnesen!
+
+**2236** Parameter datum mora biti vnesen in v številu milisekund od 1.1.1970!
+
+**2237** Paramater ref mora biti vnesen!
+
+**2238** pickup ni najden!-({0})-({0})
+
+**2401** ID države je obvezen!
+
+**2402** ID države mora biti številka!
+
+**2403** ID centra za stranke je obvezen!
+
+**2404** ID centra za stranke mora biti številka!
+
+**2405** Cargo ID je obvezen!
+
+**2406** Cargo ID mora biti številka!
+
+
+**Code Message**
+
+**2407** ID centra obračuna je obvezen!
+
+**2408** ID centra obračuna mora biti številka!
+
+**2409** ID stranke je obvezen!
+
+**2410** ID stranke mora biti številka!
+
+**2412** Število paketov mora biti številka!
+
+**2413** ID enote mora biti številka!
+
+**2414** Vsota enote je obvezna, če je naveden ID enote!
+
+**2415** Vsota enote mora biti številka!
+
+**2417** Teža mora biti številka!
+
+**2418** Kratica države prevzemnika je obvezna!
+
+**2419** Poštna številka prevzemnika je obvezna!
+
+**2420** Mesto prevzemnika je obvezno!
+
+**2421** Ime prevzemnika je predolgo (največ 35 znakov)!
+
+**2422** Kratica države prevzemnika je predolga (največ 3 znaki)!
+
+**2423** Poštna številka prevzemnika je predolga (največ 10 znakov)!
+
+**2424** Mesto prevzemnika je predolgo (največ 35 znakov)!
+
+**2425** Ulica in hišna številka prevzemnika je predolga (največ 70 znakov)!
+
+**2426** Telefonska številka prevzemnika je predolga (največ 30 znakov)!
+
+**2427** Faks prevzemnika je predolg (največ 30 znakov)!
+
+**2428** GSM za obvestilo prevzemnika je predolg (največ 35 znakov)!
+
+**2429** E-naslov za obvestilo prevzemnika je predolg (največ 70 znakov)!
+
+**2430** CosigneeNotificationType mora biti prazen, 0, 1, 2 ali 3!
+
+**2431** Ime pošiljatelja je obvezno za prevzem!
+
+**2432** Kratica države pošiljatelja je obvezena!
+
+**2433** Poštna številka pošiljatelja je obvezna!
+
+**2434** Mesto pošiljatelja je obvezeno!
+
+**2435** Ime pošiljatelja je predolgo (največ 35 znakov)!
+
+**2436** Kratica države pošiljatelja je predolgo (največ 3 znaki)!
+
+**2437** Poštna številka pošiljatelja je predolga (največ 10 znakov)!
+
+**2438** Mesto pošiljatelja je predolgo (največ 35 znakov)!
+
+**2439** Ulica in hišna številka pošiljatelja je predolga (največ 70 znakov)!
+
+**2440** Telefonska številka pošiljatelja je predolga (največ 30 znakov)!
+
+**2441** Faks pošiljatelja je predolg (največ 30 znakov)!
+
+**2442** GSM za obvestila pošiljatelja je predolg (največ 35 znakov)!
+
+**2443** E-naslov za obvestila pošiljatelja je predolg (največ 70 znakov)!
+
+
+**Code Message**
+
+**2445** Ime dejanskega prejemnika je predolgo (največ 35 znakov)!
+
+**2446** Kratica države dejanskega prejemnika je predolgo (največ 3 znaki)!
+
+**2447** Poštna številka dejanskega prejemnika je predolga (največ 10 znakov)!
+
+**2448** Mesto dejanskega prejemnika je predolgo (največ 35 znakov)!
+
+**2449** Naslov in hišna številka dejanskega prejemnika je predolga (največ 70 znakov)!
+
+**2450** Telefonska številka dejanskega prejemnika je predolga (največ 30 znakov)!
+
+**2451** Faks dejanskega prejemnika je predolg (največ 30 znakov)!
+
+**2452** Ime dejanskega pošiljatelja je predolgo (največ 35 znakov)!
+
+**2453** Kratica države dejanskega pošiljatelja je predolga (največ 3 znaki)!
+
+**2454** Poštna številka dejanskega pošiljatelja je predolga (največ 10 znakov)!
+
+**2455** Mesto dejanskega pošiljatelja je predolgo (največ 35 znakov)!
+
+**2456** Ulica in hišna številka dejanskega pošiljatelja je predolga (največ 70 znakov)!
+
+**2457** Telefonska številka dejanskega pošiljatelja je predolga (največ 30 znakov)!
+
+**2458** Faks dejanskega pošiljatelja je predolg (največ 30 znakov)!
+
+**2459** Ref1 je predolg (največ 35 znakov)!
+
+**2460** Ref2 je predolg (največ 35 znakov)!
+
+**2461** Ref3 je predolg (največ 35 znakov)!
+
+**2462** RefInt je predolg (največ 35 znakov)!
+
+**2463** Valuta je obvezna, če je vnesena vrednost zavarovanja!
+
+**2464** Valuta mora biti 0 ali 1!
+
+**2465** ExpressType mora biti 21, 22, 23, 51, 52 ali prazen!
+
+**2466** ExpressAttribute mora biti 1, 2, 3 ali prazen!
+
+**2467** SaturdayType mora biti 24, 25 ali prazen!
+
+**2468** Vrednost ExWorks ni podprta!
+
+**2469** CodValue mora biti številka!
+
+**2470** CodAttribute je obvezen, če se uporablja CODValue!
+
+**2471** CodAttribute mora biti 0, 1, 2, 3, 4 ali 5!
+
+**2472** CODReturnBankAccount je predolg (največ 35 znakov)!
+
+**2473** CODReturnBankCode je predolg (največ 15 znakov)!
+
+**2474** Zavarovanje mora biti številka!
+
+**2475** Tovor mora biti 70 ali prazen!
+
+**2476** PDELY je predolg (največ 35 znakov)!
+
+**2478** ShippingType mora biti 43,491,492,493 ali prazen!
+
+**2479** DeliveryType mora biti 13,65,20,401,402,403 ali prazen!
+
+**2480** PriorityType mora biti 1,2 ali prazen!
+
+
+**Code Message**
+
+**2481** Opomba je predolga (največ 150 znakov)!
+
+**2482** PickupRemark je predolg (največ 255 znakov)!
+
+**2483** DeliveryRemark je predolg (največ 255 znakov)!
+
+**2484** PickupFlag je obvezna!
+
+**2485** Oblika oznake PickupFlag je napačna!
+
+**2486** PickupDate je pri prevzemu obvezen!
+
+**2487** PickupTime je obvezen pri prevzemu!
+
+**2488** PickupEndDate je obvezen pri prevzemu!
+
+**2489** PickupEndTime je obvezen pri prevzemu!
+
+**2490** Oblika PickupDate je napačna, uporabite dd.M!
+
+**2491** Format PickupTime je napačen, uporabite HH:mm!
+
+**2492** Format PickupEndDate je napačen, uporabite dd.M!
+
+**2493** Oblika PickupEndTime je napačna, uporabite HH:mm!
+
+**2494** Format DeliveryDate je napačen, uporabite dd.M!
+
+**2495** Format DeliveryTime je napačen, uporabite HH:mm!
+
+**2496** Format DeliveryEndDate je napačen, uporabite dd.M!
+
+**2497** Format DeliveryEndTime je napačen, uporabljajte HH:mm!
+
+**2498** RouteID mora biti številka!
+
+**2499** GeoX mora biti številka!
+
+**2500** GeoY mora biti številka!
+
+**2501** ReturnForCargoID napačna oblika, uporabite lllcccssssssss!
+
+**2502** Vsaka pošiljka mora imeti vsaj en paket!
+
+**2504** Pri pošiljkah z več paketi mora biti prvi paket s cargoID enak 0 ali prazen!
+
+**2505** Pickup cargoID mora biti prazen (bo ustvarjen)!
+
+**2506** Samo prevzem lahko določi število paketov in mora imeti en vnos!
+
+**2507** Prevzem mora imeti en vnos paketov!
+
+**2509** PickupEndTime/Date je v preteklosti!
+
+**2510** PickupEndTime/Date mora biti večji od PickupTime!
+
+**2511** Prilogo je mogoče dodati samo pri pošiljkah APId!
+
+**2513** DelyEndTime/Date je v preteklosti!
+
+**2514** DelyEndTime/Date mora biti večji od DelyTime!
+
+**2517** NumberOfCollies ne sme biti več kot 999!
+
+**2518** Format podatkov v polju je napačen!-({0})-({0})
+
+**2519** Polje mora imeti vrednost!-({0})-({0})
+
+**2520** Podatki v polju so predolgi, vnesite veljavno vrednost!-({0})-({0})
+
+
+**Code Message**
+
+**2521** Splošna napaka v polju, preverite podatke!-({0})-({0})
+
+**2522** Pošiljka s tem sklicem danes že obstaja!
+
+**2523** Ref1 je obvezen za to pošiljko!
+
+**2525** Hitra storitev ni na voljo za prevzem!
+
+**2526** Hitra storitev ni na voljo v namembnem kraju!
+
+**2527** Storitev pošiljanja po povzetju ni na voljo v namembnem kraju!
+
+**2528** Storitev ExWorks na destinaciji ni na voljo!
+
+**2529** Storitev RDOC na destinaciji ni na voljo!
+
+**2530** Storitev Cargo ni na voljo za prevzem!
+
+**2531** Storitev Cargo ni na voljo v namembnem kraju!
+
+**2532** Lokacija pošiljatelja je neveljavna!
+
+**2533** Lokacija prejemnika je neveljavna!
+
+**2534** Interval prevzema ni na voljo!
+
+**2535** Interval dostave ni na voljo!
+
+**2536** Lokacija prejemnika je neveljavna - mora biti točna!
+
+**2537** Naročanje ni omogočeno za stranko!
+
+**2538** CommissioningType mora biti element za uporabo strukture komisioniranja!
+
+**2539** Pošiljka mora vsebovati priponko dokumenta pdf za komisioniranje dokumentov!
+
+**2540** Zahtevek mora vsebovati predmet Commissions za komisioniranje elementa!
+
+**2541** Znesek provizije ni določen za element!-({0})-({0})
+
+**2542** Naročeni predmet ni najden!-({0})-({0})
+
+**2543** Znesek provizije ni na voljo!-({0})-({0})
+
+**2544** Naročite lahko samo standardne pošiljke!
+
+**2545** Naročene pošiljke ni mogoče prevzeti!-({0})-({0})
+
+**2546** Predmeti s serijskimi številkami morajo imeti znesek=1!-({0})-({0})
+
+**2547** Naročite lahko samo en predmet s serijsko številko na pošiljko!-({0})-({0})
+
+**2548** Lokacija pošiljatelja je neveljavna - biti mora točna!
+
+**2549** Ref1 je predolg (največ 35 znakov)!
+
+**2550** RouteCenterID mora biti številka!
+
+**2551** Prevzemno mesto ni bilo najdeno, je neaktivno ali nima storitev, preverite vnos!
+
+
