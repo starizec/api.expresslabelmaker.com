@@ -187,6 +187,11 @@
                             <td>❌</td>
                         </tr>
                         <tr>
+                            <td class="text-start">Filtiranje narudžbi po statusu dostave</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
                             <td class="text-start">Jedna licenca za sve kurirske službe</td>
                             <td>✅</td>
                             <td>❌</td>
