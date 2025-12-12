@@ -21,7 +21,7 @@ class OverseasController extends Controller
     protected $courier;
 
     protected $successfulStatusDescription = [
-        'Delivered',
+        'delivered',
     ];
 
     protected $unsuccessfulStatusDescription = [
@@ -714,9 +714,9 @@ class OverseasController extends Controller
 
     protected function getColor($status_description)
     {
-        if (in_array($status_description, $this->successfulStatusDescription)) {
+        if (in_array(strtolower($status_description), $this->successfulStatusDescription)) {
             return config('colors.successful');
-        } elseif (in_array($status_description, $this->unsuccessfulStatusDescription)) {
+        } elseif (in_array(strtolower($status_description), $this->unsuccessfulStatusDescription)) {
             return config('colors.unsuccessful');
         } else {
             return config('colors.default');
