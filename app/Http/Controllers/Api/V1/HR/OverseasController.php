@@ -25,6 +25,7 @@ class OverseasController extends Controller
     ];
 
     protected $unsuccessfulStatusDescription = [
+        'return_to_sender',
     ];
 
     public function __construct()
@@ -545,7 +546,7 @@ class OverseasController extends Controller
     protected function validateParcel($parcel)
     {
         $rules = [
-            'recipient_name' => 'required|string|max:255',
+            'recipient_name' => 'required|string|max:30',
             'recipient_phone' => 'nullable|string|max:20',
             'recipient_email' => 'nullable|email|max:255',
             'recipient_adress' => 'required|string|max:255',
@@ -599,7 +600,7 @@ class OverseasController extends Controller
     protected function validateCollection($parcel)
     {
         $rules = [
-            'recipient_name' => 'required|string|max:255',
+            'recipient_name' => 'required|string|max:30',
             'recipient_phone' => 'nullable|string|max:20',
             'recipient_email' => 'nullable|email|max:255',
             'recipient_adress' => 'required|string|max:255',
