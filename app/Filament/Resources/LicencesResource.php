@@ -30,6 +30,11 @@ class LicencesResource extends Resource
                         name: 'domain',
                         titleAttribute: 'name',
                     )->searchable(),
+                Forms\Components\Select::make('user_id')
+                    ->relationship(
+                        name: 'user',
+                        titleAttribute: 'email',
+                    )->searchable(),
                 Forms\Components\Select::make('licence_type_id')
                     ->options([
                         '1' => 'trial',
