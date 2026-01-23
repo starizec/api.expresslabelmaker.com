@@ -68,7 +68,7 @@ class FetchOverseasDeliveryLocations implements ShouldQueue
                 Log::error('Invalid response format from Overseas API');
                 return;
             }
-
+            
             foreach ($responseJson['data'] as $item) {
                 if (
                     $item['IsActive'] == false ||
@@ -80,7 +80,8 @@ class FetchOverseasDeliveryLocations implements ShouldQueue
                     !is_numeric($item['GeoLong']) ||
                     !is_numeric($item['GeoLat']) ||
                     !str_contains((string) $item['GeoLong'], '.') ||
-                    !str_contains((string) $item['GeoLat'], '.')
+                    !str_contains((string) $item['GeoLat'], '.') ||
+                    !isset($item['Address']['Street'])
                 ) {
                     continue;
                 }
@@ -95,7 +96,7 @@ class FetchOverseasDeliveryLocations implements ShouldQueue
                     'lon' => $item['GeoLong'],
                     'lat' => $item['GeoLat'],
                     'name' => $item['Address']['Name'],
-                    'type' => $item['Type'],
+                    'type' => $item['Address']['Type'],
                     'description' => null,
                     'phone' => $item['Address']['TextPhone'] ?? null,
                     'active' => $item['IsActive'],
