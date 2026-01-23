@@ -58,6 +58,10 @@ class PluginDownloadResource extends Resource
                 Tables\Columns\TextColumn::make('plugin_download_link')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('download_count')
+                    ->label('Download Count')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

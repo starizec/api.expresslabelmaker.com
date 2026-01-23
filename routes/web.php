@@ -12,6 +12,7 @@ Route::group(['prefix' => '{lang}', 'where' => ['lang' => '[a-zA-Z]{2}'], 'defau
     Route::get('/legal/{slug}', [App\Http\Controllers\PostController::class, 'legalPost'])->name('pages.posts');
     Route::get('/documentation/{slug}', [App\Http\Controllers\PostController::class, 'documentationPost'])->name('pages.documentations');
     Route::get('/download', [App\Http\Controllers\PageController::class, 'download'])->name('pages.download');
+    Route::get('/download-plugin/{id}', [App\Http\Controllers\PageController::class, 'downloadPlugin'])->name('pages.download-plugin');
     Route::get('/payment/{licence_uid}', [App\Http\Controllers\PageController::class, 'payment'])->name('pages.payment');
     Route::post('/stripe-session/{licence_uid}', [App\Http\Controllers\PaymentController::class, 'createSession'])->name('payment.create-session');
 

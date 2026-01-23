@@ -6,6 +6,7 @@ use App\Models\Licence;
 use App\Models\PluginDownload;
 use App\Models\Post;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class PageController extends Controller
 {
@@ -41,5 +42,21 @@ class PageController extends Controller
         $price = 120;
 
         return view('pages.payment', compact('licence', 'valid_until', 'price'));
+    }
+
+    public function downloadPlugin(string $lang, int $id)
+    {
+        $pluginDownload = PluginDownload::findOrFail($id);
+
+        if (!Storage::exists($pluginDownload->plugin_download_link)) {
+            abort(404, 'File not found');
+        }
+
+        // Increment download count
+        $pluginDownload->increment('download_count');
+
+        $fileName = basename($pluginDownload->plugin_download_link);
+
+        return Storage::download($pluginDownload->plugin_download_link, $fileName);
     }
 }
