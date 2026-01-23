@@ -72,6 +72,14 @@
                                         </span>
                                     </div>
 
+                                    <div class="mb-4">
+                                        {!! NoCaptcha::renderJs() !!}
+                                        {!! NoCaptcha::display() !!}
+                                        @error('g-recaptcha-response')
+                                            <div class="text-danger mt-1">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
                                     <button type="submit"
                                         class="btn btn-block btn-primary">{{ __('messages.login') }}</button>
                                 </form>
