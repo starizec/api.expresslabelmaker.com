@@ -293,6 +293,7 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
+                                @if(config('captcha.enabled', env('CAPTCHA_ENABLED', true)))
                                 <div class="mb-3">
                                     <div class="row">
                                         <div class="col-md-6 mb-3 mb-md-0">
@@ -307,6 +308,11 @@
                                         </div>
                                     </div>
                                 </div>
+                                @else
+                                <div class="mb-3">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">Pošalji poruku</button>
+                                </div>
+                                @endif
                             </form>
                         </div>
                     </div>

@@ -15,11 +15,16 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        $rules = [
             'email' => ['required', 'email'],
             'password' => ['required'],
-            'g-recaptcha-response' => 'required|captcha',
-        ]);
+        ];
+
+        if (config('captcha.enabled', env('CAPTCHA_ENABLED', true))) {
+            $rules['g-recaptcha-response'] = 'required|captcha';
+        }
+
+        $credentials = $request->validate($rules);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();

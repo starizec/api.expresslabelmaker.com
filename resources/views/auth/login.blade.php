@@ -72,6 +72,7 @@
                                         </span>
                                     </div>
 
+                                    @if(config('captcha.enabled', env('CAPTCHA_ENABLED', true)))
                                     <div class="mb-4">
                                         {!! NoCaptcha::renderJs() !!}
                                         {!! NoCaptcha::display() !!}
@@ -79,6 +80,7 @@
                                             <div class="text-danger mt-1">{{ $message }}</div>
                                         @enderror
                                     </div>
+                                    @endif
 
                                     <button type="submit"
                                         class="btn btn-block btn-primary">{{ __('messages.login') }}</button>

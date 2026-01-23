@@ -73,6 +73,7 @@
                                         id="password_confirmation" required>
                                 </div>
 
+                                @if(config('captcha.enabled', env('CAPTCHA_ENABLED', true)))
                                 <div class="mb-4">
                                     {!! NoCaptcha::renderJs() !!}
                                     {!! NoCaptcha::display() !!}
@@ -80,6 +81,7 @@
                                         <div class="text-danger mt-1">{{ $message }}</div>
                                     @enderror
                                 </div>
+                                @endif
 
                                 <div class="d-grid">
                                     <button type="submit"
