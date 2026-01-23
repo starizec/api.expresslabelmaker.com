@@ -22,6 +22,7 @@ class RegisterController extends Controller
         $request->validate([
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'g-recaptcha-response' => 'required|captcha',
         ]);
 
         // Extract the username from email

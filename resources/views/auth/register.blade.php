@@ -73,6 +73,14 @@
                                         id="password_confirmation" required>
                                 </div>
 
+                                <div class="mb-4">
+                                    {!! NoCaptcha::renderJs() !!}
+                                    {!! NoCaptcha::display() !!}
+                                    @error('g-recaptcha-response')
+                                        <div class="text-danger mt-1">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
                                 <div class="d-grid">
                                     <button type="submit"
                                         class="btn btn-primary">{{ __('messages.register') }}</button>
