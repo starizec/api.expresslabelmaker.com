@@ -35,11 +35,4 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
-    'dpd_sftp' => [
-        'host' => env('HR_DPD_SFTP_HOST'),
-        'username' => env('HR_DPD_SFTP_USERNAME'),
-        'password' => env('HR_DPD_SFTP_PASSWORD'),
-        'port' => env('HR_DPD_SFTP_PORT', 22),
-    ],
-
 ];

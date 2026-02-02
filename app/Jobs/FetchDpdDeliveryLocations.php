@@ -159,17 +159,16 @@ class FetchDpdDeliveryLocations implements ShouldQueue
     protected function connectToSftp(): ?SFTP
     {
         try {
-            $host = config('services.dpd_sftp.host');
-            $username = config('services.dpd_sftp.username');
-            $password = config('services.dpd_sftp.password');
-            $port = (int) config('services.dpd_sftp.port', 22);
+            $host = env('HR_DPD_SFTP_HOST');
+            $username = env('HR_DPD_SFTP_USERNAME');
+            $password = env('HR_DPD_SFTP_PASSWORD');
 
             if (!$host || !$username || !$password) {
                 Log::error('DPD SFTP credentials not configured');
                 return null;
             }
 
-            $sftp = new SFTP($host, $port);
+            $sftp = new SFTP($host, 22);
             $sftp->setTimeout(30);
 
             if (!$sftp->login($username, $password)) {
