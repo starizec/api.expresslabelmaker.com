@@ -52,11 +52,6 @@ class FetchDpdDeliveryLocations implements ShouldQueue
                 return;
             }
 
-            $header = DeliveryLocationHeader::create([
-                'courier_id' => $courier->id,
-                'location_count' => 0,
-                'geojson_file_name' => 'U_IZRADI'
-            ]);
 
             $files = $sftp->nlist('/OUT/CPF/');
             $files = array_filter($files, function ($file) {
@@ -99,6 +94,12 @@ class FetchDpdDeliveryLocations implements ShouldQueue
             }
 
             $data = $this->parseDpdFile($latestFile);
+
+            $header = DeliveryLocationHeader::create([
+                'courier_id' => $courier->id,
+                'location_count' => 0,
+                'geojson_file_name' => 'U_IZRADI'
+            ]);
 
             foreach ($data as $item) {
                 DeliveryLocation::create([
