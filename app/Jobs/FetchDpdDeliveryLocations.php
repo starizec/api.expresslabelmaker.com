@@ -9,27 +9,17 @@ use App\Models\DeliveryLocation;
 use App\Models\DeliveryLocationHeader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use phpseclib3\Net\SFTP;
 
-class FetchDpdDeliveryLocations implements ShouldQueue, ShouldBeUnique
+class FetchDpdDeliveryLocations implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected string $path = 'app/hr/dpd';
-
-    /**
-     * The unique ID of the job.
-     * Only one instance of this job can be in the queue or running at a time.
-     */
-    public function uniqueId(): string
-    {
-        return 'fetch-dpd-delivery-locations';
-    }
 
     /**
      * Create a new job instance.
