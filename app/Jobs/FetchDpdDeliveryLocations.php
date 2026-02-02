@@ -12,7 +12,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use phpseclib3\Net\SFTP;
 
@@ -35,13 +34,6 @@ class FetchDpdDeliveryLocations implements ShouldQueue
      */
     public function handle(): void
     {
-        $lock = Cache::lock('fetch_dpd_delivery_locations', 600);
-
-        if (!$lock->get()) {
-            Log::info('DPD delivery locations fetch already running, skipping');
-            return;
-        }
-
         try {
             $courier = Courier::where('name', 'DPD')
                 ->whereHas('country', function ($query) {
@@ -57,38 +49,41 @@ class FetchDpdDeliveryLocations implements ShouldQueue
             $sftp = $this->connectToSftp();
             if (!$sftp) {
                 Log::error('Failed to connect to DPD SFTP');
-                throw new \RuntimeException('DPD SFTP: connection failed or credentials not configured.');
+                return;
             }
+
+            $header = DeliveryLocationHeader::create([
+                'courier_id' => $courier->id,
+                'location_count' => 0,
+                'geojson_file_name' => 'U_IZRADI'
+            ]);
 
             $files = $sftp->nlist('/OUT/CPF/');
-            if ($files === false) {
-                Log::error('DPD SFTP nlist failed', ['errors' => $sftp->getErrors()]);
-                throw new \RuntimeException('DPD SFTP: failed to list directory /OUT/CPF/');
-            }
-            $files = array_values(array_filter($files, function ($file) {
+            $files = array_filter($files, function ($file) {
                 return $file !== '.' && $file !== '..';
-            }));
+            });
 
-            $storagePath = storage_path($this->path);
+            $storagePath = storage_path('app/hr/dpd');
             if (!file_exists($storagePath)) {
                 mkdir($storagePath, 0755, true);
             }
 
-            $downloaded = 0;
             foreach ($files as $file) {
                 $remotePath = '/OUT/CPF/' . $file;
                 $localPath = $storagePath . '/' . $file;
+
                 if ($sftp->get($remotePath, $localPath)) {
-                    $downloaded++;
+                    Log::info('Downloaded DPD file', ['file' => $file]);
                 }
             }
-            Log::info('DPD files downloaded', ['count' => $downloaded, 'total_listed' => count($files)]);
 
-            $localFiles = array_diff(scandir($storagePath), ['.', '..']);
+            $localPath = storage_path($this->path);
+            $files = array_diff(scandir($localPath), ['.', '..']);
+
             $latestFile = null;
             $latestDate = null;
 
-            foreach ($localFiles as $file) {
+            foreach ($files as $file) {
                 if (preg_match('/D(\d{8})T/', $file, $matches)) {
                     $fileDate = $matches[1];
                     if ($latestDate === null || $fileDate > $latestDate) {
@@ -99,22 +94,11 @@ class FetchDpdDeliveryLocations implements ShouldQueue
             }
 
             if (!$latestFile) {
-                Log::error('No valid DPD file found in ' . $storagePath);
-                throw new \RuntimeException('DPD: no valid file found (expected filename pattern D{YYYYMMDD}T...).');
-            }
-
-            $data = $this->parseDpdFile($latestFile);
-
-            if (empty($data)) {
-                Log::warning('DPD file parsed but no HR locations found', ['file' => $latestFile]);
+                Log::error('No valid DPD file found');
                 return;
             }
 
-            $header = DeliveryLocationHeader::create([
-                'courier_id' => $courier->id,
-                'location_count' => 0,
-                'geojson_file_name' => 'U_IZRADI'
-            ]);
+            $data = $this->parseDpdFile($latestFile);
 
             foreach ($data as $item) {
                 DeliveryLocation::create([
@@ -135,21 +119,19 @@ class FetchDpdDeliveryLocations implements ShouldQueue
             }
 
             $header->update([
-                'location_count' => count($data)
+                'location_count' => DeliveryLocation::where('header_id', $header->id)->count()
             ]);
 
             Log::info('DPD delivery locations fetched successfully', [
                 'header_id' => $header->id,
                 'location_count' => $header->location_count
             ]);
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             Log::error('Error fetching DPD delivery locations', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
             throw $e;
-        } finally {
-            $lock->release();
         }
     }
 
@@ -196,45 +178,36 @@ class FetchDpdDeliveryLocations implements ShouldQueue
         }
 
         $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if ($lines === false) {
-            Log::error('DPD file could not be read', ['file' => $filename]);
-            return [];
-        }
-
         $result = [];
 
         foreach ($lines as $row => $line) {
             $parts = explode(';', $line);
-            if (($parts[0] ?? '') !== 'PUDOADDRESS') {
-                continue;
-            }
-            // PUDOADDRESS must be preceded by a PUDO line
-            if ($row < 1) {
-                continue;
-            }
 
-            $pudoInfo = explode(';', $lines[$row - 1]);
-            if (($pudoInfo[7] ?? '') !== 'HR') {
-                continue;
-            }
-            if (count($pudoInfo) < 13 || count($parts) < 15) {
-                continue;
-            }
+            if ($parts[0] === 'PUDOADDRESS') {
+                $pudoInfo = $lines[$row - 1];
+                $pudoInfo = explode(';', $pudoInfo);
 
-            $result[] = [
-                'location_id' => $pudoInfo[2],
-                'place' => $parts[15] ?? '',
-                'postal_code' => $parts[13] ?? '',
-                'street' => $parts[3] ?? '',
-                'house_number' => $parts[4] ?? null,
-                'lon' => isset($parts[18]) ? (float) $parts[18] : null,
-                'lat' => isset($parts[17]) ? (float) $parts[17] : null,
-                'name' => $pudoInfo[5],
-                'type' => $pudoInfo[12],
-                'description' => null,
-                'phone' => $parts[7] ?? null,
-                'active' => true,
-            ];
+                if ($pudoInfo[7] !== 'HR') {
+                    continue;
+                }
+
+                $item = [
+                    'location_id' => $pudoInfo[2],
+                    'place' => $parts[15] ?? '',
+                    'postal_code' => $parts[13] ?? '',
+                    'street' => $parts[3] ?? '',
+                    'house_number' => $parts[4] ?? null,
+                    'lon' => isset($parts[18]) ? (float) $parts[18] : null,
+                    'lat' => isset($parts[17]) ? (float) $parts[17] : null,
+                    'name' => $pudoInfo[5],
+                    'type' => $pudoInfo[12],
+                    'description' => null,
+                    'phone' => $parts[7] ?? null,
+                    'active' => true,
+                ];
+
+                $result[] = $item;
+            }
         }
 
         return $result;
