@@ -60,6 +60,7 @@ class FetchDpdDeliveryLocations implements ShouldQueue
 
             $storagePath = storage_path('app/hr/dpd');
             if (!file_exists($storagePath)) {
+                Log::info('Creating DPD storage path', ['path' => $storagePath]);
                 mkdir($storagePath, 0755, true);
             }
 
@@ -68,7 +69,7 @@ class FetchDpdDeliveryLocations implements ShouldQueue
                 $localPath = $storagePath . '/' . $file;
 
                 if ($sftp->get($remotePath, $localPath)) {
-                    Log::info('Downloaded DPD file', ['file' => $file]);
+                    Log::info('Downloaded DPD file' . $file . ' to ' . $localPath);
                 }
             }
 
