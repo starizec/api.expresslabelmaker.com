@@ -78,7 +78,7 @@ class FetchDpdDeliveryLocations implements ShouldQueue
 
             $latestFile = null;
             $latestDate = null;
-
+            Log::info('Fetching latest DPD file');
             foreach ($files as $file) {
                 if (preg_match('/D(\d{8})T/', $file, $matches)) {
                     $fileDate = $matches[1];
@@ -88,6 +88,7 @@ class FetchDpdDeliveryLocations implements ShouldQueue
                     }
                 }
             }
+            Log::info('Latest DPD file found: ' . $latestFile . ' with date: ' . $latestDate);
 
             if (!$latestFile) {
                 Log::error('No valid DPD file found');
